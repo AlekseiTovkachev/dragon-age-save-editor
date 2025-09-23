@@ -1,24 +1,26 @@
 import zlib
 from array import array
+from io import BytesIO
+
 
 class ZlibReader(object):
     def __init__(self, source, sizehint=0):
         self.source = source
-        self.sizehint = long(sizehint)
+        self.sizehint = int(sizehint)
         self.decobj = zlib.decompressobj()
         self.ended = False
         self.decompressed = 0
         self.tail = 0
         self.consumed = 0
-        self.unconsumed_tail = ''
-        self.unused_data = ''
+        self.unconsumed_tail = ""
+        self.unused_data = ""
         self._closed = False
-    
+
     def read(self, size=-1):
         if self._closed:
-            raise IOError, 'closed'
+            raise OSError("closed")
         if self.ended:
-            return ''
+            return ""
         f = self.source
         d = self.decobj
         decompressed = self.decompressed
@@ -27,13 +29,13 @@ class ZlibReader(object):
         sizehint = self.sizehint
         unconsumed_tail = self.unconsumed_tail
         unused_data = self.unused_data
-        s = array('c')
+        s = bytearray()
         if size < 0:
             c = f.read(65536)
             consumed += len(c)
             if unconsumed_tail:
                 c = unconsumed_tail + c
-                unconsumed_tail = ''
+                unconsumed_tail = ""
             while c:
                 if not tail:
                     c = d.decompress(c)
@@ -45,7 +47,7 @@ class ZlibReader(object):
                     if unused_data:
                         s.extend(unused_data)
                         tail += len(unused_data)
-                        unused_data = ''
+                        unused_data = ""
                 else:
                     s.extend(c)
                     tail += len(c)
@@ -53,14 +55,14 @@ class ZlibReader(object):
                 consumed += len(c)
                 if unconsumed_tail:
                     c = unconsumed_tail + c
-                    unconsumed_tail = ''
+                    unconsumed_tail = ""
             self.ended = True
         else:
             while len(s) < size:
                 if not tail:
                     if unconsumed_tail:
                         c = unconsumed_tail
-                        unconsumed_tail = ''
+                        unconsumed_tail = ""
                     else:
                         c = f.read(min(max(sizehint - consumed, 1), 65536))
                         consumed += len(c)
@@ -76,7 +78,7 @@ class ZlibReader(object):
                     if unused_data:
                         s.extend(unused_data)
                         tail += len(unused_data)
-                        unused_data = ''
+                        unused_data = ""
                 else:
                     c = f.read(min(65536, size - len(s)))
                     consumed += len(c)
@@ -89,34 +91,34 @@ class ZlibReader(object):
         self.consumed = consumed
         self.unconsumed_tail = unconsumed_tail
         self.unused_data = unused_data
-        return s.tostring()
-    
+        return bytes(s)
+
     def close(self):
         self._closed = True
         self.source.close()
 
-if __name__ == '__main__':
-    from StringIO import StringIO
-    sample = zlib.compress('The quick brown fox jumped over the lazy dog')
-    
-    print 'Read full test'
-    print ZlibReader(StringIO(sample)).read()
 
-    print 'Read 1 test'
-    f = ZlibReader(StringIO(sample))
+if __name__ == "__main__":
+    sample = zlib.compress(b"The quick brown fox jumped over the lazy dog")
+
+    print("Read full test")
+    print(ZlibReader(BytesIO(sample)).read())
+
+    print("Read 1 test")
+    f = ZlibReader(BytesIO(sample))
     s = f.read(1)
     while s:
-        print s,
+        print(s),
         s = f.read(1)
     print
-    
-    print 'Read part and rest test'
-    f = ZlibReader(StringIO(sample))
-    print f.read(10),
-    print f.read()
 
-    print 'Read full and unused test'
-    f = ZlibReader(StringIO(sample+' and then his tail fell off'))
-    print f.read()
-    print f.decompressed
-    print f.tail
+    print("Read part and rest test")
+    f = ZlibReader(BytesIO(sample))
+    print(f.read(10))
+    print(f.read())
+
+    print("Read full and unused test")
+    f = ZlibReader(BytesIO(sample + b" and then his tail fell off"))
+    print(f.read())
+    print(f.decompressed)
+    print(f.tail)
