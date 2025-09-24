@@ -1,0 +1,372 @@
+id,name,core_id,tree,type
+4001,Skill Tree Unlocked 1,,Core Skill,"Skill "
+4002,Skill Tree Unlocked 2,,Core Skill,Skill
+4023,Core Mage Unlocked,,Core Class,Class
+4020,Core Rogue Unlocked,,Core Class,Class
+4022,Core Warrior Unlocked,,Core Class,Class
+4012,Arcane Warrior,,Mage Specialization,Specialization
+4015,Bard,,Rogue Specialization,Specialization
+4018,Shapeshifter,,Mage Specialization,Specialization
+4025,Spirit Healer,,Mage Specialization,Specialization
+4013,Champion,,Warrior Specialization,Specialization
+4016,Berserker,,Warrior Specialization,Specialization
+4019,Reaver,,Warrior Specialization,Specialization
+4029,Ranger,,Rogue Specialization,Specialization
+4014,Assassin,,Rogue Specialization,Specialization
+4017,Blood Mage,,Mage Specialization,Specialization
+4021,Templar,,Warrior Specialization,Specialization
+4030,Duelist,,Rogue Specialization,Specialization
+401000,Spirit Warrior,,Warrior Specialization,Specialization
+401001,Guardian,,Warrior Specialization,Specialization
+401002,Keeper,,Mage Specialization,Specialization
+401003,Battlemage,,Mage Specialization,Specialization
+401004,Legionnaire Scout,,Rogue Specialization,Specialization
+401005,Shadow,,Rogue Specialization,Specialization
+100011,Coercion,"4001, 4002",Skill Tree,Skill
+100012,Improved Coercion,"4001, 4002",Skill Tree,Skill
+100013,Expert Coercion,"4001, 4002",Skill Tree,Skill
+100014,Master Coercion,"4001, 4002",Skill Tree,Skill
+100021,Stealing,"4001, 4002",Skill Tree,Skill
+100022,Improved Stealing,"4001, 4002",Skill Tree,Skill
+100023,Expert Stealing,"4001, 4002",Skill Tree,Skill
+100024,Master Stealing,"4001, 4002",Skill Tree,Skill
+100041,Trap-Making,"4001, 4002",Skill Tree,Skill
+100042,Improved Trap-Making,"4001, 4002",Skill Tree,Skill
+100043,Expert Trap-Making,"4001, 4002",Skill Tree,Skill
+100044,Master Trap-Making,"4001, 4002",Skill Tree,Skill
+100051,Survival,"4001, 4002",Skill Tree,Skill
+100052,Improved Survival,"4001, 4002",Skill Tree,Skill
+100053,Expert Survival,"4001, 4002",Skill Tree,Skill
+100054,Master Survival,"4001, 4002",Skill Tree,Skill
+100061,Herbalism,"4001, 4002",Skill Tree,Skill
+100062,Improved Herbalism,"4001, 4002",Skill Tree,Skill
+100063,Expert Herbalism,"4001, 4002",Skill Tree,Skill
+100064,Master Herbalism,"4001, 4002",Skill Tree,Skill
+100071,Poison-Making,"4001, 4002",Skill Tree,Skill
+100072,Improved Poison-Making,"4001, 4002",Skill Tree,Skill
+100073,Expert Poison-Making,"4001, 4002",Skill Tree,Skill
+100074,Master Poison-Making,"4001, 4002",Skill Tree,Skill
+100100,Combat Training,"4001, 4002",Skill Tree,Skill
+100101,Improved Combat Training,"4001, 4002",Skill Tree,Skill
+100102,Expert Combat Training,"4001, 4002",Skill Tree,Skill
+100103,Master Combat Training,"4001, 4002",Skill Tree,Skill
+100110,Combat Tactics,"4001, 4002",Skill Tree,Skill
+100111,Improved Combat Tactics,"4001, 4002",Skill Tree,Skill
+100112,Expert Combat Tactics,"4001, 4002",Skill Tree,Skill
+100113,Master Combat Tactics,"4001, 4002",Skill Tree,Skill
+410000,Runecrafting,"4001, 4002",Skill Tree,Skill
+410001,Improved Runecrafting,"4001, 4002",Skill Tree,Skill
+410002,Expert Runecrafting,"4001, 4002",Skill Tree,Skill
+410003,Master Runecrafting,"4001, 4002",Skill Tree,Skill
+410100,Vitality,"4001, 4002",Skill Tree,Skill
+410101,Improved Vitality,"4001, 4002",Skill Tree,Skill
+410102,Expert Vitality,"4001, 4002",Skill Tree,Skill
+410103,Master Vitality,"4001, 4002",Skill Tree,Skill
+410200,Clarity,"4001, 4002",Skill Tree,Skill
+410201,Improved Clarity,"4001, 4002",Skill Tree,Skill
+410202,Expert Clarity,"4001, 4002",Skill Tree,Skill
+410203,Master Clarity,"4001, 4002",Skill Tree,Skill
+90200,Minor Strength,90224,Plot Skill (Strength),Skill
+90201,Moderate Strength,90224,Plot Skill (Strength),Skill
+90202,Major Strength,90224,Plot Skill (Strength),Skill
+90218,Massive Strength,90224,Plot Skill (Strength),Skill
+90203,Minor Dexterity,90225,Plot Skill (Dexterity),Skill
+90204,Moderate Dexterity,90225,Plot Skill (Dexterity),Skill
+90205,Major Dexterity,90225,Plot Skill (Dexterity),Skill
+90219,Massive Dexterity,90225,Plot Skill (Dexterity),Skill
+90206,Minor Constitution,90226,Plot Skill (Constitution),Skill
+90207,Moderate Constitution,90226,Plot Skill (Constitution),Skill
+90208,Major Constitution,90226,Plot Skill (Constitution),Skill
+90220,Massive Constitution,90226,Plot Skill (Constitution),Skill
+90209,Minor Cunning,90227,Plot Skill (Cunning),Skill
+90210,Moderate Cunning,90227,Plot Skill (Cunning),Skill
+90211,Major Cunning,90227,Plot Skill (Cunning),Skill
+90221,Massive Cunning,90227,Plot Skill (Cunning),Skill
+90212,Minor Willpower,90228,Plot Skill (Willpower),Skill
+90213,Moderate Willpower,90228,Plot Skill (Willpower),Skill
+90214,Major Willpower,90228,Plot Skill (Willpower),Skill
+90222,Massive Willpower,90228,Plot Skill (Willpower),Skill
+90215,Minor Magic,90229,Plot Skill (Magic),Skill
+90216,Moderate Magic,90229,Plot Skill (Magic),Skill
+90217,Major Magic,90229,Plot Skill (Magic),Skill
+90223,Massive Magic,90229,Plot Skill (Magic),Skill
+100080,Golem Form,,Plot skill (Fade),Skill
+100081,Mouse Form,,Plot skill (Fade),Skill
+100083,Burning Man Form,,Plot skill (Fade),Skill
+100084,Spirit Form,,Plot skill (Fade),Skill
+3080,Dwarven Resistance,,Racial Ability,Talent
+603,Dirty Fighting,4020,Rogue,Talent
+21,Combat Movement,4020,Rogue,Talent
+3002,Coup De Grace,4020,Rogue,Talent
+3023,Feign Death,4020,Rogue,Talent
+3026,Below the Belt,4020,Rogue,Talent
+708,Deadly Strike,4020,Rogue,Talent
+777,Lethality,4020,Rogue,Talent
+3069,Evasion,4020,Rogue,Talent
+100001,Deft Hands,4020,Rogue,Talent
+100002,Improved Tools,4020,Rogue,Talent
+100003,Mechanical Expertise,4020,Rogue,Talent
+100004,Device Mastery,4020,Rogue,Talent
+100075,Stealth,4020,Rogue,Talent
+100076,Stealthy Item Use,4020,Rogue,Talent
+100077,Combat Stealth,4020,Rogue,Talent
+100078,Master Stealth,4020,Rogue,Talent
+400200,Heartseeker,4020,Rogue,Talent
+400201,Ghost,4020,Rogue,Talent
+400202,Weak Points,4020,Rogue,Talent
+400203,Flicker,4020,Rogue,Talent
+6,Dual-Weapon Training,"4020, 4022",Dual Weapon,Talent
+8,Dual-Weapon Finesse,"4020, 4022",Dual Weapon,Talent
+5,Dual-Weapon Expert,"4020, 4022",Dual Weapon,Talent
+3036,Dual-Weapon Mastery,"4020, 4022",Dual Weapon,Talent
+11,Dual Striking,"4020, 4022",Dual Weapon,Talent
+9,Riposte,"4020, 4022",Dual Weapon,Talent
+10,Cripple,"4020, 4022",Dual Weapon,Talent
+7,Punisher,"4020, 4022",Dual Weapon,Talent
+3044,Dual-Weapon Sweep,"4020, 4022",Dual Weapon,Talent
+3035,Flurry,"4020, 4022",Dual Weapon,Talent
+717,Momentum,"4020, 4022",Dual Weapon,Talent
+3043,Whirlwind,"4020, 4022",Dual Weapon,Talent
+402100,Twin Strikes,"4020, 4022",Dual Weapon,Talent
+402101,Find Vitals,"4020, 4022",Dual Weapon,Talent
+402102,Low Blow,"4020, 4022",Dual Weapon,Talent
+402103,Unending Flurry,"4020, 4022",Dual Weapon,Talent
+34,Melee Archer,"4020, 4022",Archery,Talent
+500,Aim,"4020, 4022",Archery,Talent
+33,Defensive Fire,"4020, 4022",Archery,Talent
+35,Master Archer,"4020, 4022",Archery,Talent
+803,Pinning Shot,"4020, 4022",Archery,Talent
+805,Crippling Shot,"4020, 4022",Archery,Talent
+804,Critical Shot,"4020, 4022",Archery,Talent
+802,Arrow of Slaying,"4020, 4022",Archery,Talent
+3071,Rapid Shot,"4020, 4022",Archery,Talent
+3072,Shattering Shot,"4020, 4022",Archery,Talent
+801,Suppressing Fire,"4020, 4022",Archery,Talent
+800,Scattershot,"4020, 4022",Archery,Talent
+402000,Accuracy,"4020, 4022",Archery,Talent
+402001,Arrow Time,"4020, 4022",Archery,Talent
+402002,Burst Shot,"4020, 4022",Archery,Talent
+402003,Rain of Arrows,"4020, 4022",Archery,Talent
+3060,Mark of Death,4014,Assassin,Talent
+56,Exploit Weakness,4014,Assassin,Talent
+3059,Lacerate,4014,Assassin,Talent
+3058,Feast of the Fallen,4014,Assassin,Talent
+3045,Song of Valor,4015,Bard,Talent
+701,Distraction,4015,Bard,Talent
+705,Song of Courage,4015,Bard,Talent
+1000,Captivating Song,4015,Bard,Talent
+1004,Summon Wolf,4029,Ranger,Talent
+91,Summon Bear,4029,Ranger,Talent
+93,Summon Spider,4029,Ranger,Talent
+92,Master Ranger,4029,Ranger,Talent
+709,Dueling,4030,Duelist,Talent
+3050,Upset Balance,4030,Duelist,Talent
+3049,Keen Defense,4030,Duelist,Talent
+3051,Pinpoint Strike,4030,Duelist,Talent
+401300,Mark of the Legion,401004,Legionnaire Scout,Talent
+401301,Strength of Stone,401004,Legionnaire Scout,Talent
+401302,Endure Hardship,401004,Legionnaire Scout,Talent
+401303,Blessing of the Ancestors,401004,Legionnaire Scout,Talent
+401310,Shadow Form,401005,Shadow,Talent
+401311,Decoy,401005,Shadow,Talent
+401312,Shadow Striking,401005,Shadow,Talent
+401313,Pandemonium,401005,Shadow,Talent
+14,Powerful,4022,Warrior,Talent
+808,Threaten,4022,Warrior,Talent
+17,Bravery,4022,Warrior,Talent
+3021,Death Blow,4022,Warrior,Talent
+19,Precise Striking,4022,Warrior,Talent
+3041,Taunt,4022,Warrior,Talent
+3016,Disengage,4022,Warrior,Talent
+20,Perfect Striking,4022,Warrior,Talent
+400000,Second Wind,4022,Warrior,Talent
+400001,Peon's Plight,4022,Warrior,Talent
+400002,Grievous Insult,4022,Warrior,Talent
+400003,Massacre,4022,Warrior,Talent
+617,Shield Bash,4022,Weapon and Shield,Talent
+1,Shield Pummel,4022,Weapon and Shield,Talent
+3073,Overpower,4022,Weapon and Shield,Talent
+38,Assault,4022,Weapon and Shield,Talent
+704,Shield Defense,4022,Weapon and Shield,Talent
+37,Shield Balance,4022,Weapon and Shield,Talent
+12,Shield Wall,4022,Weapon and Shield,Talent
+36,Shield Expertise,4022,Weapon and Shield,Talent
+3074,Shield Block,4022,Weapon and Shield,Talent
+13,Shield Cover,4022,Weapon and Shield,Talent
+3030,Shield Tactics,4022,Weapon and Shield,Talent
+2,Shield Mastery,4022,Weapon and Shield,Talent
+402300,Juggernaut,4022,Weapon and Shield,Talent
+402301,Carapace,4022,Weapon and Shield,Talent
+402302,Air of Insolence,4022,Weapon and Shield,Talent
+402303,Bulwark of the Ages,4022,Weapon and Shield,Talent
+3024,Pommel Strike,4022,Two-Handed,Talent
+28,Indomitable,4022,Two-Handed,Talent
+3000,Stunning Blows,4022,Two-Handed,Talent
+3,Critical Strike,4022,Two-Handed,Talent
+3025,Sunder Arms,4022,Two-Handed,Talent
+3001,Shattering Blows,4022,Two-Handed,Talent
+4,Sunder Armor,4022,Two-Handed,Talent
+3032,Destroyer,4022,Two-Handed,Talent
+3028,Mighty Blow,4022,Two-Handed,Talent
+718,Powerful Swings,4022,Two-Handed,Talent
+27,Two-Handed Strength,4022,Two-Handed,Talent
+3031,Two-Handed Sweep,4022,Two-Handed,Talent
+402200,Sweeping Strike,4022,Two-Handed,Talent
+402201,Two-Handed Impact,4022,Two-Handed,Talent
+402202,Onslaught,4022,Two-Handed,Talent
+402203,Reaving Storm,4022,Two-Handed,Talent
+3037,War Cry,4013,Champion,Talent
+3038,Rally,4013,Champion,Talent
+42,Motivate,4013,Champion,Talent
+3039,Superiority,4013,Champion,Talent
+23,Righteous Strike,4021,Templar,Talent
+3017,Cleanse Area,4021,Templar,Talent
+52,Mental Fortress,4021,Templar,Talent
+25,Holy Smite,4021,Templar,Talent
+700,Berserk,4016,Berserker,Talent
+48,Resilience,4016,Berserker,Talent
+3006,Constraint,4016,Berserker,Talent
+3009,Final Blow,4016,Berserker,Talent
+3065,Devour,4019,Reaver,Talent
+3066,Frightening Appearance,4019,Reaver,Talent
+3067,Aura of Pain,4019,Reaver,Talent
+713,Blood Frenzy,4019,Reaver,Talent
+401100,Beyond the Veil,401000,Spirit Warrior,Talent
+401101,Soulbrand,401000,Spirit Warrior,Talent
+401102,Fade Burst,401000,Spirit Warrior,Talent
+401103,Blessing of the Fade,401000,Spirit Warrior,Talent
+401110,Guardian's Shield,401001,Guardian,Talent
+401111,Fortifying Presence,401001,Guardian,Talent
+401112,Master Guardian,401001,Guardian,Talent
+401113,Aura of the Stalwart Defender,401001,Guardian,Talent
+200254,Arcane Bolt,4023,Mage,Spell
+200255,Arcane Shield,4023,Mage,Spell
+200256,Staff Focus,4023,Mage,Spell
+200257,Arcane Mastery,4023,Mage,Spell
+400100,Fade Shield,4023,Mage,Spell
+400101,Elemental Mastery,4023,Mage,Spell
+400102,Attunement,4023,Mage,Spell
+400103,Time Spiral,4023,Mage,Spell
+400110,Repulsion Field,4023,Mage,Spell
+400111,Invigorate,4023,Mage,Spell
+400112,Arcane Field,4023,Mage,Spell
+400113,Mystical Negation,4023,Mage,Spell
+10001,Flame Blast,4023,Primal,Spell
+10204,Flaming Weapons,4023,Primal,Spell
+10003,Fireball,4023,Primal,Spell
+10002,Inferno,4023,Primal,Spell
+11002,Rock Armor,4023,Primal,Spell
+12004,Stonefist,4023,Primal,Spell
+11116,Earthquake,4023,Primal,Spell
+11124,Petrify,4023,Primal,Spell
+13001,Winter's Grasp,4023,Primal,Spell
+11007,Frost Weapons,4023,Primal,Spell
+13002,Cone of Cold,4023,Primal,Spell
+13000,Blizzard,4023,Primal,Spell
+14001,Lightning,4023,Primal,Spell
+14000,Shock,4023,Primal,Spell
+14002,Tempest,4023,Primal,Spell
+10211,Chain Lightning,4023,Primal,Spell
+10104,Heal,4023,Creation,Spell
+10200,Rejuvenate,4023,Creation,Spell
+10210,Regeneration,4023,Creation,Spell
+10207,Mass Rejuvenation,4023,Creation,Spell
+10206,Heroic Offense,4023,Creation,Spell
+10202,Heroic Aura,4023,Creation,Spell
+10203,Heroic Defense,4023,Creation,Spell
+10208,Haste,4023,Creation,Spell
+11001,Glyph of Paralysis,4023,Creation,Spell
+10601,Glyph of Warding,4023,Creation,Spell
+17000,Glyph of Repulsion,4023,Creation,Spell
+17028,Glyph of Neutralization,4023,Creation,Spell
+11006,Spell Wisp,4023,Creation,Spell
+11113,Grease,4023,Creation,Spell
+11005,Spellbloom,4023,Creation,Spell
+12008,Stinging Swarm,4023,Creation,Spell
+10400,Spell Shield,4023,Spirit,Spell
+10401,Dispel Magic,4023,Spirit,Spell
+10900,Anti-Magic Ward,4023,Spirit,Spell
+11003,Anti-Magic Burst,4023,Spirit,Spell
+10704,Mana Drain,4023,Spirit,Spell
+11004,Mana Cleanse,4023,Spirit,Spell
+17001,Spell Might,4023,Spirit,Spell
+11000,Mana Clash,4023,Spirit,Spell
+12005,Walking Bomb,4023,Spirit,Spell
+10500,Death Syphon,4023,Spirit,Spell
+12011,Virulent Walking Bomb,4023,Spirit,Spell
+10508,Animate Dead,4023,Spirit,Spell
+12006,Mind Blast,4023,Spirit,Spell
+17019,Force Field,4023,Spirit,Spell
+10209,Telekinetic Weapons,4023,Spirit,Spell
+11123,Crushing Prison,4023,Spirit,Spell
+11106,Weakness,4023,Entropy,Spell
+11107,Paralyze,4023,Entropy,Spell
+11122,Miasma,4023,Entropy,Spell
+11110,Mass Paralysis,4023,Entropy,Spell
+11112,Vulnerability Hex,4023,Entropy,Spell
+11111,Affliction Hex,4023,Entropy,Spell
+11114,Misdirection Hex,4023,Entropy,Spell
+11100,Death Hex,4023,Entropy,Spell
+11115,Disorient,4023,Entropy,Spell
+11108,Horror,4023,Entropy,Spell
+11121,Sleep,4023,Entropy,Spell
+11109,Waking Nightmare,4023,Entropy,Spell
+15002,Drain Life,4023,Entropy,Spell
+17002,Death Magic,4023,Entropy,Spell
+11101,Curse of Mortality,4023,Entropy,Spell
+15003,Death Cloud,4023,Entropy,Spell
+17008,Spider Shape,4018,Shapeshifter,Spell
+17010,Bear Shape,4018,Shapeshifter,Spell
+17007,Flying Swarm,4018,Shapeshifter,Spell
+17009,Master Shapeshifter,4018,Shapeshifter,Spell
+10509,Group Heal,4025,Spirit Healer,Spell
+10504,Revival,4025,Spirit Healer,Spell
+10506,Lifeward,4025,Spirit Healer,Spell
+10507,Cleansing Aura,4025,Spirit Healer,Spell
+17023,Combat Magic,4012,Arcane Warrior,Spell
+17020,Aura of Might,4012,Arcane Warrior,Spell
+17022,Shimmering Shield,4012,Arcane Warrior,Spell
+17021,Fade Shroud,4012,Arcane Warrior,Spell
+10700,Blood Magic,4017,Blood Mage,Spell
+10701,Blood Sacrifice,4017,Blood Mage,Spell
+10702,Blood Wound,4017,Blood Mage,Spell
+10703,Blood Control,4017,Blood Mage,Spell
+401200,One With Nature,401002,Keeper,Spell
+401201,Thornblades,401002,Keeper,Spell
+401202,Replenishment,401002,Keeper,Spell
+401203,Nature's Vengeance,401002,Keeper,Spell
+401210,Draining Aura,401003,Battlemage,Spell
+401211,Hand of Winter,401003,Battlemage,Spell
+401212,Stoic,401003,Battlemage,Spell
+401213,Elemental Chaos,401003,Battlemage,Spell
+10510,Vessel of the Spirit,,Plot (Wynne),Spell
+310010,Dark Sustenance,"310000, 310001, 310002",Power of Blood,Talent
+310020,Blood Thirst,"310000, 310001, 310002",Power of Blood,Talent
+310030,Dark Passage,"310000, 310001, 310002",Power of Blood,Talent
+310011,Bloody Grasp,"310000, 310001, 310002",Power of Blood,Talent
+310021,Blood Fury,"310000, 310001, 310002",Power of Blood,Talent
+310031,The Tainted Blade,"310000, 310001, 310002",Power of Blood,Talent
+90017,Growl,4034,War Dog,Talent
+90048,Dread Howl,4034,War Dog,Talent
+90049,Combat Training,4034,War Dog,Talent
+90015,Overwhelm,4034,War Dog,Talent
+90050,Fortitude,4034,War Dog,Talent
+90016,Charge,4034,War Dog,Talent
+90047,Shred,4034,War Dog,Talent
+90051,Nemesis,4034,War Dog,Talent
+300100,Pulverising Blows,4033,Shale,Talent
+300101,Slam,4033,Shale,Talent
+300102,Quake,4033,Shale,Talent
+300103,Killing Blow,4033,Shale,Talent
+300200,Stoneheart,4033,Shale,Talent
+300201,Bellow,4033,Shale,Talent
+300202,Stone Roar,4033,Shale,Talent
+300203,Regenerating Burst,4033,Shale,Talent
+300300,Rock Mastery,4033,Shale,Talent
+300301,Hurl Rock,4033,Shale,Talent
+300302,Earthen Grasp,4033,Shale,Talent
+300303,Rock Barrage,4033,Shale,Talent
+300400,Stone Aura,4033,Shale,Talent
+300401,Inner Reserves,4033,Shale,Talent
+300402,Renewed Assault,4033,Shale,Talent
+300403,Supernatural Resilience,4033,Shale,Talent
