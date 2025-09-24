@@ -1,86 +1,73 @@
-import sys
-import sqlite3
 import gff4
+from gff4.datoolset_fields import (
+    ITEM_PROPERTY_EFFECTID,
+    ITEM_PROPERTY_VFXID,
+    SAVEGAME_ITEM_MATERIALTYPE,
+    TEMPLATERESREF,
+    OBJECT_ID,
+    ITEM_COST,
+    ITEM_STACKSIZE,
+    SAVEGAME_OBJECT_PLOT,
+    ITEM_MATERIAL,
+    ITEM_PROPERTIES,
+    ITEM_PROPERTY_POWERS,
+)
+from data_manager import GameDataManager
+from item import Item
+from item_property import ItemProperty
 
-# Assumes you have refactored datoolset_fields.py as previously discussed
-from gff4.datoolset_fields import SAVEGAME_PARTYLIST, SAVEGAME_BACKPACK, TEMPLATERESREF
 
-DATABASE_FILE = "gamedata.db"
-
-
-def load_names_from_db(game_version="dao"):
+def load_item_from_struct(
+    item_struct: gff4.Structure, data_manager: GameDataManager
+) -> Item:
     """
-    Loads item names for a specific game from the SQLite database into a dictionary.
+    Factory function to create and populate an Item object from a raw GFF structure.
+
+    Args:
+        item_struct: The GFF Structure object for a single item from the save file.
+        data_manager: An instance of GameDataManager to look up property names.
+
+    Returns:
+        A populated Item object.
     """
-    item_names = {}
-    print(f"--- Loading '{game_version.upper()}' item names from {DATABASE_FILE} ---")
+    item = Item()
+
+    # --- Extract simple fields, providing default values if a field is missing ---
+    item.resref = str(item_struct.get(TEMPLATERESREF, "")).rstrip("\x00")
+    item.name = data_manager.get_item_name(item.resref)
+    item.object_id = int(item_struct.get(OBJECT_ID, 0))
+    item.item_cost = int(item_struct.get(ITEM_COST, 0))
+    item.item_stacksize = int(item_struct.get(ITEM_STACKSIZE, 1))
+    item.item_level = int(item_struct.get(SAVEGAME_OBJECT_PLOT, 0))
+    item.material = int(item_struct.get(SAVEGAME_ITEM_MATERIALTYPE, 0))
+
+    # --- Extract and process the item properties ---
     try:
-        con = sqlite3.connect(DATABASE_FILE)
-        cur = con.cursor()
-        # Query the database for items matching the specified game version
-        query = "SELECT resref, name FROM items WHERE game = ?"
-        for resref, name in cur.execute(query, (game_version,)):
-            item_names[resref] = name
-        con.close()
-    except sqlite3.OperationalError:
-        print(f"Error: Database not found at '{DATABASE_FILE}'.")
-        print("Please run the 'import_data_final.py' script first to create it.")
-        return None  # Return None to indicate failure
+        property_ids = item_struct[ITEM_PROPERTIES]
+        property_powers = item_struct[ITEM_PROPERTY_POWERS]
+        # property_effect_ids = item_struct[ITEM_PROPERTY_EFFECTID]
+        # property_vfx_ids = item_struct[ITEM_PROPERTY_VFXID]
 
-    print(f"--- Loaded {len(item_names)} item names ---\n")
-    return item_names
+        # Combine the parallel lists of property IDs and their power levels
+        # Not loading the rest of the data of the property, it is needed only while adding or replacing
+        for prop_id, prop_power in zip(property_ids, property_powers):
+            prop_id = int(prop_id)
+            # Use the data manager to get the human-readable name for the property
+            prop_name = data_manager.get_item_property_name(prop_id)
+            # The power is a float, but stored as an integer bitmask in the file
+            # For simplicity, we'll just cast it to float here.
+            # A more advanced implementation would convert the bits to a float.
+            power_value = float(prop_power)
 
-
-def main(savefile_path):
-    """
-    Main function to load a save file and print the translated inventory using the database.
-    """
-    if not savefile_path:
-        print("Error: Please provide path to your savegame.das file.")
-        return
-
-    # 1. Create the lookup table from the database for DAO items
-    item_name_map = load_names_from_db("dao")
-    if item_name_map is None:
-        return  # Stop if the database couldn't be loaded
-
-    print(f"--- Reading save file: {savefile_path} ---")
-    try:
-        with open(savefile_path, "rb") as f:
-            data, header = gff4.read_gff4(f)
-    except Exception as e:
-        print(f"An error occurred while reading the save file: {e}")
-        return
-
-    # 2. Navigate to the inventory list
-    try:
-        party_list = data[SAVEGAME_PARTYLIST]
-        inventory_list = party_list[SAVEGAME_BACKPACK]
-    except KeyError as e:
-        print(f"Error: Could not find inventory in the save file. Missing key: {e}")
-        return
-
-    print(f"--- Found {len(inventory_list)} items in backpack ---")
-
-    # 3. Loop through items, get the raw name, clean it, and translate it
-    for i, item_struct in enumerate(inventory_list):
-        try:
-            raw_item_object = item_struct[TEMPLATERESREF]
-
-            # Clean the ResRef name by converting to string and stripping nulls
-            raw_item_name = str(raw_item_object).rstrip("\x00")
-
-            # Look up the name in our dictionary
-            translated_name = item_name_map.get(
-                raw_item_name.lower(),
-                f"<{raw_item_name}>",  # Fallback for untranslated items
+            property = ItemProperty(
+                prop_id=prop_id, name=prop_name, power=power_value
             )
 
-            print(f"  {i+1: >2}. {translated_name}")
-        except KeyError:
-            print(f"  {i+1: >2}. <Unknown Item Structure>")
+            # item.properties.append((prop_id, prop_name, power_value))
+            item.properties.append(property)
 
+    except KeyError:
+        # If the item has no properties, these fields won't exist. We can safely ignore this.
+        pass
 
-if __name__ == "__main__":
-    save_path = "Camp.das"
-    main(save_path)
+    return item

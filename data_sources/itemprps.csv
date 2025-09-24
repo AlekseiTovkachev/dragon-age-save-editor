@@ -1,0 +1,178 @@
+ID,Label,NameStrId,IPType,effect,Int0,Int1,Float0,Float1,ConditionScript,VFX,ScalingVector,BaseCost,IsNegative,ProcChance,BaseDuration,ProjectileCrust,AbilityId
+int,string,int,int,int,int,int,float,float,resource,int,string,int,int,float,float,int,int
+1,Test Item Property,0,1,0,0,0,0,0,,0,,0,0,1,0,0,0
+7,Test Flaming,0,1,10000,0,0,0,0,,1067,,0,0,1,0,0,0
+1000,Increase Strength,380410,1,1012,1,0,1,0,,0,Float0,5000,0,1,0,0,0
+1001,Increase Dexterity,380411,1,1012,2,0,1,0,,0,Float0,5000,0,1,0,0,0
+1002,Increase Willpower,380412,1,1012,3,0,1,0,,0,Float0,5000,0,1,0,0,0
+1003,Increase Magic,380413,1,1012,4,0,1,0,,0,Float0,5000,0,1,0,0,0
+1004,Increase Cunning,380414,1,1012,5,0,1,0,,0,Float0,5000,0,1,0,0,0
+1005,Increase Constitution,380415,1,1012,6,0,1,0,,0,Float0,5000,0,1,0,0,0
+1006,Increase All Attributes,380416,1,1012,-1000,0,1,0,,0,Float0,30000,0,1,0,0,0
+1100,Increase Combat Health Regen,380417,1,1012,28,0,0.25,0,,0,Float0,5000,0,1,0,0,0
+1101,Increase Exploration Health Regen,380418,1,1012,14,0,1,0,,0,Float0,2000,0,1,0,0,0
+1108,Increase Defense (3 per power),380419,1,1012,10,0,3,0, ,0,Float0,3000,0,1,0,0,0
+1109,Increase Armor,380420,1,1012,11,0,1,0,,0,Float0,2000,0,1,0,0,0
+1200,Increase Damage,380421,1,1012,39,0,1,0,,0,Float0,2500,0,1,0,0,0
+1201,Faster Aim (0.1s per power),380422,1,1012,24,0,-0.1000000015,0,,0,Float0,1500,0,1,0,0,0
+1202,Increase Ranged Crit Chance,380423,1,1012,23,0,1,0,,0,Float0,2000,0,1,0,0,0
+1203,Increase Melee Crit Chance,380424,1,1012,21,0,1,0,,0,Float0,2000,0,1,0,0,0
+1410,Increase Fire Resistance,380425,1,1012,42,0,1,0,,0,Float0,500,0,1,0,0,0
+1411,Increase Fire Resistance (5 per power),380426,1,1012,42,0,5,0,,0,Float0,2500,0,1,0,0,0
+1420,Increase Cold Resistance,380427,1,1012,43,0,1,0,,0,Float0,500,0,1,0,0,0
+1421,Increase Cold Resistance (5 per power),380428,1,1012,43,0,5,0,,0,Float0,2500,0,1,0,0,0
+1430,Increase Electricity Resistance,380429,1,1012,44,0,1,0,,0,Float0,500,0,1,0,0,0
+1431,Increase Electricity Resistance (5 per power),380430,1,1012,44,0,5,0,,0,Float0,2500,0,1,0,0,0
+1440,Increase Nature Resistance,380431,1,1012,45,0,1,0,,0,Float0,500,0,1,0,0,0
+1441,Increase Nature Resistance (5 per power),380432,1,1012,45,0,5,0,,0,Float0,2500,0,1,0,0,0
+1450,Increase Spirit Resistance,380433,1,1012,46,0,1,0,,0,Float0,600,0,1,0,0,0
+1451,Increase Spirit Resistance (5 per power),380434,1,1012,46,0,5,0,,0,Float0,3000,0,1,0,0,0
+1500,Improves backstabs,380435,1,1031,3002,0,0,0,,0,,20000,0,1,0,0,0
+1501,Weakens nearby darkspawn,380436,1,0,0,0,0,0,,0,,22000,0,1,0,0,0
+1502,Generates cleansing aura,380437,1,0,0,0,0,0,,0,,21000,0,1,0,0,0
+1503,Generates aura of flame,380438,1,0,0,0,0,0,,0,,23000,0,1,0,0,0
+1504,Increase Armor Penetration,380439,1,1012,53,0,0.5,1,,0,Float0,2500,0,1,0,0,0
+1505,+<powervalue/>% Chance to ignite target,380440,1,0,0,0,0,5,,0,Float1,2000,0,1,0,0,0
+1506,Messy kills,380441,1,0,0,0,0,0,,0,,800,0,1,0,0,0
+1507,+<powervalue/> Damage,380442,1,1012,39,0,1,0,,0,Float0,2500,0,1,0,0,0
+1508,Lucky,380443,1,1064,1,0,1,0,,0,Float0,10000,0,1,0,0,0
+1509,Increase Combat Mana Regen,380444,1,1012,30,0,0.25,0,,0,Float0,5000,0,1,0,0,0
+1510,Chance to Ignore Hostile Magic (2% per power),380445,1,1012,52,0,2,0,,0,Float0,2500,0,1,0,0,0
+1515,Increase Random Attribute,380450,1,1015,-2000,1,0,0,,0,Int1,7000,0,1,0,0,0
+1516,Increase Spellpower,380451,1,1012,13,0,1,0,,0,Float0,2000,0,1,0,0,0
+1517,(NOT IMPL) Inc hostility and int,380452,1,0,0,0,1,0, ,0,Float0,1000,0,1,0,0,0
+1519,Reduces hostility,380453,1,1012,40,0,5,0,,0,Float0,3000,0,1,0,0,0
+5000,Increase Healing Spells (5% per power),380454,1,1012,51,0,5,0,,0,Float0,5000,0,1,0,0,0
+6060,Improves Blood Magic,380455,1,1067,0,0,0,0,,0,,10000,0,1,0,0,0
+6062,Increase Chance to Dodge Attacks (5% per power),380456,1,1012,16,0,5,0,,0,Float0,5000,0,1,0,0,0
+6066,Increase Exploraton Mana Regen,380457,1,1012,29,0,1,0,,0,Float0,2000,0,1,0,0,0
+6067,[NOT IMPELMENTED] Dual-weapon fatigue,380458,1,0,0,0,0.5,0,,0,Float0,3000,0,1,0,0,0
+6068,[NOT IMPLEMENTED] Archery fatigue,380459,1,0,0,0,0.5,0,,0,Float0,2000,0,1,0,0,0
+6069,[NOT IMPLEMENTED] Weapon-and-shield fatigue,380460,1,0,0,0,0.5,0,,0,Float0,2500,0,1,0,0,0
+6070,[NOT IMPLEMENTED] Two-handed-weapon fatigue,380461,1,0,0,0,0.5,0,,0,Float0,4000,0,1,0,0,0
+6071,[NOT IMPLEMENTED] Damage from spirits,380462,1,0,0,0,2,0,,0,Float0,2000,0,1,0,0,0
+6072,Improves trap detection,380463,1,1066,0,0,0,0,,0,,5000,0,1,0,0,0
+6073,Increase Exploration Stamina Regen,380464,1,1012,29,0,1,0,,0,Float0,2000,0,1,0,0,0
+6074,Increase Combat Stamina Regen (0.25 per power),380465,1,1012,30,0,0.25,0,,0,Float0,5000,0,1,0,0,0
+6076,Increases XP bonus from codex,380466,1,1065,1,25,0,0,,0,,3000,0,1,0,0,0
+6081,Increases monetary gain,380468,1,1065,2,0,0.05000000075,0,,0,Float0,5000,0,1,0,0,0
+6085,Telekinetic,380519,1,1012,53,0,1,0,,5030,Float0,0,0,1,0,0,0
+6087,Decrease Constitution,380469,1,1012,6,0,-1,0,,0,Float0,0,1,1,0,0,0
+6088,Decrease Cunning,380470,1,1012,5,0,-1,0,,0,Float0,0,1,1,0,0,0
+6089,Decrease Dexterity,380471,1,1012,2,0,-1,0,,0,Float0,0,1,1,0,0,0
+6090,Decrease Strength,380472,1,1012,1,0,-1,0,,0,Float0,0,1,1,0,0,0
+6091,Decrease Willpower,380473,1,1012,3,0,-1,0,,0,Float0,0,1,1,0,0,0
+6092,Decrease Magic,380474,1,1012,4,0,-1,0,,0,Float0,0,1,1,0,0,0
+6093,[NI] Decrease All attributes,380475,1,1015,-1000,1,0,0,,0,Int1,0,0,1,0,0,0
+6094,Decrease Electricity resistance (5 per power),380476,1,1012,44,0,-5,0,,0,Float0,0,1,1,0,0,0
+6095,Decrease Cold resistance (5 per power),380477,1,1012,43,0,-5,0,,0,Float0,0,1,1,0,0,0
+6096,Decrease Fire resistance (5 per power),380478,1,1012,42,0,-5,0,,0,Float0,0,1,1,0,0,0
+6097,Decrease Nature resistance (5 per power),380479,1,1012,45,0,-5,0,,0,Float0,0,1,1,0,0,0
+6098,Decrease Spirit resistance (5 per power),380480,1,1012,46,0,-5,0,,0,Float0,0,1,1,0,0,0
+6099,Increase Attack (2 per power),380481,1,1012,9,0,2,0,,0,Float0,3000,0,1,0,0,0
+6100,[NI] Increase Backstab damage (2 per power),380482,1,0,0,0,2,0,,0,Float0,3525,0,1,0,0,0
+6101,Decrease Attack (5 per power),380483,1,1012,9,0,-5,0,,0,Float0,0,1,1,0,0,0
+6102,Decrease Armor (3 per power),380484,1,1012,11,0,-3,0,,0,Float0,0,1,1,0,0,0
+6103,Increase Natural armor,380485,1,1012,11,0,1,0,,0,Float0,4000,0,1,0,0,0
+6104,Increase Stamina (25 per power),380486,1,1012,8,0,25,0,,0,Float0,2500,0,1,0,0,0
+6105,Decrease Damage,380487,1,1012,39,0,-1,0,,0,Float0,0,1,1,0,0,0
+6106,Morrigan's protection,380488,1,1012,11,0,2,0,,0,Float0,0,0,1,0,0,0
+6112,Increase Defense against Missiles (2 per power),380491,1,1012,22,0,2,0,,0,Float0,2000,0,1,0,0,0
+6115,Increases incoming damage (0.1 per power),380492,1,1012,12,0,0.1000000015,0,,0,Float0,0,1,1,0,0,0
+10006,Increase Crit Damage (+5% per power),396406,1,1012,54,0,5,0,,0,Float0,2500,0,1,0,0,0
+10007,Increases all Fire Damage (+2.5% per power),396564,1,1012,55,0,2.5,0,,0,Float0,2500,0,1,0,0,0
+10008,Increases all Sprit Damage (+2.5% per power),396567,1,1012,56,0,2.5,0,,0,Float0,2500,0,1,0,0,0
+10009,Increases all Cold Damage (+2.5% per power),396566,1,1012,57,0,2.5,0,,0,Float0,2500,0,1,0,0,0
+10010,Increases all Nature Damage (+2.5% per power),396568,1,1012,58,0,2.5,0,,0,Float0,2500,0,1,0,0,0
+10011,Increases all Lightning Damage (+2.5% per power),396565,1,1012,59,0,2.5,0,,0,Float0,2500,0,1,0,0,0
+10016,Increase Mental Resistance,396575,1,1012,32,0,1,0,,0,Float0,350,0,1,0,0,0
+10017,Increase Physical Resistance,396576,1,1012,33,0,1,0,,0,Float0,350,0,1,0,0,0
+10019,Spellshield,397796,1,1069,0,0,0,0,,90180,,0,0,1,0,0,0
+10021,Cold VFX,398979,1,0,0,0,0,0,,1068,,0,0,1,0,0,0
+1511,+<powervalue/> damage vs. darkspawn,380446,2,0,0,0,2,0,,0,Float0,3000,0,1,0,0,0
+1512,+<powervalue/> damage vs. dragons,380447,2,0,0,0,2,0,,0,Float0,4000,0,1,0,0,0
+1513,+<powervalue/> damage vs. spirits,380448,2,0,0,0,2,0,,0,Float0,2000,0,1,0,0,0
+1514,Increased damage vs. Fade creatures,380449,2,0,0,0,2,0,,0,,2000,0,1,0,0,0
+3000,"Flaming (INTERNAL, DO NOT USE)",380493,2,1013,2,0,2,0,,1067,Float0,0,0,1,0,0,0
+3001,"Iced (INTERNAL, DO NOT USE)",380494,2,1013,3,0,1,0,,1068,Float0,0,0,1,0,0,0
+3002,Electrified (INTERNAL DO NOT USE),380495,2,1013,4,0,1.5,0,,1069,Float0,0,0,1,0,0,0
+3003,"Flame Coating (INTERNAL, DO NOT USE)",380496,2,1013,2,0,2,0,,91056,Float0,0,0,1,0,0,0
+3004,"Freezing Coating (INTERNAL, DO NOT USE)",380497,2,1013,3,0,2,0,,91057,Float0,0,0,1,0,0,0
+3005,Shock Coating,380498,2,1013,4,0,3,0,,91058,Float0,0,0,1,0,0,0
+3006,Acidic Coating,380499,2,1013,5,0,2,0,,91055,Float0,0,0,1,0,0,0
+3007,Soulrot Coating,380500,2,1013,8,0,2,0,,91059,Float0,0,0,1,0,0,0
+3008,Poison - Venom,380501,2,1013,5,0,1,0,,91060,Float0,0,0,1,10,5031,200235
+3009,Poison - Deathroot Extract,380502,2,1013,5,0,1,0,,91061,Float0,0,0,1,2,5031,200236
+3010,Poison - Crow Poison,380503,2,1013,5,0,3,0,,91063,Float0,0,0,1,5,5031,0
+3011,Poison - Soldier's Bane,380504,2,0,0,0,0,0,,91065,Float0,0,0,1,0,5031,0
+3012,Poison - Magebane,380505,2,0,0,0,0,0,,91066,Float0,0,0,1,0,5031,0
+3013,Poison - Demonic Poison,380506,2,1013,8,0,5,0,,91068,Float0,0,0,1,0,5031,0
+3014,Poison - Quiet Death,380507,2,1013,5,0,1,0,,91074,Float0,0,0,1,0,5031,0
+4000,+<powervalue/> Nature damage,380508,2,1013,5,0,1,0,,0,Float0,2000,0,1,0,0,0
+4001,+<powervalue/> Fire damage,380509,2,1013,2,0,1,0,,1067,Float0,2000,0,1,0,0,0
+4002,Chance of +<powervalue/> fire damage,380510,2,1013,2,0,2.5,0,,1067,Float0,5000,0,0.009999999776,0,0,0
+4005,Massive damage to darkspawn,380511,2,0,0,0,0,0,,0,,5000,0,1,0,0,0
+4006,Mage Slayer - Interrupts spellcasting,380512,2,0,0,0,0,0,,0,,5000,0,1,0,0,0
+4008,Increases hostility,380514,2,0,0,0,0,0,,0, ,1000,0,1,0,0,0
+4009,Chance to knock target back,380515,2,1057,0,0,0,0,,0,,5000,0,0.1000000015,0,0,0
+4010,Explosive,380516,2,1013,2,0,10,0,0,0,Float0,2000,0,0.05000000075,0,0,0
+6065,Weakens and bloodies targets,380517,2,0,0,0,0,0,,0,,4000,0,0.25,0,0,0
+6083,+<powervalue/> Electricity damage,380518,2,1013,4,0,1,0,,1069,Float0,2000,0,1,0,0,0
+6086,Righteous Strike,380520,2,1013,8,0,2,0,,1106,Float0,0,0,1,0,0,0
+6107,+<powervalue/> damage vs. beasts,380489,2,0,0,0,2,0,,0,Float0,2000,0,1,0,0,0
+6109,+<powervalue/> Cold damage,380521,2,1013,3,0,1,0,,1068,Float0,2000,0,1,0,0,0
+6110,Chance of +<powervalue/> cold damage,380522,2,1013,3,0,2.5,0,,1068,Float0,5000,0,0.1000000015,0,0,0
+6111,Chance of +<powervalue/> electricity damage,380523,2,1013,4,0,2.5,0,,1069,Float0,5000,0,0.1000000015,0,0,0
+6113,Chance of paralysis,380524,2,8,0,0,0,0,,0,,6000,0,0.05000000075,3,0,0
+6114,Chance to reduce movement speed,380525,2,0,0,0,0,0,,0,,4000,0,0.1000000015,3,0,0
+10001,Chance to stun,380526,2,1027,0,0,0,0,,0,,4000,0,0.05000000075,1,0,0
+10002,Vicious,380566,2,0,0,0,0,0,,0,,4000,0,0.1000000015,5,0,0
+10003,Chance for +<powervalue/> Nature damage,0,2,1013,5,0,2,0,,0,,5000,0,0.200000003,0,0,0
+10004,+<powervalue/> Cold damage (no crust),380521,2,1013,3,0,1,0,,0,Float0,2000,0,1,0,0,0
+10022,+<powervalue/> spirit damage,404077,2,1013,8,0,2,0,,5040,Float0,0,0,1,0,0,0
+6000,Required: Elf or dwarf,380527,3,0,0,0,0,0,ip_restrict_human,0,,0,0,1,0,0,0
+6001,Required: Human or dwarf,380528,3,0,0,0,0,0,ip_restrict_elf,0,,0,0,1,0,0,0
+6002,Required: Human or elf,380529,3,0,0,0,0,0,ip_restrict_dwarf,0,,0,0,1,0,0,0
+6005,Required: Human,380530,3,0,0,0,0,0,ip_restrict_ohuman,0,,0,0,1,0,0,0
+6006,Required: Elf,380531,3,0,0,0,0,0,ip_restrict_oelf,0,,0,0,1,0,0,0
+6007,Required: Dwarf,380532,3,0,0,0,0,0,ip_restrict_odwarf,0,,0,0,1,0,0,0
+6010,Required: Mage,380533,3,0,0,0,0,0,ip_restrict_omage,0,,0,0,1,0,0,0
+6011,Required: Warrior,380534,3,0,0,0,0,0,ip_restrict_owar,0,,0,0,1,0,0,0
+6012,Required: Rogue,380535,3,0,0,0,0,0,ip_restrict_orog,0,,0,0,1,0,0,0
+6015,Required: Warrior or Rogue,380536,3,0,0,0,0,0,ip_restrict_mage,0,,0,0,1,0,0,0
+6016,Required: Mage or Rogue,380537,3,0,0,0,0,0,ip_restrict_war,0,,0,0,1,0,0,0
+6017,Required: Warrior or Mage,380538,3,0,0,0,0,0,ip_restrict_rog,0,,0,0,1,0,0,0
+6020,Required: Templar,380539,3,0,0,0,0,0,ip_restrict_temp,0,,0,0,1,0,0,0
+6021,Required: Spirit Healer,380540,3,0,0,0,0,0,ip_restrict_sph,0,,0,0,1,0,0,0
+6022,Required: Berserker,380541,3,0,0,0,0,0,ip_restrict_ber,0,,0,0,1,0,0,0
+6023,Required: Assassin,380542,3,0,0,0,0,0,ip_restrict_ass,0,,0,0,1,0,0,0
+6024,Required: Bard,380543,3,0,0,0,0,0,ip_restrict_bard,0,,0,0,1,0,0,0
+6025,Required: Shapeshifter,380544,3,0,0,0,0,0,ip_restrict_shif,0,,0,0,1,0,0,0
+6026,Required: Champion,380545,3,0,0,0,0,0,ip_restrict_cham,0,,0,0,1,0,0,0
+6027,Restriction: Mabari hound,380546,3,0,0,0,0,0,ip_restrict_dog,0,,0,0,1,0,0,0
+6028,Restriction: Wynne,380547,3,0,0,0,0,0,ip_restrict_wynn,0,,0,0,1,0,0,0
+6029,Restriction: Morrigan,380548,3,0,0,0,0,0,ip_restrict_morr,0,,0,0,1,0,0,0
+6030,Restriction: Alistair,380549,3,0,0,0,0,0,ip_restrict_alist,0,,0,0,1,0,0,0
+6031,Restriction: Grey Warden,380550,3,0,0,0,0,0,ip_restrict_ward,0,,0,0,1,0,0,0
+6032,Required: Duelist,380551,3,0,0,0,0,0,ip_restrict_duel,0,,0,0,1,0,0,0
+6033,Required: Reaver,380552,3,0,0,0,0,0,ip_restrict_reav,0,,0,0,1,0,0,0
+6034,Required: Ranger,380553,3,0,0,0,0,0,ip_restrict_rang,0,,0,0,1,0,0,0
+6040,Required: All Templar talents,380554,3,0,0,0,0,0,ip_restrict_mtemp,0,,0,0,1,0,0,0
+6041,Required: All Berserker talents,380555,3,0,0,0,0,0,ip_restrict_mbers,0,,0,0,1,0,0,0
+6051,Required: Poison-Making,380556,3,0,0,0,0,0,ip_restrict_skpoison,0,,0,0,1,0,0,0
+6052,Required: Trap-Making,380557,3,0,0,0,0,0,ip_restrict_sktraps,0,,0,0,1,0,0,0
+6053,Required: Herbalism,380558,3,0,0,0,0,0,ip_restrict_skherb,0,,0,0,1,0,0,0
+6055,Required: Stealth,380559,3,0,0,0,0,0,ip_restrict_tstealth,0,,0,0,1,0,0,0
+6056,Required: Any archery talent,380560,3,0,0,0,0,0,ip_restrict_tarch,0,,0,0,1,0,0,0
+6063,Required: Blood Mage,380561,3,0,0,0,0,0,ip_restrict_bloodm,0,,0,0,1,0,0,0
+6064,Required: Arcane Warrior,380562,3,0,0,0,0,0,ip_restrict_arcanew,0,,0,0,1,0,0,0
+10005,Restriction: Sten,394300,3,0,0,0,0,0,ip_restrict_sten,0,,0,0,1,0,0,0
+10012,Restriction: Oghren,396569,3,0,0,0,0,0,ip_restrict_oghren,0,,0,0,1,0,0,0
+10013,Restrict: Leliana,396570,3,0,0,0,0,0,ip_restrict_leliana,0,,0,0,1,0,0,0
+10014,Restrict: Loghain,396571,3,0,0,0,0,0,ip_restrict_loghain,0,,0,0,1,0,0,0
+10015,Restrict: Zevran,396572,3,0,0,0,0,0,ip_restrict_zevran,0,,0,0,1,0,0,0
+10018,Restrict: player,397261,3,0,0,0,0,0,ip_restrict_player,0,,0,0,1,0,0,0
+10020,Restriction: Jory,0,3,0,0,0,0,0,ip_restrict_jory,0,,0,0,1,0,0,0
+6116,Flag: Is Healing Potion,382892,4,0,0,0,0,0,,0,Float0,0,0,1,0,0,0
+6117,Flag: Is Mana Potion,382893,4,0,0,0,0,0,,0,Float0,0,0,1,0,0,0
+10000,No attribute requirements,380563,4,0,0,0,0,0,,0,,0,0,0,0,0,0

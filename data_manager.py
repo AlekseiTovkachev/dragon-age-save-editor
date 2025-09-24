@@ -145,6 +145,30 @@ class GameDataManager:
             self._ability_cache[ability_id] = None
             return None
 
+    # TODO: finish this method for property changing/adding
+    def load_item_property(self, property_id):
+        pass
+
+    def get_item_property_name(self, prop_id: int, game="dao") -> str:
+        """
+        Gets the in-game name for a item property ID.
+        """
+
+        self._connect()
+        cursor = self._connection.cursor()
+        query = "SELECT label FROM item_properties WHERE id = ?"
+        cursor.execute(query, (str(prop_id),))
+        result = cursor.fetchone()
+
+        # 3. Cache and return the result
+        if result:
+            name = result[0]
+            return name
+        else:
+            fallback_name = f"<Property ID: {prop_id}>"
+            self._property_cache[prop_id] = fallback_name
+            return fallback_name
+
     def close(self):
         """Closes the database connection if it's open."""
         if self._connection:

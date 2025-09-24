@@ -4,6 +4,7 @@ from ability import Ability
 from data_manager import GameDataManager
 import gff4
 from item import Item
+from item_loader import load_item_from_struct
 from properties import *
 from character import CharacterData
 from gff4.datoolset_fields import (
@@ -39,6 +40,7 @@ class CharacterReader:
         try:
             with open(savefile_path, "rb") as f:
                 self.save_data, _ = gff4.read_gff4(f)
+                print("hello")
             self._navigate_to_character_sheet()
         except FileNotFoundError:
             raise Exception(f"Save file not found at '{savefile_path}'")
@@ -89,23 +91,33 @@ class CharacterReader:
             print(f"Warning: Could not find stats list. Missing key: {e}")
 
     def get_equipment(self, char_data: CharacterData):
-        """Extracts equipped items and shows their raw ResRef names."""
+        """
+        Extracts equipped items by creating full Item objects using the
+        load_item_from_struct factory function.
+        """
         try:
+            # Navigate to the list of equipped item structures
+            # Note: Dragon Age saves have multiple equipment sets; we assume the first is the active one.
             # equipment_sets = self.character_sheet[SAVEGAME_EQUIPMENT]
             # active_set = equipment_sets[0]
-            equipped_items = self.character_sheet[SAVEGAME_EQUIPMENT_ITEMS]
-            equipment = {}
+            equipped_items_list = self.character_sheet[SAVEGAME_EQUIPMENT_ITEMS]
 
+            equipment = {}
             slot_counter = 0
-            for item_struct in equipped_items:
-                resref = str(item_struct[TEMPLATERESREF]).rstrip("\x00").lower()
-                item_name = self.data_manager.get_item_name(resref)
-                item = Item(resref, item_name)
-                equipment[f"Slot {slot_counter}"] = item                
+
+            for item_struct in equipped_items_list:
+                # Use the factory function to create a complete, detailed Item object.
+                # This function handles all the logic for extracting resref, properties, etc.
+                item = load_item_from_struct(item_struct, self.data_manager)
+                # print(item)
+                # Store the populated Item object in the character's equipment dictionary.
+                equipment[f"Slot {slot_counter}"] = item
                 slot_counter += 1
+
             char_data.equipment = equipment
+
         except (KeyError, IndexError) as e:
-            print(f"Warning: Could not find equipment list. Error: {e}")
+            print(f"Warning: Could not find or parse equipment list. Error: {e}")
 
     def get_abilities(self, char_data: CharacterData):
         """Extracts skills, talents, and spells as raw IDs."""
