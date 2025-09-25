@@ -117,11 +117,72 @@ def check_for_duplicates(csv_file):
         return []
 
 
+def validate_csv_columns(csv_file, expected_columns=5):
+    """
+    Reads a CSV file and identifies any rows that do not have the expected
+    number of columns.
+
+    Args:
+        csv_file (str): The absolute path to the CSV file to validate.
+        expected_columns (int): The number of columns each row should have.
+    """
+    if not os.path.exists(csv_file):
+        print(f"❌ Error: The file '{csv_file}' was not found.")
+        return
+
+    print(f"--- Starting validation for '{os.path.basename(csv_file)}' ---")
+    print(f"Expecting exactly {expected_columns} columns per row.")
+
+    found_issues = False
+    try:
+        with open(csv_file, "r", encoding="utf-8") as file:
+            csv_reader = csv.reader(file)
+            header = next(csv_reader)  # Read header to move past it
+
+            # Check header itself
+            if len(header) != expected_columns:
+                print(
+                    f"⚠️ Warning: The header row has {len(header)} columns, not {expected_columns}."
+                )
+                print(f"   Header: {header}")
+
+            # Check all data rows
+            for line_num, row in enumerate(
+                csv_reader, start=2
+            ):  # Start counting from line 2
+                if len(row) != expected_columns:
+                    found_issues = True
+                    print(f"\n❌ Found issue on line {line_num}:")
+                    print(
+                        f"   Expected {expected_columns} columns, but found {len(row)}."
+                    )
+                    print(f"   Row content: {row}")
+
+    except Exception as e:
+        print(f"❌ An unexpected error occurred while reading the file: {e}")
+        return
+
+    print("\n--- Validation Finished ---")
+    if not found_issues:
+        print("✅ No rows with incorrect column counts were found.")
+    else:
+        print(
+            "➡️ Please correct the lines listed above in your CSV file and run the import script again."
+        )
+
+
 # --- Main execution block ---
 if __name__ == "__main__":
-    DATABASE_FILE = "gamedata.db"
-    CSV_SOURCE_FILE = "abilities_clean.csv"
+
+    script_dir = os.path.dirname(__file__)
+
+    db_relative_path = "../gamedata.db"
+    csv_relative_path = "../data_sources/abilities_clean.csv"
+    DATABASE_FILE = os.path.abspath(os.path.join(script_dir, db_relative_path))
+    CSV_SOURCE_FILE = os.path.abspath(os.path.join(script_dir, csv_relative_path))
     TABLE_NAME = "abilities"
+
+    validate_csv_columns(CSV_SOURCE_FILE)
     # check_for_duplicates(CSV_SOURCE_FILE)
 
     print("--- Starting CSV to SQLite Import Process ---")

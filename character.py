@@ -4,7 +4,7 @@ from ability import Ability
 from item import Item
 
 
-class CharacterData:
+class Character:
     """A data class to hold all the extracted character data."""
 
     name: str

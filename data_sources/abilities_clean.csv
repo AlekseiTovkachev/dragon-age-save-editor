@@ -370,3 +370,12 @@ id,name,core_id,tree,type
 300401,Inner Reserves,4033,Shale,Talent
 300402,Renewed Assault,4033,Shale,Talent
 300403,Supernatural Resilience,4033,Shale,Talent
+90224,Core Strength,,Plot Skill (Strength),Skill
+90225,Core Dexterity,,Plot Skill (Dexterity),Skill
+90226,Core Constitution,,Plot Skill (Strength),Skill
+90227,Core Cunning,,Plot Skill (Strength),Skill
+90228,Core Willpower,,Plot Skill (Strength),Skill
+90229,Core Magic,,Plot Skill (Strength),Skill
+4034,Core Dog,,Core Talent Dog, Talent
+4033,Core Shale,,Core Talent Shale, Talent
+300500,Shale(Unknown),,Shale,Talent

@@ -200,7 +200,10 @@ Generic = _basictype(
 )
 
 
-class Binary(str):
+# class Binary(str):
+#     def __repr__(self):
+#         return "Binary(%r)" % str(self)
+class Binary(bytes):
     def __repr__(self):
         return "Binary(%r)" % str(self)
 
@@ -886,29 +889,30 @@ def write_gff4(f, data, header=None, def_align=8):
         header = build_header(data)
     elif not isinstance(header, Header):
         raise ValueError("header is not a Header", type(header))
-    if header.version not in ("V4.0", "V4.1"):
+    if header.version not in (b"V4.0", b"V4.1"):
         raise ValueError(("Unsupported GFF version", header.version))
 
     version = real_version(header.version, header.platform)
-    use_cstring = "V4.1" <= version
+    use_cstring = b"V4.1" <= version
     bigendian = isbeplatform(header.platform)
     def_align = 4
     if def_align < 1:
         def_align = 1
-    header_section = array("c")
-    string_section = array("c")
-    data_section = array("c")
-    string_cache = dict()
+    header_section = bytearray()
+    string_section = bytearray()
+    data_section = bytearray()
+    string_cache = {}
 
     if use_cstring:
         string_cache[""] = 0
-        string_section.extend("\0")
+        string_section.extend(b"\0")
 
     def align_end(align=def_align):
         offset = len(data_section)
         if offset % align:
             padding = align - offset % align
-            data_section.extend(repeat("\xff", padding))
+            # data_section.extend(repeat(b"\xff", padding))
+            data_section.extend(b"\xff" * padding)
             offset += padding
         return offset
 
@@ -918,7 +922,8 @@ def write_gff4(f, data, header=None, def_align=8):
             padding = align - offset % align
             size += padding
             offset += padding
-        data_section.extend(repeat("\xff", size))
+        # data_section.extend(repeat("\xff", size))
+        data_section.extend(b"\xff" * size)
         return offset
 
     type2struct = dict()
@@ -945,6 +950,7 @@ def write_gff4(f, data, header=None, def_align=8):
 
     def write_field(field, data, offset):
         # print 'write field %08X'%f.tell()
+
         if issubclass(field.type, List):
             if not data:
                 UINT32.format[bigendian].pack_into(data_section, offset, 0xFFFFFFFF)
@@ -969,8 +975,13 @@ def write_gff4(f, data, header=None, def_align=8):
                     for structure in data:
                         write_struct(datatype, structure, elem_offset)
                         elem_offset += datatype.size
+
                 elif isinstance(data, str):
+                    print(data)
                     data_section.extend(data)
+                    # data_section.extend(data.encode('latin-1'))
+
+
                 else:
                     elem_offset = allocate(len(data) * datatype.size, 1)
                     for value in data:
@@ -1068,7 +1079,7 @@ def write_gff4(f, data, header=None, def_align=8):
             if offset is None:
                 string_cache[data] = offset = len(string_cache)
                 string_section.extend(data.encode("utf-8"))
-                string_section.append("\0")
+                string_section.append(b"\0")
             return offset
 
     elif _use_string_cache:
@@ -1098,7 +1109,7 @@ def write_gff4(f, data, header=None, def_align=8):
     _StructureFormat = StructureFormat[bigendian]
     _FieldFormat = FieldFormat[bigendian]
 
-    if version == "V4.0":
+    if version == b"V4.0":
         struct_offset = 12 + Header40Format.size
         field_offset = struct_offset + len(header.structs) * _StructureFormat.size
         data_offset = (
@@ -1110,7 +1121,7 @@ def write_gff4(f, data, header=None, def_align=8):
         if data_offset % 16:
             data_offset += 16 - data_offset % 16
 
-        header_section.extend("GFF ")
+        header_section.extend(b"GFF ")
         header_section.extend(header.version)
         header_section.extend(header.platform)
         header_section.extend(
@@ -1118,7 +1129,7 @@ def write_gff4(f, data, header=None, def_align=8):
                 header.file_type, header.file_version, len(header.structs), data_offset
             )
         )
-    elif version == "V4.1":
+    elif version == b"V4.1":
         struct_offset = 12 + Header41Format.size
         field_offset = struct_offset + len(header.structs) * _StructureFormat.size
         string_offset = (
@@ -1131,7 +1142,7 @@ def write_gff4(f, data, header=None, def_align=8):
         if data_offset % 16:
             data_offset += 16 - data_offset % 16
 
-        header_section.extend("GFF ")
+        header_section.extend(b"GFF ")
         header_section.extend(header.version)
         header_section.extend(header.platform)
         header_section.extend(
@@ -1148,7 +1159,11 @@ def write_gff4(f, data, header=None, def_align=8):
     for structure in header.structs:
         header_section.extend(
             _StructureFormat.pack(
-                structure.fourcc, len(structure.fields), field_offset, structure.size
+                # structure.fourcc,
+                structure.fourcc.encode("latin-1"),
+                len(structure.fields),
+                field_offset,
+                structure.size,
             )
         )
         field_offset += len(structure.fields) * _FieldFormat.size
@@ -1201,17 +1216,17 @@ def write_gff4(f, data, header=None, def_align=8):
         if use_cstring:
             f.seek(string_offset)
             f.write(string_section)
-        f.write("\xff" * (data_offset - f.tell()))
+        f.write(b"\xff" * (data_offset - f.tell()))
         # f.seek(data_offset)
         f.write(data_section)
 
 
 def build_header(
     root_struct,
-    platform="PC  ",
-    file_type="\0\0\0\0",
-    file_version="\0\0\0\0",
-    gff_version="V4.0",
+    platform=b"PC  ",
+    file_type=b"\0\0\0\0",
+    file_version=b"\0\0\0\0",
+    gff_version=b"V4.0",
 ):
     if not all(
         isinstance(s, str) for s in (gff_version, platform, file_type, file_version)
@@ -1219,7 +1234,7 @@ def build_header(
         raise TypeError
     if not all(len(s) == 4 for s in (gff_version, platform, file_type, file_version)):
         raise ValueError
-    if not gff_version in ("V4.0", "V4.1"):
+    if not gff_version in (b"V4.0", b"V4.1"):
         raise ValueError
     if not isinstance(root_struct, Structure):
         raise TypeError
