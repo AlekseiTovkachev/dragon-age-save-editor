@@ -1,3 +1,4 @@
+# Character property ID's
 Properties = {
     0: {"stat": "INVALID", "type": "INVALID", "min": 0, "max": 0, "comment": ""},
     1: {
