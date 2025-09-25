@@ -18,6 +18,11 @@ class GameDataManager:
         Args:
             db_path (str): The path to the SQLite database file.
         """
+
+        # Resolve relative to the file where this class is defined
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        self.db_path = db_path or os.path.join(base_dir, "gamedata.db")
+
         if not os.path.exists(db_path):
             raise FileNotFoundError(
                 f"Database not found at '{db_path}'. "
