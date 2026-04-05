@@ -1,0 +1,34 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Dragon Age Save Editor",
+  "version": "0.1.0",
+  "identifier": "com.atovk.dragonagesaveeditor",
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "beforeBuildCommand": "npm run build",
+    "frontendDist": "../dist",
+    "devUrl": "http://localhost:5173"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "Dragon Age Save Editor",
+        "width": 1440,
+        "height": 920,
+        "minWidth": 1440,
+        "minHeight": 920,
+        "maxWidth": 1440,
+        "maxHeight": 920,
+        "resizable": false
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": ["icons/icon.ico"]
+  }
+}

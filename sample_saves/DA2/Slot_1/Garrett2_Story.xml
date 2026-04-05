@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Story Version="1.1" Name="Garrett" Module="campaign_base">
+    <EventList>
+        <e ID="298060" t="18" utc="1753176717" />
+        <e ID="6207426" t="23" utc="1753176722" />
+        <e ID="369168" t="30" utc="1753176729" />
+        <e ID="6201330" t="124" utc="1753176823" />
+        <e ID="6201333" t="124" utc="1753176823" />
+        <e ID="6180822" t="280" utc="1753176979" />
+        <e ID="231858" t="420" utc="1753177119" />
+        <e ID="100001" t="395" utc="1753177094" L="1">
+            <LevelData Area="" Money="0" CurrentHealth="125" MaxHealth="125" CurrentStamina="130" MaxStamina="130" Level="1" XP="700">
+                <AbilityList>
+                    <Abi ID="100" />
+                    <Abi ID="101" />
+                    <Abi ID="10100" />
+                    <Abi ID="200000" />
+                    <Abi ID="201000" />
+                    <Abi ID="201001" />
+                    <Abi ID="202000" />
+                    <Abi ID="202001" />
+                    <Abi ID="203000" />
+                    <Abi ID="203001" />
+                    <Abi ID="204000" />
+                    <Abi ID="204001" />
+                    <Abi ID="205000" />
+                    <Abi ID="205001" />
+                    <Abi ID="206000" />
+                    <Abi ID="206001" />
+                    <Abi ID="201050" />
+                    <Abi ID="501000" />
+                    <Abi ID="501010" />
+                    <Abi ID="501020" />
+                </AbilityList>
+                <StatList>
+                    <Strength Base="10" Modifier="0" />
+                    <Dexterity Base="10" Modifier="3" />
+                    <Willpower Base="10" Modifier="1" />
+                    <Magic Base="10" Modifier="0" />
+                    <Cunning Base="10" Modifier="2" />
+                    <Constitution Base="10" Modifier="0" />
+                </StatList>
+                <EquippedItems>
+                    <Slot Index="0" ResRef="gen_im_wep_rog_dua_start" StackSize="1">
+                        <ItemPropertyList>
+                            <ItemProperty Index="0" ID="5200" />
+                            <ItemProperty Index="1" ID="3001" />
+                        </ItemPropertyList>
+                        <ItemPropertyPowerList>
+                            <ItemPropertyPower Index="0" ID="5.000000" />
+                            <ItemPropertyPower Index="1" ID="0.000000" />
+                        </ItemPropertyPowerList>
+                    </Slot>
+                    <Slot Index="1" ResRef="gen_im_wep_rog_dua_start" StackSize="1">
+                        <ItemPropertyList>
+                            <ItemProperty Index="0" ID="5200" />
+                            <ItemProperty Index="1" ID="3001" />
+                        </ItemPropertyList>
+                        <ItemPropertyPowerList>
+                            <ItemPropertyPower Index="0" ID="5.000000" />
+                            <ItemPropertyPower Index="1" ID="0.000000" />
+                        </ItemPropertyPowerList>
+                    </Slot>
+                    <Slot Index="4" ResRef="gen_im_arm_cht_med_start" StackSize="1">
+                        <ItemPropertyList>
+                            <ItemProperty Index="0" ID="5501" />
+                        </ItemPropertyList>
+                        <ItemPropertyPowerList>
+                            <ItemPropertyPower Index="0" ID="49.000000" />
+                        </ItemPropertyPowerList>
+                    </Slot>
+                    <Slot Index="6" ResRef="gen_im_arm_boo_med_start" StackSize="1">
+                        <ItemPropertyList>
+                            <ItemProperty Index="0" ID="5501" />
+                        </ItemPropertyList>
+                        <ItemPropertyPowerList>
+                            <ItemPropertyPower Index="0" ID="18.000000" />
+                        </ItemPropertyPowerList>
+                    </Slot>
+                    <Slot Index="7" ResRef="gen_im_arm_glv_med_start" StackSize="1">
+                        <ItemPropertyList>
+                            <ItemProperty Index="0" ID="5501" />
+                        </ItemPropertyList>
+                        <ItemPropertyPowerList>
+                            <ItemPropertyPower Index="0" ID="12.000000" />
+                        </ItemPropertyPowerList>
+                    </Slot>
+                </EquippedItems>
+            </LevelData>
+        </e>
+    </EventList>
+</Story>
