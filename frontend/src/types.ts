@@ -103,6 +103,23 @@ export type ItemProperty = {
   power: number;
 };
 
+export type MaterialInfo = {
+  code: number;
+  tier: number;
+  name: string;
+  family: MaterialFamily;
+  target: MaterialTarget;
+};
+
+export type MaterialFamily = "metal" | "wood" | "leather";
+
+export type MaterialTarget = "armor" | "weapon" | "shield";
+
+export type MaterialProfile = {
+  family: MaterialFamily;
+  target: MaterialTarget;
+};
+
 export type Item = {
   resref: string | null;
   name: string | null;
@@ -112,6 +129,9 @@ export type Item = {
   item_stacksize: number | null;
   item_level: number | null;
   material: number | null;
+  material_profile: MaterialProfile | null;
+  material_info: MaterialInfo | null;
+  material_options: MaterialInfo[];
   properties: ItemProperty[];
 };
 

@@ -16,6 +16,11 @@ import type {
 } from "./types";
 
 type Section = "overview" | "characters" | "abilities" | "inventory";
+type ItemPropertyDraft = {
+  id: number;
+  name: string | null;
+  power: string;
+};
 
 const MAIN_TARGET: CharacterTarget = "main_character";
 const SECTIONS: Section[] = ["overview", "characters", "abilities", "inventory"];
@@ -36,14 +41,6 @@ function parseNumber(value: string): number | null {
   }
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : null;
-}
-
-function parseSignedNumber(value: string): number | null {
-  if (value.trim() === "") {
-    return null;
-  }
-  const parsed = Number(value);
-  return Number.isInteger(parsed) ? parsed : null;
 }
 
 function abilityLabel(ability: Ability): string {
@@ -79,8 +76,40 @@ function cloneAbilities(abilities: Ability[]): Ability[] {
   return abilities.map((ability) => ({ ...ability, core_ids: [...ability.core_ids] }));
 }
 
-function cloneItemProperties(properties: ItemProperty[]): ItemProperty[] {
-  return properties.map((property) => ({ ...property }));
+function toItemPropertyDrafts(properties: ItemProperty[]): ItemPropertyDraft[] {
+  return properties.map((property) => ({
+    id: property.id,
+    name: property.name,
+    power: property.power.toString(),
+  }));
+}
+
+function materialLabel(item: Item): string {
+  if (item.material_info) {
+    return `Tier ${item.material_info.tier} - ${item.material_info.name} (${item.material_info.code})`;
+  }
+  if (item.material !== null) {
+    return item.material.toString();
+  }
+  return "";
+}
+
+function materialProfileLabel(item: Item): string {
+  if (!item.material_profile) {
+    return "";
+  }
+  return `${titleCase(item.material_profile.family)} ${titleCase(item.material_profile.target)}`;
+}
+
+function materialOptionLabel(code: number, item: Item): string {
+  const material = item.material_options.find((option) => option.code === code);
+  if (material) {
+    return `Tier ${material.tier} - ${material.name}`;
+  }
+  if (item.material_info?.code === code) {
+    return `Tier ${item.material_info.tier} - ${item.material_info.name}`;
+  }
+  return `Material ${code}`;
 }
 
 function App() {
@@ -99,7 +128,6 @@ function App() {
   const [moneyDraft, setMoneyDraft] = useState("");
   const [statsDraft, setStatsDraft] = useState<Record<string, string>>({});
   const [levelDraft, setLevelDraft] = useState("");
-  const [approvalDraft, setApprovalDraft] = useState("");
   const [pointPoolsDraft, setPointPoolsDraft] = useState<Record<string, string>>({});
   const [abilityDrafts, setAbilityDrafts] = useState<Record<AbilityListKind, Ability[]>>({
     skills: [],
@@ -118,18 +146,11 @@ function App() {
   });
   const [availableItemProperties, setAvailableItemProperties] = useState<SelectableItemProperty[]>([]);
   const [itemMetadataDraft, setItemMetadataDraft] = useState({
-    item_cost: "",
     material: "",
     item_level: "",
   });
-  const [itemPropertiesDraft, setItemPropertiesDraft] = useState<ItemProperty[]>([]);
+  const [itemPropertiesDraft, setItemPropertiesDraft] = useState<ItemPropertyDraft[]>([]);
   const [propertyDraft, setPropertyDraft] = useState({ property_id: "", power: "" });
-  const [replacementDraft, setReplacementDraft] = useState({
-    resref: "",
-    item_cost: "",
-    material: "",
-    item_level: "",
-  });
 
   const selectedCharacterTarget = useMemo(
     () => characters.find((entry) => targetKey(entry.target) === characterKey)?.target ?? MAIN_TARGET,
@@ -180,7 +201,6 @@ function App() {
       constitution: character.core_stats.constitution.toString(),
     });
     setLevelDraft(character.level?.toString() ?? "");
-    setApprovalDraft(character.approval?.toString() ?? "");
     setPointPoolsDraft({
       attribute_points: character.point_pools.attribute_points?.toString() ?? "",
       skill_points: character.point_pools.skill_points?.toString() ?? "",
@@ -199,17 +219,10 @@ function App() {
       return;
     }
     setItemMetadataDraft({
-      item_cost: selectedItem.item_cost?.toString() ?? "",
       material: selectedItem.material?.toString() ?? "",
       item_level: selectedItem.item_level?.toString() ?? "",
     });
-    setReplacementDraft({
-      resref: selectedItem.resref ?? "",
-      item_cost: selectedItem.item_cost?.toString() ?? "",
-      material: selectedItem.material?.toString() ?? "",
-      item_level: selectedItem.item_level?.toString() ?? "",
-    });
-    setItemPropertiesDraft(cloneItemProperties(selectedItem.properties));
+    setItemPropertiesDraft(toItemPropertyDrafts(selectedItem.properties));
   }, [selectedItem]);
 
   useEffect(() => {
@@ -273,10 +286,13 @@ function App() {
     for (const list of ["skills", "talents", "spells"] as AbilityListKind[]) {
       const response = await executeCommand({ command: "list_available_abilities", list });
       if (response.result === "available_abilities") {
-        setAvailableAbilities((current) => ({ ...current, [list]: response.abilities }));
+        const sortedAbilities = [...response.abilities].sort((left, right) =>
+          abilityLabel(left).localeCompare(abilityLabel(right), undefined, { sensitivity: "base" }),
+        );
+        setAvailableAbilities((current) => ({ ...current, [list]: sortedAbilities }));
         setSelectedAbilityToAdd((current) => ({
           ...current,
-          [list]: response.abilities[0] ? response.abilities[0].id.toString() : "",
+          [list]: sortedAbilities[0] ? sortedAbilities[0].id.toString() : "",
         }));
       }
     }
@@ -358,7 +374,7 @@ function App() {
     }
     const path = await save({
       title: "Save Edited File As",
-      defaultPath: summary.source_path.replace(/\.das$/i, "-edited.das"),
+      defaultPath: summary.source_path,
       filters: [{ name: "Dragon Age Save", extensions: ["das"] }],
     });
     if (!path) {
@@ -426,28 +442,26 @@ function App() {
         command: "patch_point_pools",
         target: selectedCharacterTarget,
         patch: {
-          attribute_points: parseNumber(pointPoolsDraft.attribute_points) ?? undefined,
-          skill_points: parseNumber(pointPoolsDraft.skill_points) ?? undefined,
-          talent_points: parseNumber(pointPoolsDraft.talent_points) ?? undefined,
-          specialization_points: parseNumber(pointPoolsDraft.specialization_points) ?? undefined,
+          attribute_points:
+            character?.point_pools.attribute_points !== null
+              ? parseNumber(pointPoolsDraft.attribute_points) ?? undefined
+              : undefined,
+          skill_points:
+            character?.point_pools.skill_points !== null
+              ? parseNumber(pointPoolsDraft.skill_points) ?? undefined
+              : undefined,
+          talent_points:
+            character?.point_pools.talent_points !== null
+              ? parseNumber(pointPoolsDraft.talent_points) ?? undefined
+              : undefined,
+          specialization_points:
+            character?.point_pools.specialization_points !== null
+              ? parseNumber(pointPoolsDraft.specialization_points) ?? undefined
+              : undefined,
         },
       });
       if (response.result === "character") {
         setCharacter(response.character);
-      }
-      if (selectedCharacterTarget !== "main_character") {
-        const approval = parseSignedNumber(approvalDraft);
-        if (approval === null) {
-          throw new Error("Approval must be a valid number.");
-        }
-        response = await executeCommand({
-          command: "set_approval",
-          target: selectedCharacterTarget,
-          approval,
-        });
-        if (response.result === "character") {
-          setCharacter(response.character);
-        }
       }
       await refreshSummary();
     });
@@ -466,7 +480,6 @@ function App() {
       constitution: character.core_stats.constitution.toString(),
     });
     setLevelDraft(character.level?.toString() ?? "");
-    setApprovalDraft(character.approval?.toString() ?? "");
     setPointPoolsDraft({
       attribute_points: character.point_pools.attribute_points?.toString() ?? "",
       skill_points: character.point_pools.skill_points?.toString() ?? "",
@@ -546,7 +559,7 @@ function App() {
     const selectedProperty = availableItemProperties.find((property) => property.id === propertyId);
     setItemPropertiesDraft((current) => [
       ...current,
-      { id: propertyId, name: selectedProperty?.name ?? null, power },
+      { id: propertyId, name: selectedProperty?.name ?? null, power: propertyDraft.power.trim() },
     ]);
     setPropertyDraft((current) => ({ ...current, power: "" }));
   }
@@ -556,21 +569,17 @@ function App() {
   }
 
   function handlePropertyUpdateDraft(kind: "id" | "power", propertyIndex: number, raw: string) {
-    const value = parseNumber(raw);
-    if (value === null) {
-      setError("Property value must be a valid number.");
-      return;
-    }
     setItemPropertiesDraft((current) =>
       current.map((property, index) => {
         if (index !== propertyIndex) {
           return property;
         }
         if (kind === "id") {
+          const value = Number(raw);
           const selectedProperty = availableItemProperties.find((entry) => entry.id === value);
           return { ...property, id: value, name: selectedProperty?.name ?? null };
         }
-        return { ...property, power: value };
+        return { ...property, power: raw };
       }),
     );
   }
@@ -585,7 +594,6 @@ function App() {
         container: selectedInventoryContainer,
         index: itemIndex,
         patch: {
-          item_cost: parseNumber(itemMetadataDraft.item_cost),
           material: parseNumber(itemMetadataDraft.material),
           item_level: parseNumber(itemMetadataDraft.item_level),
         },
@@ -599,6 +607,10 @@ function App() {
       const sharedCount = Math.min(sourceProperties.length, draftProperties.length);
 
       for (let index = 0; index < sharedCount; index += 1) {
+        const parsedPower = parseNumber(draftProperties[index].power);
+        if (parsedPower === null) {
+          throw new Error(`Property ${index + 1} power must be a valid number.`);
+        }
         if (sourceProperties[index].id !== draftProperties[index].id) {
           response = await executeCommand({
             command: "set_item_property_id",
@@ -608,13 +620,13 @@ function App() {
             property_id: draftProperties[index].id,
           });
         }
-        if (sourceProperties[index].power !== draftProperties[index].power) {
+        if (sourceProperties[index].power !== parsedPower) {
           response = await executeCommand({
             command: "set_item_property_power",
             container: selectedInventoryContainer,
             index: itemIndex,
             property_index: index,
-            power: draftProperties[index].power,
+            power: parsedPower,
           });
         }
       }
@@ -632,12 +644,16 @@ function App() {
 
       if (draftProperties.length > sourceProperties.length) {
         for (let index = sourceProperties.length; index < draftProperties.length; index += 1) {
+          const parsedPower = parseNumber(draftProperties[index].power);
+          if (parsedPower === null) {
+            throw new Error(`Property ${index + 1} power must be a valid number.`);
+          }
           response = await executeCommand({
             command: "add_item_property",
             container: selectedInventoryContainer,
             index: itemIndex,
             property_id: draftProperties[index].id,
-            power: draftProperties[index].power,
+            power: parsedPower,
           });
         }
       }
@@ -655,11 +671,10 @@ function App() {
       return;
     }
     setItemMetadataDraft({
-      item_cost: selectedItem.item_cost?.toString() ?? "",
       material: selectedItem.material?.toString() ?? "",
       item_level: selectedItem.item_level?.toString() ?? "",
     });
-    setItemPropertiesDraft(cloneItemProperties(selectedItem.properties));
+    setItemPropertiesDraft(toItemPropertyDrafts(selectedItem.properties));
     setPropertyDraft((current) => ({ ...current, power: "" }));
   }
 
@@ -671,28 +686,6 @@ function App() {
       await executeCommand({ command: "remove_backpack_item", index: itemIndex });
       await refreshSummary();
       await refreshItems();
-    });
-  }
-
-  async function handleBackpackReplace() {
-    if (inventoryMode !== "backpack" || itemIndex === null) {
-      return;
-    }
-    await run(async () => {
-      const response = await executeCommand({
-        command: "replace_backpack_item",
-        index: itemIndex,
-        replacement: {
-          resref: replacementDraft.resref,
-          item_cost: parseNumber(replacementDraft.item_cost),
-          material: parseNumber(replacementDraft.material),
-          item_level: parseNumber(replacementDraft.item_level),
-        },
-      });
-      if (response.result === "item") {
-        updateVisibleItem(response.index, response.item);
-      }
-      await refreshSummary();
     });
   }
 
@@ -800,7 +793,8 @@ function App() {
                           onChange={(event) =>
                             setPointPoolsDraft((current) => ({ ...current, attribute_points: event.target.value }))
                           }
-                          disabled={!canEdit || busy}
+                          disabled={!canEdit || busy || character?.point_pools.attribute_points === null}
+                          placeholder={character?.point_pools.attribute_points === null ? "Unavailable in this save" : undefined}
                         />
                       </label>
                       <label>
@@ -810,7 +804,8 @@ function App() {
                           onChange={(event) =>
                             setPointPoolsDraft((current) => ({ ...current, skill_points: event.target.value }))
                           }
-                          disabled={!canEdit || busy}
+                          disabled={!canEdit || busy || character?.point_pools.skill_points === null}
+                          placeholder={character?.point_pools.skill_points === null ? "Unavailable in this save" : undefined}
                         />
                       </label>
                       <label>
@@ -820,7 +815,8 @@ function App() {
                           onChange={(event) =>
                             setPointPoolsDraft((current) => ({ ...current, talent_points: event.target.value }))
                           }
-                          disabled={!canEdit || busy}
+                          disabled={!canEdit || busy || character?.point_pools.talent_points === null}
+                          placeholder={character?.point_pools.talent_points === null ? "Unavailable in this save" : undefined}
                         />
                       </label>
                       <label>
@@ -830,19 +826,10 @@ function App() {
                           onChange={(event) =>
                             setPointPoolsDraft((current) => ({ ...current, specialization_points: event.target.value }))
                           }
-                          disabled={!canEdit || busy}
+                          disabled={!canEdit || busy || character?.point_pools.specialization_points === null}
+                          placeholder={character?.point_pools.specialization_points === null ? "Unavailable in this save" : undefined}
                         />
                       </label>
-                      {selectedCharacterTarget !== "main_character" ? (
-                        <label>
-                          <span>Approval</span>
-                          <input
-                            value={approvalDraft}
-                            onChange={(event) => setApprovalDraft(event.target.value)}
-                            disabled={!canEdit || busy}
-                          />
-                        </label>
-                      ) : null}
                     </div>
                     <div className="button-row">
                       <button onClick={() => void handleCharacterApply()} disabled={!canEdit || busy}>Apply</button>
@@ -973,8 +960,34 @@ function App() {
                     <div className="field-grid">
                       <label><span>Name</span><input value={selectedItem.name ?? ""} disabled /></label>
                       <label><span>Resref</span><input value={selectedItem.resref ?? ""} disabled /></label>
-                      <label><span>Item Cost</span><input value={itemMetadataDraft.item_cost} onChange={(event) => setItemMetadataDraft((current) => ({ ...current, item_cost: event.target.value }))} disabled={!canEdit || busy} /></label>
-                      <label><span>Material</span><input value={itemMetadataDraft.material} onChange={(event) => setItemMetadataDraft((current) => ({ ...current, material: event.target.value }))} disabled={!canEdit || busy} /></label>
+                      <label>
+                        <span>Material</span>
+                        {selectedItem.material_options.length > 0 ? (
+                          <select
+                            value={itemMetadataDraft.material}
+                            onChange={(event) =>
+                              setItemMetadataDraft((current) => ({ ...current, material: event.target.value }))
+                            }
+                            disabled={!canEdit || busy}
+                          >
+                            {selectedItem.material_options.map((option) => (
+                              <option key={`material-${option.code}`} value={option.code}>
+                                {`Tier ${option.tier} - ${option.name}`}
+                              </option>
+                            ))}
+                          </select>
+                        ) : (
+                          <input
+                            value={itemMetadataDraft.material}
+                            onChange={(event) =>
+                              setItemMetadataDraft((current) => ({ ...current, material: event.target.value }))
+                            }
+                            disabled={!canEdit || busy}
+                          />
+                        )}
+                      </label>
+                      <label><span>Material Name</span><input value={materialLabel(selectedItem)} disabled /></label>
+                      <label><span>Material Type</span><input value={materialProfileLabel(selectedItem)} disabled /></label>
                       <label><span>Item Level</span><input value={itemMetadataDraft.item_level} onChange={(event) => setItemMetadataDraft((current) => ({ ...current, item_level: event.target.value }))} disabled={!canEdit || busy} /></label>
                       <label><span>Equipment Slot</span><input value={selectedItem.equipment_slot ?? ""} disabled /></label>
                     </div>
@@ -982,31 +995,25 @@ function App() {
                       {inventoryMode === "backpack" ? (
                         <>
                           <button onClick={() => void handleBackpackRemove()} disabled={!canEdit || busy}>Remove Item</button>
-                          <button onClick={() => void handleBackpackReplace()} disabled={!canEdit || busy}>Same Resref Replace</button>
                         </>
                       ) : null}
                     </div>
-                    {inventoryMode === "backpack" ? (
-                      <div className="replacement-box">
-                        <h3>Backpack Replacement</h3>
-                        <div className="field-grid">
-                          <label><span>Resref</span><input value={replacementDraft.resref} onChange={(event) => setReplacementDraft((current) => ({ ...current, resref: event.target.value }))} disabled={!canEdit || busy} /></label>
-                          <label><span>Item Cost</span><input value={replacementDraft.item_cost} onChange={(event) => setReplacementDraft((current) => ({ ...current, item_cost: event.target.value }))} disabled={!canEdit || busy} /></label>
-                          <label><span>Material</span><input value={replacementDraft.material} onChange={(event) => setReplacementDraft((current) => ({ ...current, material: event.target.value }))} disabled={!canEdit || busy} /></label>
-                          <label><span>Item Level</span><input value={replacementDraft.item_level} onChange={(event) => setReplacementDraft((current) => ({ ...current, item_level: event.target.value }))} disabled={!canEdit || busy} /></label>
-                        </div>
-                      </div>
-                    ) : null}
                     <div className="properties-section">
                       <div className="panel-heading"><h3>Properties</h3></div>
                       <div className="property-list scroll-region">
                         {itemPropertiesDraft.map((property, propertyIndex) => (
                           <div key={`${property.id}-${propertyIndex}`} className="property-row">
-                            <input
+                            <select
                               value={property.id}
                               onChange={(event) => handlePropertyUpdateDraft("id", propertyIndex, event.target.value)}
                               disabled={!canEdit || busy}
-                            />
+                            >
+                              {availableItemProperties.map((option) => (
+                                <option key={`existing-property-${propertyIndex}-${option.id}`} value={option.id}>
+                                  {option.name ?? `Property ${option.id}`}
+                                </option>
+                              ))}
+                            </select>
                             <input value={property.name ?? `Property ${property.id}`} disabled />
                             <input
                               value={property.power}
@@ -1017,6 +1024,14 @@ function App() {
                           </div>
                         ))}
                       </div>
+                      {selectedItem.material_options.length > 0 ? (
+                        <p className="muted editor-help">
+                          Available material tiers are filtered for this item type. Current choice:{" "}
+                          {itemMetadataDraft.material === ""
+                            ? "none"
+                            : materialOptionLabel(Number(itemMetadataDraft.material), selectedItem)}
+                        </p>
+                      ) : null}
                       <div className="property-row add-property">
                         <select value={propertyDraft.property_id} onChange={(event) => setPropertyDraft((current) => ({ ...current, property_id: event.target.value }))} disabled={!canEdit || busy}>
                           {availableItemProperties.map((property) => (
@@ -1044,7 +1059,12 @@ function App() {
         <span>{summary ? "Ready" : "No Save Loaded"}</span>
       </footer>
 
-      {error ? <div className="error-banner">{error}</div> : null}
+      {error ? (
+        <div className="error-banner">
+          <span>{error}</span>
+          <button className="dismiss-button" onClick={() => setError(null)}>Dismiss</button>
+        </div>
+      ) : null}
     </div>
   );
 }

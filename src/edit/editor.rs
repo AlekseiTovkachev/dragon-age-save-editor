@@ -1,7 +1,7 @@
 use crate::domain::ability::{AbilityKind, AbilityRef};
 use crate::domain::character::Character;
 use crate::domain::gamedata::{GameDataLookup, GameId};
-use crate::domain::item::{Item, ItemProperty};
+use crate::domain::item::{Item, ItemProperty, MaterialProfile};
 use crate::domain::save::{ExtractError, SaveGame};
 use crate::domain::stats::{CoreStat, CoreStatsPatch, PointPoolsPatch};
 use crate::gff4::fields::{
@@ -482,6 +482,32 @@ impl SaveEditor {
         Ok(())
     }
 
+    pub fn refresh_item_material_info(
+        &mut self,
+        container: InventoryContainer,
+        index: usize,
+        lookup: Option<&dyn GameDataLookup>,
+        preferred_game: Option<GameId>,
+    ) -> Result<(), EditError> {
+        let item = item_mut(&mut self.save, container, index)?;
+        item.material_info = match (lookup, item.material) {
+            (Some(lookup), Some(material_code)) => lookup
+                .material_info(material_code, preferred_game)
+                .map_err(|err| EditError::LookupFailed {
+                    path: "item.SAVEGAME_ITEM_MATERIALTYPE".to_string(),
+                    detail: err.to_string(),
+                })?,
+            _ => None,
+        };
+        if item.material_profile.is_none() {
+            item.material_profile = item.material_info.as_ref().map(|info| MaterialProfile {
+                family: info.family,
+                target: info.target,
+            });
+        }
+        Ok(())
+    }
+
     pub fn remove_backpack_item(&mut self, index: usize) -> Result<(), EditError> {
         let party = raw_party_mut(&mut self.raw)?;
         let items = party
@@ -891,6 +917,7 @@ fn load_validated_abilities(
 ) -> Result<Vec<AbilityRef>, EditError> {
     let mut abilities = Vec::with_capacity(ability_ids.len());
     let mut replacement_ids = BTreeSet::new();
+    let expected_kind = expected_ability_kind(list);
 
     for &ability_id in ability_ids {
         let ability = lookup
@@ -900,7 +927,7 @@ fn load_validated_abilities(
                 detail: err.to_string(),
             })?
             .ok_or(EditError::UnknownAbility { ability_id })?;
-        if ability.kind != expected_ability_kind(list) {
+        if ability.kind != expected_kind {
             return Err(EditError::InvalidAbilityKind {
                 ability_id,
                 expected: list,
@@ -914,7 +941,24 @@ fn load_validated_abilities(
     let mut required_core_ids = BTreeSet::new();
     for ability in &abilities {
         for &core_id in &ability.core_ids {
-            required_core_ids.insert(core_id);
+            let Some(core_ability) = lookup
+                .ability(core_id, preferred_game)
+                .map_err(|err| EditError::LookupFailed {
+                    path: "character.ability_list".to_string(),
+                    detail: err.to_string(),
+                })?
+            else {
+                continue;
+            };
+            if matches!(
+                core_ability.ability_type.as_deref().map(str::trim),
+                Some("Class") | Some("Specialization")
+            ) {
+                continue;
+            }
+            if core_ability.kind == expected_kind {
+                required_core_ids.insert(core_id);
+            }
         }
     }
     for &core_id in &required_core_ids {
@@ -939,6 +983,24 @@ fn load_validated_abilities(
             continue;
         };
         for &core_id in &ability.core_ids {
+            let Some(core_ability) = lookup
+                .ability(core_id, preferred_game)
+                .map_err(|err| EditError::LookupFailed {
+                    path: "character.ability_list".to_string(),
+                    detail: err.to_string(),
+                })?
+            else {
+                continue;
+            };
+            if matches!(
+                core_ability.ability_type.as_deref().map(str::trim),
+                Some("Class") | Some("Specialization")
+            ) {
+                continue;
+            }
+            if core_ability.kind != expected_kind {
+                continue;
+            }
             if current_ids.contains(&core_id) {
                 currently_owned_cores.insert(core_id);
             }
@@ -1752,6 +1814,24 @@ mod tests {
             abilities.iter().map(|ability| ability.id).collect::<Vec<_>>(),
             replacement
         );
+    }
+
+    #[test]
+    fn class_core_dependencies_do_not_block_talent_replacement() {
+        let lookup = SqliteGameData::open(DEFAULT_GAME_DATA_PATH).unwrap();
+        let current_ids = std::collections::BTreeSet::from([23_u32]);
+        let abilities = super::load_validated_abilities(
+            CharacterTarget::MainCharacter,
+            AbilityListKind::Talents,
+            &[23],
+            &current_ids,
+            &lookup,
+            Some(crate::domain::gamedata::GameId::Dao),
+        )
+        .unwrap();
+
+        assert_eq!(abilities.len(), 1);
+        assert_eq!(abilities[0].id, 23);
     }
 
     #[test]

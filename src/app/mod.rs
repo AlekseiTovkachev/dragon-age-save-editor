@@ -2,7 +2,7 @@ use base64::Engine;
 use crate::domain::gamedata::{GameDataLookup, LookupError, SqliteGameData, DEFAULT_GAME_DATA_PATH};
 use crate::domain::character::Character;
 use crate::domain::ability::AbilityRef;
-use crate::domain::item::{Item, ItemProperty};
+use crate::domain::item::{Item, ItemProperty, MaterialFamily, MaterialInfo, MaterialProfile, MaterialTarget};
 use crate::domain::stats::{CoreStats, CoreStatsPatch, PointPools, PointPoolsPatch};
 use crate::edit::{
     AbilityListKind, BackpackItemReplacement, CharacterTarget, EditError, InventoryContainer,
@@ -300,7 +300,41 @@ pub struct ItemDto {
     pub item_stacksize: Option<u32>,
     pub item_level: Option<u8>,
     pub material: Option<u32>,
+    pub material_profile: Option<MaterialProfileDto>,
+    pub material_info: Option<MaterialInfoDto>,
+    pub material_options: Vec<MaterialInfoDto>,
     pub properties: Vec<ItemPropertyDto>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct MaterialInfoDto {
+    pub code: u32,
+    pub tier: u8,
+    pub name: String,
+    pub family: MaterialFamilyDto,
+    pub target: MaterialTargetDto,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum MaterialFamilyDto {
+    Metal,
+    Wood,
+    Leather,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum MaterialTargetDto {
+    Armor,
+    Weapon,
+    Shield,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct MaterialProfileDto {
+    pub family: MaterialFamilyDto,
+    pub target: MaterialTargetDto,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -428,11 +462,13 @@ impl SaveDocument {
                     .iter()
                     .cloned()
                     .enumerate()
-                    .map(|(index, item)| IndexedItemDto {
-                        index,
-                        item: ItemDto::from(item),
+                    .map(|(index, item)| {
+                        Ok(IndexedItemDto {
+                            index,
+                            item: self.item_to_dto(item)?,
+                        })
                     })
-                    .collect(),
+                    .collect::<Result<Vec<_>, CommandError>>()?,
             }),
             SaveCommand::ListEquipmentItems { target } => {
                 let target = CharacterTarget::from(target);
@@ -444,11 +480,13 @@ impl SaveDocument {
                         .iter()
                         .cloned()
                         .enumerate()
-                        .map(|(index, item)| IndexedItemDto {
-                            index,
-                            item: ItemDto::from(item),
+                        .map(|(index, item)| {
+                            Ok(IndexedItemDto {
+                                index,
+                                item: self.item_to_dto(item)?,
+                            })
                         })
-                        .collect(),
+                        .collect::<Result<Vec<_>, CommandError>>()?,
                 })
             }
             SaveCommand::SetMoney { money } => {
@@ -548,6 +586,19 @@ impl SaveDocument {
                         ItemMetadataPatch::from(patch),
                     )
                     .map_err(CommandError::from)?;
+                let lookup = self.lookup.take();
+                let preferred_game = self.preferred_game();
+                self.editor_mut()?
+                    .refresh_item_material_info(
+                        container_enum,
+                        index,
+                        lookup
+                            .as_ref()
+                            .map(|db| db as &dyn crate::domain::gamedata::GameDataLookup),
+                        preferred_game,
+                    )
+                    .map_err(CommandError::from)?;
+                self.lookup = lookup;
                 self.dirty = true;
                 Ok(SaveCommandResult::Item {
                     container,
@@ -714,7 +765,23 @@ impl SaveDocument {
                     message: format!("invalid character target: {target:?}"),
                 })?,
         };
-        Ok(CharacterDto::from(character.clone()))
+        Ok(CharacterDto {
+            name: character.name.clone(),
+            template_resref: character.template_resref.clone(),
+            approval: character.approval,
+            level: character.level,
+            core_stats: CoreStatsDto::from(character.core_stats),
+            point_pools: PointPoolsDto::from(character.point_pools),
+            equipment: character
+                .equipment
+                .iter()
+                .cloned()
+                .map(|item| self.item_to_dto(item))
+                .collect::<Result<Vec<_>, CommandError>>()?,
+            skills: character.skills.iter().cloned().map(AbilityDto::from).collect(),
+            talents: character.talents.iter().cloned().map(AbilityDto::from).collect(),
+            spells: character.spells.iter().cloned().map(AbilityDto::from).collect(),
+        })
     }
 
     fn item_dto(&self, container: InventoryContainer, index: usize) -> Result<ItemDto, CommandError> {
@@ -733,7 +800,7 @@ impl SaveDocument {
             code: CommandErrorCode::InvalidItemIndex,
             message: format!("invalid item index {index} in {container:?}"),
         })?;
-        Ok(ItemDto::from(item.clone()))
+        self.item_to_dto(item.clone())
     }
 
     fn screenshot_data_url(&self) -> Result<Option<String>, CommandError> {
@@ -781,6 +848,41 @@ impl SaveDocument {
         self.editor
             .as_ref()
             .and_then(|editor| editor.save().preferred_game)
+    }
+
+    fn item_to_dto(&self, value: Item) -> Result<ItemDto, CommandError> {
+        let material_profile = value.material_profile.clone();
+        let material_options = if let (Some(profile), Some(lookup)) =
+            (material_profile.as_ref(), self.lookup.as_ref())
+        {
+            lookup
+                .material_options(profile.family, profile.target, self.preferred_game())
+                .map_err(CommandError::from_lookup)?
+                .into_iter()
+                .map(MaterialInfoDto::from)
+                .collect()
+        } else {
+            Vec::new()
+        };
+
+        Ok(ItemDto {
+            resref: value.resref,
+            name: value.name,
+            object_id: value.object_id,
+            equipment_slot: value.equipment_slot,
+            item_cost: value.item_cost,
+            item_stacksize: value.item_stacksize,
+            item_level: value.item_level,
+            material: value.material,
+            material_profile: material_profile.map(MaterialProfileDto::from),
+            material_info: value.material_info.map(MaterialInfoDto::from),
+            material_options,
+            properties: value
+                .properties
+                .into_iter()
+                .map(ItemPropertyDto::from)
+                .collect(),
+        })
     }
 }
 
@@ -935,11 +1037,55 @@ impl From<Item> for ItemDto {
             item_stacksize: value.item_stacksize,
             item_level: value.item_level,
             material: value.material,
+            material_profile: value.material_profile.map(MaterialProfileDto::from),
+            material_info: value.material_info.map(MaterialInfoDto::from),
+            material_options: Vec::new(),
             properties: value
                 .properties
                 .into_iter()
                 .map(ItemPropertyDto::from)
                 .collect(),
+        }
+    }
+}
+
+impl From<MaterialInfo> for MaterialInfoDto {
+    fn from(value: MaterialInfo) -> Self {
+        Self {
+            code: value.code,
+            tier: value.tier,
+            name: value.name,
+            family: MaterialFamilyDto::from(value.family),
+            target: MaterialTargetDto::from(value.target),
+        }
+    }
+}
+
+impl From<MaterialFamily> for MaterialFamilyDto {
+    fn from(value: MaterialFamily) -> Self {
+        match value {
+            MaterialFamily::Metal => Self::Metal,
+            MaterialFamily::Wood => Self::Wood,
+            MaterialFamily::Leather => Self::Leather,
+        }
+    }
+}
+
+impl From<MaterialTarget> for MaterialTargetDto {
+    fn from(value: MaterialTarget) -> Self {
+        match value {
+            MaterialTarget::Armor => Self::Armor,
+            MaterialTarget::Weapon => Self::Weapon,
+            MaterialTarget::Shield => Self::Shield,
+        }
+    }
+}
+
+impl From<MaterialProfile> for MaterialProfileDto {
+    fn from(value: MaterialProfile) -> Self {
+        Self {
+            family: MaterialFamilyDto::from(value.family),
+            target: MaterialTargetDto::from(value.target),
         }
     }
 }

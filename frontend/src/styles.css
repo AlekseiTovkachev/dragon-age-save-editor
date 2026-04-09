@@ -367,12 +367,21 @@ textarea {
   border: 1px solid #6f472d;
   background: rgba(58, 30, 25, 0.96);
   color: #f6d7cf;
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .warning-banner {
   bottom: 4.75rem;
   background: rgba(68, 51, 26, 0.97);
   color: #f1dfb0;
+}
+
+.dismiss-button {
+  flex: 0 0 auto;
+  padding: 0.35rem 0.65rem;
 }
 
 label span,

@@ -1,7 +1,7 @@
 use crate::domain::ability::{AbilityKind, AbilityRef};
 use crate::domain::character::Character;
 use crate::domain::gamedata::{GameDataLookup, GameId, LookupError};
-use crate::domain::item::{Item, ItemProperty};
+use crate::domain::item::{Item, ItemProperty, MaterialProfile};
 use crate::domain::stats::{CoreStats, PointPools};
 use crate::gff4::fields::{
     ITEM_COST, ITEM_STACKSIZE, OBJECT_ID, SAVEGAME_BACKPACK, SAVEGAME_CREATURE_STATS,
@@ -432,6 +432,30 @@ fn extract_item(
         None
     };
 
+    let material = optional_u32(source, SAVEGAME_ITEM_MATERIALTYPE);
+    let material_profile = if let (Some(lookup), Some(resref)) = (lookup, resref.as_deref()) {
+        map_lookup_error(
+            lookup.item_material_profile(resref, preferred_game),
+            "item.TEMPLATERESREF",
+        )?
+    } else {
+        None
+    };
+    let material_info = if let (Some(lookup), Some(material)) = (lookup, material) {
+        map_lookup_error(
+            lookup.material_info(material, preferred_game),
+            "item.SAVEGAME_ITEM_MATERIALTYPE",
+        )?
+    } else {
+        None
+    };
+    let material_profile = material_profile.or_else(|| {
+        material_info.as_ref().map(|info| MaterialProfile {
+            family: info.family,
+            target: info.target,
+        })
+    });
+
     Ok(Item {
         resref,
         name,
@@ -440,7 +464,9 @@ fn extract_item(
         item_cost: optional_u32(source, ITEM_COST),
         item_stacksize: optional_u32(source, ITEM_STACKSIZE),
         item_level: optional_u8(source, SAVEGAME_OBJECT_PLOT),
-        material: optional_u32(source, SAVEGAME_ITEM_MATERIALTYPE),
+        material,
+        material_profile,
+        material_info,
         properties,
     })
 }

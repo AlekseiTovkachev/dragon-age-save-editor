@@ -1,4 +1,5 @@
 use crate::domain::ability::{AbilityKind, AbilityRef};
+use crate::domain::item::{MaterialFamily, MaterialInfo, MaterialProfile, MaterialTarget};
 use rusqlite::{params, Connection, OptionalExtension};
 use std::error::Error;
 use std::fmt;
@@ -43,6 +44,25 @@ pub trait GameDataLookup {
     fn item_properties(&self) -> Result<Vec<(u32, Option<String>)>, LookupError>;
 
     fn item_property_name(&self, property_id: u32) -> Result<Option<String>, LookupError>;
+
+    fn material_info(
+        &self,
+        material_code: u32,
+        preferred_game: Option<GameId>,
+    ) -> Result<Option<MaterialInfo>, LookupError>;
+
+    fn item_material_profile(
+        &self,
+        resref: &str,
+        preferred_game: Option<GameId>,
+    ) -> Result<Option<MaterialProfile>, LookupError>;
+
+    fn material_options(
+        &self,
+        family: MaterialFamily,
+        target: MaterialTarget,
+        preferred_game: Option<GameId>,
+    ) -> Result<Vec<MaterialInfo>, LookupError>;
 }
 
 #[derive(Debug)]
@@ -137,6 +157,40 @@ impl SqliteGameData {
         }
 
         Ok(None)
+    }
+
+    fn family_from_db(value: &str) -> Option<MaterialFamily> {
+        match value {
+            "metal" => Some(MaterialFamily::Metal),
+            "wood" => Some(MaterialFamily::Wood),
+            "leather" => Some(MaterialFamily::Leather),
+            _ => None,
+        }
+    }
+
+    fn target_from_db(value: &str) -> Option<MaterialTarget> {
+        match value {
+            "armor" => Some(MaterialTarget::Armor),
+            "weapon" => Some(MaterialTarget::Weapon),
+            "shield" => Some(MaterialTarget::Shield),
+            _ => None,
+        }
+    }
+
+    fn family_to_db(value: MaterialFamily) -> &'static str {
+        match value {
+            MaterialFamily::Metal => "metal",
+            MaterialFamily::Wood => "wood",
+            MaterialFamily::Leather => "leather",
+        }
+    }
+
+    fn target_to_db(value: MaterialTarget) -> &'static str {
+        match value {
+            MaterialTarget::Armor => "armor",
+            MaterialTarget::Weapon => "weapon",
+            MaterialTarget::Shield => "shield",
+        }
     }
 }
 
@@ -257,11 +311,147 @@ impl GameDataLookup for SqliteGameData {
 
         Ok(result)
     }
+
+    fn material_info(
+        &self,
+        material_code: u32,
+        preferred_game: Option<GameId>,
+    ) -> Result<Option<MaterialInfo>, LookupError> {
+        if preferred_game != Some(GameId::Dao) {
+            return Ok(None);
+        }
+
+        self.connection
+            .query_row(
+                "SELECT code, tier, name, family, target
+                 FROM material_codes
+                 WHERE game = 'dao' AND code = ?1",
+                params![material_code],
+                |row| {
+                    let family = row.get::<_, String>(3)?;
+                    let target = row.get::<_, String>(4)?;
+                    Ok(MaterialInfo {
+                        code: row.get::<_, u32>(0)?,
+                        tier: row.get::<_, u8>(1)?,
+                        name: row.get::<_, String>(2)?,
+                        family: Self::family_from_db(&family).ok_or_else(|| {
+                            rusqlite::Error::FromSqlConversionFailure(
+                                3,
+                                rusqlite::types::Type::Text,
+                                Box::<dyn std::error::Error + Send + Sync>::from("invalid family"),
+                            )
+                        })?,
+                        target: Self::target_from_db(&target).ok_or_else(|| {
+                            rusqlite::Error::FromSqlConversionFailure(
+                                4,
+                                rusqlite::types::Type::Text,
+                                Box::<dyn std::error::Error + Send + Sync>::from("invalid target"),
+                            )
+                        })?,
+                    })
+                },
+            )
+            .optional()
+            .map_err(LookupError::from)
+    }
+
+    fn item_material_profile(
+        &self,
+        resref: &str,
+        preferred_game: Option<GameId>,
+    ) -> Result<Option<MaterialProfile>, LookupError> {
+        let Some(game) = preferred_game else {
+            return Ok(None);
+        };
+        let cleaned = resref.trim_end_matches('\0').to_ascii_lowercase();
+        self.connection
+            .query_row(
+                "SELECT material_family, material_target FROM items WHERE resref = ?1 AND game = ?2",
+                params![cleaned, game.as_db_value()],
+                |row| {
+                    let family = row.get::<_, Option<String>>(0)?;
+                    let target = row.get::<_, Option<String>>(1)?;
+                    Ok(match (family.as_deref(), target.as_deref()) {
+                        (Some(family), Some(target)) => Some(MaterialProfile {
+                            family: Self::family_from_db(family).ok_or_else(|| {
+                                rusqlite::Error::FromSqlConversionFailure(
+                                    0,
+                                    rusqlite::types::Type::Text,
+                                    Box::<dyn std::error::Error + Send + Sync>::from("invalid family"),
+                                )
+                            })?,
+                            target: Self::target_from_db(target).ok_or_else(|| {
+                                rusqlite::Error::FromSqlConversionFailure(
+                                    1,
+                                    rusqlite::types::Type::Text,
+                                    Box::<dyn std::error::Error + Send + Sync>::from("invalid target"),
+                                )
+                            })?,
+                        }),
+                        _ => None,
+                    })
+                },
+            )
+            .optional()
+            .map(|result| result.flatten())
+            .map_err(LookupError::from)
+    }
+
+    fn material_options(
+        &self,
+        family: MaterialFamily,
+        target: MaterialTarget,
+        preferred_game: Option<GameId>,
+    ) -> Result<Vec<MaterialInfo>, LookupError> {
+        if preferred_game != Some(GameId::Dao) {
+            return Ok(Vec::new());
+        }
+
+        let mut statement = self.connection.prepare(
+            "SELECT code, tier, name, family, target
+             FROM material_codes
+             WHERE game = 'dao' AND family = ?1 AND target = ?2
+             ORDER BY tier, code",
+        )?;
+        let rows = statement.query_map(
+            params![Self::family_to_db(family), Self::target_to_db(target)],
+            |row| {
+                let family = row.get::<_, String>(3)?;
+                let target = row.get::<_, String>(4)?;
+                Ok(MaterialInfo {
+                    code: row.get::<_, u32>(0)?,
+                    tier: row.get::<_, u8>(1)?,
+                    name: row.get::<_, String>(2)?,
+                    family: Self::family_from_db(&family).ok_or_else(|| {
+                        rusqlite::Error::FromSqlConversionFailure(
+                            3,
+                            rusqlite::types::Type::Text,
+                            Box::<dyn std::error::Error + Send + Sync>::from("invalid family"),
+                        )
+                    })?,
+                    target: Self::target_from_db(&target).ok_or_else(|| {
+                        rusqlite::Error::FromSqlConversionFailure(
+                            4,
+                            rusqlite::types::Type::Text,
+                            Box::<dyn std::error::Error + Send + Sync>::from("invalid target"),
+                        )
+                    })?,
+                })
+            },
+        )?;
+
+        let mut materials = Vec::new();
+        for row in rows {
+            materials.push(row?);
+        }
+        Ok(materials)
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use super::{AbilityKind, GameDataLookup, GameId, SqliteGameData, DEFAULT_GAME_DATA_PATH};
+    use crate::domain::item::{MaterialFamily, MaterialTarget};
     use std::path::PathBuf;
     use std::time::{SystemTime, UNIX_EPOCH};
 
@@ -288,11 +478,32 @@ mod tests {
                     game TEXT NOT NULL,
                     PRIMARY KEY (id, game)
                 );
+                CREATE TABLE material_codes (
+                    code INTEGER NOT NULL,
+                    tier INTEGER NOT NULL,
+                    name TEXT NOT NULL,
+                    family TEXT NOT NULL,
+                    target TEXT NOT NULL,
+                    game TEXT NOT NULL,
+                    PRIMARY KEY (code, game)
+                );
+                CREATE TABLE items (
+                    resref TEXT NOT NULL,
+                    name TEXT,
+                    game TEXT NOT NULL,
+                    material_family TEXT,
+                    material_target TEXT,
+                    PRIMARY KEY (resref, game)
+                );
                 INSERT INTO abilities (id, name, core_id, tree, type, game) VALUES
                     ('5000', 'DAO Test Talent', '5001', 'DAO Tree', ' Talent ', 'dao'),
                     ('5000', 'DA2 Test Talent', '5002', 'DA2 Tree', 'Specialization', 'da2'),
                     ('5001', 'DAO Skill', NULL, 'DAO Skills', 'Skill', 'dao'),
                     ('5002', 'DA2 Spell', NULL, 'DA2 Spells', 'Spell', 'da2');
+                INSERT INTO material_codes (code, tier, name, family, target, game) VALUES
+                    (45, 6, 'Silverite', 'metal', 'weapon', 'dao');
+                INSERT INTO items (resref, name, game, material_family, material_target) VALUES
+                    ('gen_im_wep_mel_lsw_lsw', 'Longsword', 'dao', 'metal', 'weapon');
                 ",
             )
             .unwrap();
@@ -334,6 +545,35 @@ mod tests {
         assert_eq!(dao_talents[0].name.as_deref(), Some("DAO Test Talent"));
         assert_eq!(da2_talents.len(), 1);
         assert_eq!(da2_talents[0].name.as_deref(), Some("DA2 Test Talent"));
+    }
+
+    #[test]
+    fn material_lookup_returns_dao_material_metadata() {
+        let lookup = create_test_lookup();
+        let material = lookup.material_info(45, Some(GameId::Dao)).unwrap().unwrap();
+        assert_eq!(material.tier, 6);
+        assert_eq!(material.name, "Silverite");
+    }
+
+    #[test]
+    fn item_material_profile_returns_db_backed_shape() {
+        let lookup = create_test_lookup();
+        let profile = lookup
+            .item_material_profile("gen_im_wep_mel_lsw_lsw", Some(GameId::Dao))
+            .unwrap()
+            .unwrap();
+        assert_eq!(profile.family, MaterialFamily::Metal);
+        assert_eq!(profile.target, MaterialTarget::Weapon);
+    }
+
+    #[test]
+    fn material_options_are_scoped_by_family_and_target() {
+        let lookup = create_test_lookup();
+        let options = lookup
+            .material_options(MaterialFamily::Metal, MaterialTarget::Weapon, Some(GameId::Dao))
+            .unwrap();
+        assert_eq!(options.len(), 1);
+        assert_eq!(options[0].code, 45);
     }
 
     #[test]
