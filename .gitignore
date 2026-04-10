@@ -3,3 +3,12 @@ node_modules/
 dist/
 src-tauri/target/
 sample_saves/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+._*
+.Spotlight-V100
+.Trashes

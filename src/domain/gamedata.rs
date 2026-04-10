@@ -5,7 +5,7 @@ use std::error::Error;
 use std::fmt;
 use std::path::Path;
 
-pub const DEFAULT_GAME_DATA_PATH: &str = "data\\gamedata.db";
+pub const DEFAULT_GAME_DATA_PATH: &str = "data/gamedata.db";
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum GameId {
@@ -582,5 +582,46 @@ mod tests {
         let ability = lookup.ability(301000, Some(GameId::Da2)).unwrap().unwrap();
         assert_eq!(ability.name.as_deref(), Some("Elemental"));
         assert_eq!(ability.kind, AbilityKind::Spell);
+    }
+
+    #[test]
+    fn dao_core_skill_rows_have_behavioral_names() {
+        let lookup = SqliteGameData::open(DEFAULT_GAME_DATA_PATH).unwrap();
+
+        let player_unlock = lookup.ability(4001, Some(GameId::Dao)).unwrap().unwrap();
+        let humanoid_unlock = lookup.ability(4002, Some(GameId::Dao)).unwrap().unwrap();
+
+        assert_eq!(player_unlock.name.as_deref(), Some("Player Skill Unlock"));
+        assert_eq!(humanoid_unlock.name.as_deref(), Some("Humanoid Skill Unlock"));
+    }
+
+    #[test]
+    fn dao_coercion_rows_require_player_skill_unlock() {
+        let lookup = SqliteGameData::open(DEFAULT_GAME_DATA_PATH).unwrap();
+
+        for ability_id in [100011_u32, 100012, 100013, 100014] {
+            let ability = lookup.ability(ability_id, Some(GameId::Dao)).unwrap().unwrap();
+            assert_eq!(ability.core_ids, vec![4001]);
+        }
+    }
+
+    #[test]
+    fn dao_normal_skills_require_humanoid_skill_unlock() {
+        let lookup = SqliteGameData::open(DEFAULT_GAME_DATA_PATH).unwrap();
+
+        for ability_id in [100021_u32, 100061, 100100, 100110] {
+            let ability = lookup.ability(ability_id, Some(GameId::Dao)).unwrap().unwrap();
+            assert_eq!(ability.core_ids, vec![4002]);
+        }
+    }
+
+    #[test]
+    fn awakening_skills_require_humanoid_skill_unlock() {
+        let lookup = SqliteGameData::open(DEFAULT_GAME_DATA_PATH).unwrap();
+
+        for ability_id in [410000_u32, 410100, 410200] {
+            let ability = lookup.ability(ability_id, Some(GameId::Dao)).unwrap().unwrap();
+            assert_eq!(ability.core_ids, vec![4002]);
+        }
     }
 }

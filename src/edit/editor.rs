@@ -950,13 +950,7 @@ fn load_validated_abilities(
             else {
                 continue;
             };
-            if matches!(
-                core_ability.ability_type.as_deref().map(str::trim),
-                Some("Class") | Some("Specialization")
-            ) {
-                continue;
-            }
-            if core_ability.kind == expected_kind {
+            if should_enforce_core_ability(&core_ability, expected_kind) {
                 required_core_ids.insert(core_id);
             }
         }
@@ -992,16 +986,9 @@ fn load_validated_abilities(
             else {
                 continue;
             };
-            if matches!(
-                core_ability.ability_type.as_deref().map(str::trim),
-                Some("Class") | Some("Specialization")
-            ) {
-                continue;
-            }
-            if core_ability.kind != expected_kind {
-                continue;
-            }
-            if current_ids.contains(&core_id) {
+            if should_enforce_core_ability(&core_ability, expected_kind)
+                && current_ids.contains(&core_id)
+            {
                 currently_owned_cores.insert(core_id);
             }
         }
@@ -1017,6 +1004,17 @@ fn load_validated_abilities(
     }
 
     Ok(abilities)
+}
+
+fn should_enforce_core_ability(core_ability: &AbilityRef, expected_kind: AbilityKind) -> bool {
+    if matches!(
+        core_ability.ability_type.as_deref().map(str::trim),
+        Some("Class") | Some("Specialization")
+    ) {
+        return false;
+    }
+
+    core_ability.kind == expected_kind
 }
 
 fn expected_ability_kind(list: AbilityListKind) -> AbilityKind {
@@ -1832,6 +1830,68 @@ mod tests {
 
         assert_eq!(abilities.len(), 1);
         assert_eq!(abilities[0].id, 23);
+    }
+
+    #[test]
+    fn coercion_requires_player_skill_unlock() {
+        let lookup = SqliteGameData::open(DEFAULT_GAME_DATA_PATH).unwrap();
+        let error = super::load_validated_abilities(
+            CharacterTarget::MainCharacter,
+            AbilityListKind::Skills,
+            &[100011],
+            &std::collections::BTreeSet::new(),
+            &lookup,
+            Some(crate::domain::gamedata::GameId::Dao),
+        )
+        .unwrap_err();
+
+        match error {
+            EditError::MissingCoreAbility {
+                required_id: 4001, ..
+            } => {}
+            other => panic!("unexpected error: {other}"),
+        }
+    }
+
+    #[test]
+    fn humanoid_skill_requires_humanoid_skill_unlock() {
+        let lookup = SqliteGameData::open(DEFAULT_GAME_DATA_PATH).unwrap();
+        let error = super::load_validated_abilities(
+            CharacterTarget::MainCharacter,
+            AbilityListKind::Skills,
+            &[100021],
+            &std::collections::BTreeSet::new(),
+            &lookup,
+            Some(crate::domain::gamedata::GameId::Dao),
+        )
+        .unwrap_err();
+
+        match error {
+            EditError::MissingCoreAbility {
+                required_id: 4002, ..
+            } => {}
+            other => panic!("unexpected error: {other}"),
+        }
+    }
+
+    #[test]
+    fn humanoid_skill_list_succeeds_without_player_skill_unlock() {
+        let lookup = SqliteGameData::open(DEFAULT_GAME_DATA_PATH).unwrap();
+        let current_ids = std::collections::BTreeSet::from([4002_u32, 100021_u32]);
+        let abilities = super::load_validated_abilities(
+            CharacterTarget::MainCharacter,
+            AbilityListKind::Skills,
+            &[4002, 100021],
+            &current_ids,
+            &lookup,
+            Some(crate::domain::gamedata::GameId::Dao),
+        )
+        .unwrap();
+
+        assert_eq!(
+            abilities.iter().map(|ability| ability.id).collect::<Vec<_>>(),
+            vec![4002, 100021]
+        );
     }
 
     #[test]

@@ -57,5 +57,8 @@ fn default_sample_save() -> PathBuf {
     //     }
     // }
 
-    PathBuf::from("sample_saves").join("DA2\\Slot_18\\GallowsCourtyard.das")
+    PathBuf::from("sample_saves")
+        .join("DA2")
+        .join("Slot_18")
+        .join("GallowsCourtyard.das")
 }
