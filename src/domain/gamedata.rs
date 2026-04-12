@@ -17,7 +17,7 @@ pub enum GameId {
 }
 
 impl GameId {
-    fn as_db_value(self) -> &'static str {
+    fn primary_catalog_game(self) -> &'static str {
         match self {
             GameId::Dao => "dao",
             GameId::DaoAwakening => "dao",
@@ -25,7 +25,7 @@ impl GameId {
         }
     }
 
-    fn item_lookup_games(self) -> &'static [&'static str] {
+    fn item_catalog_games(self) -> &'static [&'static str] {
         match self {
             GameId::Dao => &["dao"],
             GameId::DaoAwakening => &["dao", "daoa"],
@@ -194,7 +194,7 @@ impl SqliteGameData {
                 .connection
                 .query_row(
                     "SELECT id, name, core_id, tree, type FROM abilities WHERE id = ?1 AND game = ?2",
-                    params![id, game.as_db_value()],
+                    params![id, game.primary_catalog_game()],
                     |row| {
                         Ok((
                             row.get::<_, String>(0)?,
@@ -283,7 +283,7 @@ impl GameDataLookup for SqliteGameData {
         let cleaned = resref.trim_end_matches('\0').to_ascii_lowercase();
 
         if let Some(game) = preferred_game {
-            for game in game.item_lookup_games() {
+            for game in game.item_catalog_games() {
                 let result = self
                     .connection
                     .query_row(
@@ -340,7 +340,7 @@ impl GameDataLookup for SqliteGameData {
         let mut statement = self.connection.prepare(
             "SELECT id, name, core_id, tree, type FROM abilities WHERE game = ?1 ORDER BY name, CAST(id AS INTEGER)",
         )?;
-        let rows = statement.query_map(params![game.as_db_value()], |row| {
+        let rows = statement.query_map(params![game.primary_catalog_game()], |row| {
             Ok((
                 row.get::<_, String>(0)?,
                 row.get::<_, Option<String>>(1)?,
@@ -374,7 +374,7 @@ impl GameDataLookup for SqliteGameData {
         let mut statement = self
             .connection
             .prepare("SELECT id, label FROM item_properties WHERE game = ?1 ORDER BY label, id")?;
-        let rows = statement.query_map(params![game.as_db_value()], |row| {
+        let rows = statement.query_map(params![game.primary_catalog_game()], |row| {
             Ok((row.get::<_, u32>(0)?, row.get::<_, Option<String>>(1)?))
         })?;
 
@@ -395,7 +395,7 @@ impl GameDataLookup for SqliteGameData {
                 .connection
                 .query_row(
                     "SELECT label FROM item_properties WHERE id = ?1 AND game = ?2",
-                    params![property_id, game.as_db_value()],
+                    params![property_id, game.primary_catalog_game()],
                     |row| row.get::<_, Option<String>>(0),
                 )
                 .optional()?
@@ -477,7 +477,7 @@ impl GameDataLookup for SqliteGameData {
             return Ok(None);
         };
         let cleaned = resref.trim_end_matches('\0').to_ascii_lowercase();
-        for game in game.item_lookup_games() {
+        for game in game.item_catalog_games() {
             let result = self
                 .connection
                 .query_row(

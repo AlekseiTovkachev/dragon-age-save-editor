@@ -2,6 +2,10 @@ import { useEffect, useMemo, useState } from "react";
 import { open, save } from "@tauri-apps/plugin-dialog";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { executeCommand, hasDocument, openDocument, toErrorMessage } from "./api";
+import { abilityLabel, cloneAbilities, groupedAbilities, isUselessDa2Talent } from "./lib/abilityUtils";
+import { gameLabel, parseNumber, titleCase } from "./lib/format";
+import { itemLabel, MAIN_TARGET, targetKey, toItemPropertyDrafts } from "./lib/itemUtils";
+import type { ItemPropertyDraft } from "./lib/itemUtils";
 import type {
   Ability,
   AbilityListKind,
@@ -12,7 +16,6 @@ import type {
   IndexedItem,
   InventoryContainer,
   Item,
-  ItemProperty,
   PlotBooleanFlag,
   PlotIntegerFlag,
   SelectableItemProperty,
@@ -21,13 +24,7 @@ import type {
 
 type Section = "characters" | "inventory" | "recipes" | "plot_flags";
 type CharacterTab = "overview" | "abilities" | "equipment";
-type ItemPropertyDraft = {
-  id: number;
-  name: string | null;
-  power: string;
-};
 
-const MAIN_TARGET: CharacterTarget = "main_character";
 const SECTIONS: Section[] = ["characters", "inventory", "recipes", "plot_flags"];
 const SECTION_TITLES: Record<Section, string> = {
   characters: "Characters",
@@ -41,125 +38,6 @@ const CHARACTER_TAB_TITLES: Record<CharacterTab, string> = {
   abilities: "Abilities",
   equipment: "Equipment",
 };
-
-function targetKey(target: CharacterTarget): string {
-  return target === "main_character" ? "main" : `companion:${target.companion.index}`;
-}
-
-function parseNumber(value: string): number | null {
-  if (value.trim() === "") {
-    return null;
-  }
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? parsed : null;
-}
-
-function abilityLabel(ability: Ability): string {
-  const name = ability.name ?? `Ability ${ability.id}`;
-  const parts = [name, `ID ${ability.id}`];
-  if (ability.tree) {
-    parts.push(ability.tree);
-  }
-  if (ability.ability_type) {
-    parts.push(ability.ability_type);
-  }
-  return parts.join("  |  ");
-}
-
-function itemLabel(item: Item, index: number): string {
-  if (item.name) {
-    return item.name;
-  }
-  if (item.resref) {
-    return `<${item.resref}>`;
-  }
-  return `Item ${index}`;
-}
-
-function titleCase(value: string): string {
-  return value
-    .split("_")
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(" ");
-}
-
-function gameLabel(value: SaveSummary["preferred_game"]): string {
-  switch (value) {
-    case "dao":
-      return "DAO";
-    case "dao_awakening":
-      return "DAO Awakening";
-    case "da2":
-      return "DA2";
-    default:
-      return "Unknown Game";
-  }
-}
-
-function cloneAbilities(abilities: Ability[]): Ability[] {
-  return abilities.map((ability) => ({ ...ability, core_ids: [...ability.core_ids] }));
-}
-
-function toItemPropertyDrafts(properties: ItemProperty[]): ItemPropertyDraft[] {
-  return properties.map((property) => ({
-    id: property.id,
-    name: property.name,
-    power: property.power.toString(),
-  }));
-}
-
-function isWeaponTalent(ability: Ability): boolean {
-  return ["Archery", "Dual Weapon", "Two-Handed", "Weapon and Shield"].includes(ability.tree ?? "");
-}
-
-function abilityGroupLabel(list: AbilityListKind, ability: Ability, knownAbilities: Ability[]): string {
-  if (list === "spells") {
-    return ability.tree ? `${ability.tree} Spells` : "Other Spells";
-  }
-  if (list === "skills") {
-    return ability.tree ?? ability.ability_type ?? "Other Skills";
-  }
-  if (isWeaponTalent(ability)) {
-    return `${ability.tree} Talents`;
-  }
-  if (ability.ability_type === "Class") {
-    return "Class Unlocks";
-  }
-  if (ability.ability_type === "Specialization") {
-    return "Specialization Unlocks";
-  }
-  if (list === "talents" && ability.tree) {
-    return `${ability.tree} Talents`;
-  }
-
-  const coreLabels = ability.core_ids
-    .map((coreId) => knownAbilities.find((candidate) => candidate.id === coreId))
-    .filter((candidate): candidate is Ability => Boolean(candidate))
-    .map((candidate) => candidate.name ?? candidate.tree ?? `Core ${candidate.id}`);
-  if (coreLabels.length > 0) {
-    return coreLabels.join(" / ");
-  }
-
-  return ability.tree ?? "Other Talents";
-}
-
-function groupedAbilities(
-  list: AbilityListKind,
-  abilities: Ability[],
-  availableAbilities: Ability[],
-): { label: string; abilities: Ability[] }[] {
-  const knownAbilities = [...abilities, ...availableAbilities];
-  const groups = new Map<string, Ability[]>();
-  for (const ability of abilities) {
-    const label = abilityGroupLabel(list, ability, knownAbilities);
-    groups.set(label, [...(groups.get(label) ?? []), ability]);
-  }
-  return Array.from(groups, ([label, entries]) => ({ label, abilities: entries }));
-}
-
-function isUselessDa2Talent(ability: Ability): boolean {
-  return ability.id < 100000 && ability.id !== 700000;
-}
 
 function App() {
   const [section, setSection] = useState<Section>("characters");
@@ -267,7 +145,7 @@ function App() {
         await refreshAvailablePlotFlags();
       }
     });
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (summary) {
@@ -331,7 +209,7 @@ function App() {
     if (summary && shouldLoadItems) {
       void refreshItems();
     }
-  }, [selectedInventoryContainer, shouldLoadItems, summary]);
+  }, [selectedInventoryContainer, shouldLoadItems, summary]); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function run(action: () => Promise<void>) {
     setBusy(true);

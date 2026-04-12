@@ -1,10 +1,14 @@
+use super::{
+    AbilityListKind, BackpackItemReplacement, CharacterSummary, CharacterTarget, EditError,
+    InventoryContainer, ItemMetadataPatch, PlotBooleanPatch, PlotIntegerPatch,
+};
 use crate::domain::ability::{AbilityKind, AbilityRef};
 use crate::domain::character::Character;
 use crate::domain::gamedata::{GameDataLookup, GameId};
 use crate::domain::item::{Item, ItemProperty, MaterialProfile};
 use crate::domain::save::{
-    ExtractError, SaveGame, WORLD_VAULT_BOOLEANS_LABEL, WORLD_VAULT_ID_LABEL,
-    WORLD_VAULT_INTS_LABEL, WORLD_VAULT_LABEL, WORLD_VAULT_VALUE_LABEL,
+    SaveGame, WORLD_VAULT_BOOLEANS_LABEL, WORLD_VAULT_ID_LABEL, WORLD_VAULT_INTS_LABEL,
+    WORLD_VAULT_LABEL, WORLD_VAULT_VALUE_LABEL,
 };
 use crate::domain::stats::{CoreStat, CoreStatsPatch, PointPoolsPatch};
 use crate::gff4::fields::{
@@ -15,9 +19,6 @@ use crate::gff4::fields::{
 };
 use crate::gff4::{FieldValue, GffFile, GffStruct, Value};
 use std::collections::BTreeSet;
-use std::error::Error;
-use std::fmt;
-use std::io;
 use std::path::Path;
 
 const SAVEGAME_PLAYERCHAR_NAME: &str = "SAVEGAME_PLAYERCHAR";
@@ -36,260 +37,10 @@ const SAVEGAME_ABILITYLIST_NAME: &str = "SAVEGAME_ABILITYLIST";
 const SAVEGAME_WORLDDB_LASTID: u32 = 16502;
 const MAX_ITEM_STACK_SIZE: u32 = 99;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum CharacterTarget {
-    MainCharacter,
-    Companion(usize),
-}
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct CharacterSummary {
-    pub target: CharacterTarget,
-    pub name: String,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum AbilityListKind {
-    Skills,
-    Talents,
-    Spells,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum InventoryContainer {
-    Backpack,
-    Equipment { target: CharacterTarget },
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
-pub struct ItemMetadataPatch {
-    pub item_cost: Option<u32>,
-    pub material: Option<u32>,
-    pub item_level: Option<u8>,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct BackpackItemReplacement {
-    pub resref: String,
-    pub item_cost: Option<u32>,
-    pub material: Option<u32>,
-    pub item_level: Option<u8>,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct PlotBooleanPatch {
-    pub id: u16,
-    pub value: bool,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct PlotIntegerPatch {
-    pub id: u16,
-    pub value: i32,
-}
-
 #[derive(Debug)]
 pub struct SaveEditor {
     raw: GffFile,
     save: SaveGame,
-}
-
-#[derive(Debug)]
-pub enum EditError {
-    Extract(ExtractError),
-    Io(io::Error),
-    InvalidTarget {
-        target: CharacterTarget,
-    },
-    MissingField {
-        path: String,
-    },
-    TypeMismatch {
-        path: String,
-        expected: &'static str,
-        actual: &'static str,
-    },
-    MissingStatRow {
-        target: CharacterTarget,
-        stat_id: u32,
-    },
-    UnsupportedNumericValue {
-        path: String,
-        actual: &'static str,
-    },
-    NumericRange {
-        path: String,
-        detail: String,
-    },
-    LookupFailed {
-        path: String,
-        detail: String,
-    },
-    UnknownAbility {
-        ability_id: u32,
-    },
-    InvalidAbilityKind {
-        ability_id: u32,
-        expected: AbilityListKind,
-        actual: AbilityKind,
-    },
-    MissingCoreAbility {
-        target: CharacterTarget,
-        list: AbilityListKind,
-        required_id: u32,
-    },
-    InvalidItemIndex {
-        container: InventoryContainer,
-        index: usize,
-    },
-    MissingItemResref {
-        container: InventoryContainer,
-        index: usize,
-    },
-    BackpackResrefMismatch {
-        index: usize,
-        expected: String,
-        actual: String,
-    },
-    InvalidPropertyIndex {
-        container: InventoryContainer,
-        item_index: usize,
-        property_index: usize,
-    },
-    InvalidPropertyArrayParity {
-        container: InventoryContainer,
-        item_index: usize,
-        ids_len: usize,
-        powers_len: usize,
-    },
-    UnsupportedGameForClone {
-        game: Option<GameId>,
-    },
-    ItemIsStackable {
-        index: usize,
-    },
-    ItemIsNotStackable {
-        index: usize,
-    },
-    InvalidStackSize {
-        stack_size: u32,
-    },
-    UnsupportedPlotFlags {
-        game: Option<GameId>,
-    },
-}
-
-impl fmt::Display for EditError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            EditError::Extract(err) => write!(f, "{err}"),
-            EditError::Io(err) => write!(f, "{err}"),
-            EditError::InvalidTarget { target } => {
-                write!(f, "invalid character target: {target:?}")
-            }
-            EditError::MissingField { path } => write!(f, "missing field at {path}"),
-            EditError::TypeMismatch {
-                path,
-                expected,
-                actual,
-            } => write!(
-                f,
-                "type mismatch at {path}: expected {expected}, found {actual}"
-            ),
-            EditError::MissingStatRow { target, stat_id } => {
-                write!(f, "missing stat row {stat_id} for target {target:?}")
-            }
-            EditError::UnsupportedNumericValue { path, actual } => {
-                write!(f, "unsupported numeric value at {path}: {actual}")
-            }
-            EditError::NumericRange { path, detail } => {
-                write!(f, "numeric range error at {path}: {detail}")
-            }
-            EditError::LookupFailed { path, detail } => {
-                write!(f, "lookup failed at {path}: {detail}")
-            }
-            EditError::UnknownAbility { ability_id } => {
-                write!(f, "unknown ability id {ability_id}")
-            }
-            EditError::InvalidAbilityKind {
-                ability_id,
-                expected,
-                actual,
-            } => write!(
-                f,
-                "ability {ability_id} has invalid kind for {expected:?}: {actual:?}"
-            ),
-            EditError::MissingCoreAbility {
-                target,
-                list,
-                required_id,
-            } => write!(
-                f,
-                "editing {list:?} for {target:?} would remove required core ability {required_id}"
-            ),
-            EditError::InvalidItemIndex { container, index } => {
-                write!(f, "invalid item index {index} in {container:?}")
-            }
-            EditError::MissingItemResref { container, index } => {
-                write!(f, "missing item resref at index {index} in {container:?}")
-            }
-            EditError::BackpackResrefMismatch {
-                index,
-                expected,
-                actual,
-            } => write!(
-                f,
-                "backpack replacement at index {index} must keep resref {expected}, found {actual}"
-            ),
-            EditError::InvalidPropertyIndex {
-                container,
-                item_index,
-                property_index,
-            } => write!(
-                f,
-                "invalid property index {property_index} for item {item_index} in {container:?}"
-            ),
-            EditError::InvalidPropertyArrayParity {
-                container,
-                item_index,
-                ids_len,
-                powers_len,
-            } => write!(
-                f,
-                "invalid property array parity for item {item_index} in {container:?}: ITEM_PROPERTIES has {ids_len}, ITEM_PROPERTY_POWERS has {powers_len}"
-            ),
-            EditError::UnsupportedGameForClone { game } => {
-                write!(f, "backpack item cloning is not supported for {game:?}")
-            }
-            EditError::ItemIsStackable { index } => {
-                write!(f, "backpack item {index} is stackable and cannot be cloned")
-            }
-            EditError::ItemIsNotStackable { index } => {
-                write!(f, "backpack item {index} is not stackable")
-            }
-            EditError::InvalidStackSize { stack_size } => write!(
-                f,
-                "invalid stack size {stack_size}; stack size must be between 1 and {MAX_ITEM_STACK_SIZE}"
-            ),
-            EditError::UnsupportedPlotFlags { game } => {
-                write!(f, "plot flag editing is not supported for {game:?}")
-            }
-        }
-    }
-}
-
-impl Error for EditError {}
-
-impl From<ExtractError> for EditError {
-    fn from(value: ExtractError) -> Self {
-        Self::Extract(value)
-    }
-}
-
-impl From<io::Error> for EditError {
-    fn from(value: io::Error) -> Self {
-        Self::Io(value)
-    }
 }
 
 impl SaveEditor {

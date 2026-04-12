@@ -1,0 +1,700 @@
+resref,name,game,material_family,material_target,wiki_url,stackable,category
+gxa_im_acc_amu_001,Nature's Blessing,daoa,,,https://dragonage.fandom.com/wiki/Nature%27s_Blessing,0,accessories.amulets
+gxa_im_acc_amu_002,Illumination,daoa,,,https://dragonage.fandom.com/wiki/Illumination,0,accessories.amulets
+gxa_im_acc_amu_and,Fox's Pendant,daoa,,,https://dragonage.fandom.com/wiki/Fox%27s_Pendant,0,accessories.amulets
+gxa_im_acc_amu_g01,Seeker's Chain,daoa,,,https://dragonage.fandom.com/wiki/Seeker%27s_Chain,0,accessories.amulets
+gxa_im_acc_amu_g02,Scout's Medal,daoa,,,https://dragonage.fandom.com/wiki/Scout%27s_Medal,0,accessories.amulets
+gxa_im_acc_amu_jus,Kristoff's Locket,daoa,,,https://dragonage.fandom.com/wiki/Kristoff%27s_Locket,0,accessories.amulets
+gxa_im_acc_amu_m01,Magus Ward,daoa,,,https://dragonage.fandom.com/wiki/Magus_Ward,0,accessories.amulets
+gxa_im_acc_amu_m02,Will of the Unyielding,daoa,,,https://dragonage.fandom.com/wiki/Will_of_the_Unyielding,0,accessories.amulets
+gxa_im_acc_amu_m03,Talisman of Restoration,daoa,,,https://dragonage.fandom.com/wiki/Talisman_of_Restoration,0,accessories.amulets
+gxa_im_acc_amu_r02,Spirit Cord,daoa,,,https://dragonage.fandom.com/wiki/Spirit_Cord,0,accessories.amulets
+gxa_im_acc_amu_w01,Blood of the Warrior,daoa,,,https://dragonage.fandom.com/wiki/Blood_of_the_Warrior,0,accessories.amulets
+gxa_im_acc_amu_w02,Rough-Hewn Pendant,daoa,,,https://dragonage.fandom.com/wiki/Rough-Hewn_Pendant,0,accessories.amulets
+prm000im_ep1_pearlan,Pearl of the Anointed (Awakening),daoa,,,https://dragonage.fandom.com/wiki/Pearl_of_the_Anointed_(Awakening),0,accessories.amulets
+gxa_im_acc_blt_001,Girdle of Kal'Hirol,daoa,,,https://dragonage.fandom.com/wiki/Girdle_of_Kal%27Hirol,0,accessories.belts
+gxa_im_acc_blt_002,Gladiator's Belt,daoa,,,https://dragonage.fandom.com/wiki/Gladiator%27s_Belt,0,accessories.belts
+gxa_im_acc_blt_g01,Sash of Power,daoa,,,https://dragonage.fandom.com/wiki/Sash_of_Power,0,accessories.belts
+gxa_im_acc_blt_g02,Panacea,daoa,,,https://dragonage.fandom.com/wiki/Panacea,0,accessories.belts
+gxa_im_acc_blt_m01,Lucrosian's Silken Cord,daoa,,,https://dragonage.fandom.com/wiki/Lucrosian%27s_Silken_Cord,0,accessories.belts
+gxa_im_acc_blt_m03,Battlemage's Cinch,daoa,,,https://dragonage.fandom.com/wiki/Battlemage%27s_Cinch,0,accessories.belts
+gxa_im_acc_blt_m04,Belt of the Architect,daoa,,,https://dragonage.fandom.com/wiki/Belt_of_the_Architect,0,accessories.belts
+gxa_im_acc_blt_ogh,One for the Ditch,daoa,,,https://dragonage.fandom.com/wiki/One_for_the_Ditch_(Awakening),0,accessories.belts
+gxa_im_acc_blt_r01,Doge's Dodger,daoa,,,https://dragonage.fandom.com/wiki/Doge%27s_Dodger,0,accessories.belts
+gxa_im_acc_blt_sig,Deep Roads Girdle,daoa,,,https://dragonage.fandom.com/wiki/Deep_Roads_Girdle,0,accessories.belts
+gxa_im_acc_blt_w01,Enduring Faith,daoa,,,https://dragonage.fandom.com/wiki/Enduring_Faith,0,accessories.belts
+gxa_im_acc_blt_w02,Wasp's Sting,daoa,,,https://dragonage.fandom.com/wiki/Wasp%27s_Sting,0,accessories.belts
+prc_im_ep1_reward4,Cinch of Skillful Maneuvering,daoa,,,https://dragonage.fandom.com/wiki/Cinch_of_Skillful_Maneuvering_(Awakening),0,accessories.belts
+str_im_belt,Cinch of Skillful Maneuvering,daoa,,,https://dragonage.fandom.com/wiki/Cinch_of_Skillful_Maneuvering_(Awakening),0,accessories.belts
+coa100cr_apostate_3,Muttering Elf,daoa,,,,0,accessories.rings
+gxa_im_acc_rng_001,Sleeper,daoa,,,https://dragonage.fandom.com/wiki/Sleeper,0,accessories.rings
+gxa_im_acc_rng_002,Tingler,daoa,,,https://dragonage.fandom.com/wiki/Tingler,0,accessories.rings
+gxa_im_acc_rng_003,Corin's Proposal,daoa,,,https://dragonage.fandom.com/wiki/Corin%27s_Proposal,0,accessories.rings
+gxa_im_acc_rng_m01,Golden Cog,daoa,,,https://dragonage.fandom.com/wiki/Golden_Cog,0,accessories.rings
+gxa_im_acc_rng_m02,Silver Cog,daoa,,,https://dragonage.fandom.com/wiki/Silver_Cog,0,accessories.rings
+gxa_im_acc_rng_m03,Ring of Mastery,daoa,,,https://dragonage.fandom.com/wiki/Ring_of_Mastery,0,accessories.rings
+gxa_im_acc_rng_m04,Ring of Discipline,daoa,,,https://dragonage.fandom.com/wiki/Ring_of_Discipline,0,accessories.rings
+gxa_im_acc_rng_m05,Soulbound,daoa,,,https://dragonage.fandom.com/wiki/Soulbound,0,accessories.rings
+gxa_im_acc_rng_m06,Earthbound,daoa,,,https://dragonage.fandom.com/wiki/Earthbound,0,accessories.rings
+gxa_im_acc_rng_m07,Icicle,daoa,,,https://dragonage.fandom.com/wiki/Icicle,0,accessories.rings
+gxa_im_acc_rng_m08,Ash,daoa,,,https://dragonage.fandom.com/wiki/Ash_(ring),0,accessories.rings
+gxa_im_acc_rng_nat,Worn Golden Ring,daoa,,,https://dragonage.fandom.com/wiki/Worn_Golden_Ring,0,accessories.rings
+gxa_im_acc_rng_r01,Ring of Subtlety,daoa,,,https://dragonage.fandom.com/wiki/Ring_of_Subtlety,0,accessories.rings
+gxa_im_acc_rng_r02,Ring of Severity,daoa,,,https://dragonage.fandom.com/wiki/Ring_of_Severity,0,accessories.rings
+gxa_im_acc_rng_vel,Keeper's Charm,daoa,,,https://dragonage.fandom.com/wiki/Keeper%27s_Charm,0,accessories.rings
+gxa_im_acc_rng_w01,Blessing of the Divine,daoa,,,https://dragonage.fandom.com/wiki/Blessing_of_the_Divine,0,accessories.rings
+gxa_im_acc_rng_w02,Mark of the Divine,daoa,,,https://dragonage.fandom.com/wiki/Mark_of_the_Divine,0,accessories.rings
+gxa_im_justice_lyrium_ring,Lyrium Ring,daoa,,,https://dragonage.fandom.com/wiki/Lyrium_Ring,0,accessories.rings
+gxa_im_arm_bot_hvy_001,Stormchaser Boots,daoa,metal,armor,https://dragonage.fandom.com/wiki/Stormchaser_Boots,0,armor.boots
+gxa_im_arm_bot_hvy_002,Fleet Feet,daoa,metal,armor,https://dragonage.fandom.com/wiki/Fleet_Feet,0,armor.boots
+gxa_im_arm_bot_lgt_001,Trickster's Boots,daoa,leather,armor,https://dragonage.fandom.com/wiki/Trickster%27s_Boots,0,armor.boots
+gxa_im_arm_bot_lgt_002,Feet of the Nimble,daoa,leather,armor,https://dragonage.fandom.com/wiki/Feet_of_the_Nimble,0,armor.boots
+gxa_im_arm_bot_lgt_003,Blackblade Boots,daoa,leather,armor,https://dragonage.fandom.com/wiki/Blackblade_Boots,0,armor.boots
+gxa_im_arm_bot_lgt_004,Wolf Treads,daoa,leather,armor,https://dragonage.fandom.com/wiki/Wolf_Treads,0,armor.boots
+gxa_im_arm_bot_lgt_m01,Lorekeeper's Boots,daoa,leather,armor,https://dragonage.fandom.com/wiki/Lorekeeper%27s_Boots,0,armor.boots
+gxa_im_arm_bot_lgt_m02,Mage's Running Boots,daoa,leather,armor,https://dragonage.fandom.com/wiki/Mage%27s_Running_Boots,0,armor.boots
+gxa_im_arm_bot_lgt_m03,Firestompers,daoa,leather,armor,https://dragonage.fandom.com/wiki/Firestompers,0,armor.boots
+gxa_im_arm_bot_lgt_m04,Winter Boots,daoa,leather,armor,https://dragonage.fandom.com/wiki/Winter_Boots,0,armor.boots
+gxa_im_arm_bot_lgt_m05,Fadewalker,daoa,leather,armor,https://dragonage.fandom.com/wiki/Fadewalker,0,armor.boots
+gxa_im_arm_bot_lgt_pl2,Grey Warden Leather Boots,daoa,leather,armor,https://dragonage.fandom.com/wiki/Grey_Warden_Leather_Boots,0,armor.boots
+gxa_im_arm_bot_mas_001,Greaves of Hirol's Defense,daoa,metal,armor,https://dragonage.fandom.com/wiki/Greaves_of_Hirol%27s_Defense,0,armor.boots
+gxa_im_arm_bot_mas_002,Boots of the Sentinel,daoa,metal,armor,https://dragonage.fandom.com/wiki/Boots_of_the_Sentinel,0,armor.boots
+gxa_im_arm_bot_mas_pl2,Grey Warden Plate Boots,daoa,metal,armor,https://dragonage.fandom.com/wiki/Grey_Warden_Plate_Boots,0,armor.boots
+gxa_im_arm_bot_med_leg,Legionnaire Scout Boots,daoa,metal,armor,https://dragonage.fandom.com/wiki/Legionnaire_Scout_Boots,0,armor.boots
+aoa100cr_armored_ogre_boss,Armored Ogre Alpha,daoa,,,,0,armor.chestpieces
+gxa_im_arm_cht_hvy_001,Stormchaser Mail,daoa,metal,armor,https://dragonage.fandom.com/wiki/Stormchaser_Mail,0,armor.chestpieces
+gxa_im_arm_cht_hvy_002,Venture,daoa,metal,armor,https://dragonage.fandom.com/wiki/Venture,0,armor.chestpieces
+gxa_im_arm_cht_hvy_jus,Sturdy Heavy Chainmail,daoa,metal,armor,https://dragonage.fandom.com/wiki/Sturdy_Heavy_Chainmail,0,armor.chestpieces
+gxa_im_arm_cht_lgt_001,Trickster's Tunic,daoa,leather,armor,https://dragonage.fandom.com/wiki/Trickster%27s_Tunic,0,armor.chestpieces
+gxa_im_arm_cht_lgt_002,Vest of the Nimble,daoa,leather,armor,https://dragonage.fandom.com/wiki/Vest_of_the_Nimble,0,armor.chestpieces
+gxa_im_arm_cht_lgt_003,Blackblade Tunic,daoa,leather,armor,https://dragonage.fandom.com/wiki/Blackblade_Tunic,0,armor.chestpieces
+gxa_im_arm_cht_lgt_004,Rainswept,daoa,leather,armor,https://dragonage.fandom.com/wiki/Rainswept,0,armor.chestpieces
+gxa_im_arm_cht_lgt_nat,The Bear's Embrace,daoa,leather,armor,https://dragonage.fandom.com/wiki/The_Bear%27s_Embrace,0,armor.chestpieces
+gxa_im_arm_cht_lgt_pl2,Grey Warden Light Armor,daoa,leather,armor,https://dragonage.fandom.com/wiki/Grey_Warden_Light_Armor,0,armor.chestpieces
+gxa_im_arm_cht_lgt_pla,Orlesian Warden's Light Armor,daoa,leather,armor,https://dragonage.fandom.com/wiki/Orlesian_Warden%27s_Light_Armor,0,armor.chestpieces
+gxa_im_arm_cht_mas_001,Breastplate of Hirol's Defense,daoa,metal,armor,https://dragonage.fandom.com/wiki/Breastplate_of_Hirol%27s_Defense,0,armor.chestpieces
+gxa_im_arm_cht_mas_002,Armor of the Sentinel,daoa,metal,armor,https://dragonage.fandom.com/wiki/Armor_of_the_Sentinel,0,armor.chestpieces
+gxa_im_arm_cht_mas_003,Clamshell Plate Armor,daoa,metal,armor,https://dragonage.fandom.com/wiki/Clamshell_Plate_Armor,0,armor.chestpieces
+gxa_im_arm_cht_mas_pl2,Grey Warden Plate Armor,daoa,metal,armor,https://dragonage.fandom.com/wiki/Grey_Warden_Plate_Armor,0,armor.chestpieces
+gxa_im_arm_cht_mas_pla,Orlesian Warden's Plate Armor,daoa,metal,armor,https://dragonage.fandom.com/wiki/Orlesian_Warden%27s_Plate_Armor,0,armor.chestpieces
+gxa_im_arm_cht_med_leg,Legionnaire Scout Armor,daoa,metal,armor,https://dragonage.fandom.com/wiki/Legionnaire_Scout_Armor,0,armor.chestpieces
+prc_daep1_lel_im_arm_cht_01,Battledress of the Provocateur,daoa,,,https://dragonage.fandom.com/wiki/Battledress_of_the_Provocateur_(Awakening),0,armor.chestpieces
+gxa_im_arm_glv_hvy_001,Stormchaser Gauntlets,daoa,metal,armor,https://dragonage.fandom.com/wiki/Stormchaser_Gauntlets,0,armor.gloves
+gxa_im_arm_glv_hvy_002,Barbed Fists,daoa,metal,armor,https://dragonage.fandom.com/wiki/Barbed_Fists,0,armor.gloves
+gxa_im_arm_glv_hvy_jus,Sturdy Chainmail Gloves,daoa,metal,armor,https://dragonage.fandom.com/wiki/Sturdy_Chainmail_Gloves,0,armor.gloves
+gxa_im_arm_glv_lgt_pl2,Grey Warden Light Gloves,daoa,leather,armor,https://dragonage.fandom.com/wiki/Grey_Warden_Light_Gloves,0,armor.gloves
+gxa_im_arm_glv_mas_001,Gauntlets of Hirol's Defense,daoa,metal,armor,https://dragonage.fandom.com/wiki/Gauntlets_of_Hirol%27s_Defense,0,armor.gloves
+gxa_im_arm_glv_mas_002,Gauntlets of the Sentinel,daoa,metal,armor,https://dragonage.fandom.com/wiki/Gauntlets_of_the_Sentinel,0,armor.gloves
+gxa_im_arm_glv_mas_pl2,Grey Warden Plate Gauntlets,daoa,metal,armor,https://dragonage.fandom.com/wiki/Grey_Warden_Plate_Gauntlets,0,armor.gloves
+gxa_im_arm_glv_med_leg,Legionnaire Scout Gloves,daoa,metal,armor,https://dragonage.fandom.com/wiki/Legionnaire_Scout_Gloves,0,armor.gloves
+gxa_im_glv_lgt_001,Trickster's Gloves,daoa,,,https://dragonage.fandom.com/wiki/Trickster%27s_Gloves,0,armor.gloves
+gxa_im_glv_lgt_002,Fingers of the Nimble,daoa,,,https://dragonage.fandom.com/wiki/Fingers_of_the_Nimble,0,armor.gloves
+gxa_im_glv_lgt_003,Blackblade Gloves,daoa,,,https://dragonage.fandom.com/wiki/Blackblade_Gloves,0,armor.gloves
+gxa_im_glv_lgt_004,The Slippery Ferret's Gloves,daoa,,,https://dragonage.fandom.com/wiki/The_Slippery_Ferret%27s_Gloves,0,armor.gloves
+gxa_im_glv_lgt_m01,Lorekeeper's Mittens,daoa,,,https://dragonage.fandom.com/wiki/Lorekeeper%27s_Mittens,0,armor.gloves
+gxa_im_glv_lgt_m02,Shock Treatment,daoa,,,https://dragonage.fandom.com/wiki/Shock_Treatment,0,armor.gloves
+gxa_im_glv_lgt_m03,Elementalist's Grasp,daoa,,,https://dragonage.fandom.com/wiki/Elementalist%27s_Grasp_(Awakening),0,armor.gloves
+gxa_im_glv_lgt_m04,Spirit of the Woods,daoa,,,https://dragonage.fandom.com/wiki/Spirit_of_the_Woods,0,armor.gloves
+gxa_im_glv_lgt_m05,Oven Mitts,daoa,,,https://dragonage.fandom.com/wiki/Oven_Mitts,0,armor.gloves
+gxa_im_glv_lgt_nat,Ornate Leather Gloves,daoa,,,https://dragonage.fandom.com/wiki/Ornate_Leather_Gloves,0,armor.gloves
+gxa_im_arm_hel_hvy_001,Stormchaser Helm,daoa,metal,armor,https://dragonage.fandom.com/wiki/Stormchaser_Helm,0,armor.helmets
+gxa_im_arm_hel_hvy_002,Helm of Dragon's Peak,daoa,metal,armor,https://dragonage.fandom.com/wiki/Helm_of_Dragon%27s_Peak,0,armor.helmets
+gxa_im_arm_hel_lgt_001,Trickster's Cap,daoa,leather,armor,https://dragonage.fandom.com/wiki/Trickster%27s_Cap,0,armor.helmets
+gxa_im_arm_hel_lgt_002,Cap of the Nimble,daoa,leather,armor,https://dragonage.fandom.com/wiki/Cap_of_the_Nimble,0,armor.helmets
+gxa_im_arm_hel_lgt_003,Blackblade Helm,daoa,leather,armor,https://dragonage.fandom.com/wiki/Blackblade_Helm,0,armor.helmets
+gxa_im_arm_hel_lgt_004,Quicksilver,daoa,leather,armor,https://dragonage.fandom.com/wiki/Quicksilver_(helmet),0,armor.helmets
+gxa_im_arm_hel_lgt_pl2,Grey Warden Light Helm,daoa,leather,armor,https://dragonage.fandom.com/wiki/Grey_Warden_Light_Helm,0,armor.helmets
+gxa_im_arm_hel_mag_001,Lorekeeper's Cowl,daoa,,,https://dragonage.fandom.com/wiki/Lorekeeper%27s_Cowl,0,armor.helmets
+gxa_im_arm_hel_mag_002,Lucky Cap,daoa,,,https://dragonage.fandom.com/wiki/Lucky_Cap,0,armor.helmets
+gxa_im_arm_hel_mag_003,First Enchanter's Cowl,daoa,,,https://dragonage.fandom.com/wiki/First_Enchanter%27s_Cowl_(Awakening),0,armor.helmets
+gxa_im_arm_hel_mag_004,Sage's Fuzzy Head-Sweater,daoa,,,https://dragonage.fandom.com/wiki/Sage%27s_Fuzzy_Head-Sweater,0,armor.helmets
+gxa_im_arm_hel_mag_005,Toque of the Oblivious,daoa,,,https://dragonage.fandom.com/wiki/Toque_of_the_Oblivious,0,armor.helmets
+gxa_im_arm_hel_mag_pl2,Grey Warden Cowl,daoa,,,https://dragonage.fandom.com/wiki/Grey_Warden_Cowl,0,armor.helmets
+gxa_im_arm_hel_mas_001,Helm of Hirol's Defense,daoa,metal,armor,https://dragonage.fandom.com/wiki/Helm_of_Hirol%27s_Defense,0,armor.helmets
+gxa_im_arm_hel_mas_002,Helm of the Sentinel,daoa,metal,armor,https://dragonage.fandom.com/wiki/Helm_of_the_Sentinel,0,armor.helmets
+gxa_im_arm_hel_mas_pl2,Grey Warden Plate Helm,daoa,metal,armor,https://dragonage.fandom.com/wiki/Grey_Warden_Plate_Helm,0,armor.helmets
+gxa_im_arm_hel_med_leg,Legionnaire Scout Helm,daoa,metal,armor,https://dragonage.fandom.com/wiki/Legionnaire_Scout_Helm,0,armor.helmets
+gxa_im_qck_grenade_401,Dispel Grenade,daoa,,,https://dragonage.fandom.com/wiki/Dispel_Grenade,1,consumables.bombs
+gxa_im_qck_grenade_402,Elemental Grenade,daoa,,,https://dragonage.fandom.com/wiki/Elemental_Grenade,1,consumables.bombs
+gxa_im_qck_health_402,Superb Health Poultice,daoa,,,https://dragonage.fandom.com/wiki/Superb_Health_Poultice,1,consumables.health_poultices
+gxa_im_qck_health_403,Master Health Poultice,daoa,,,https://dragonage.fandom.com/wiki/Master_Health_Poultice,1,consumables.health_poultices
+gxa_im_qck_health_fade,Ethereal Health Poultice,daoa,,,https://dragonage.fandom.com/wiki/Ethereal_Health_Poultice,1,consumables.health_poultices
+gxa_im_qck_mana_402,Superb Lyrium Potion,daoa,,,https://dragonage.fandom.com/wiki/Superb_Lyrium_Potion,1,consumables.lyrium_potions
+gxa_im_qck_mana_403,Master Lyrium Potion,daoa,,,https://dragonage.fandom.com/wiki/Master_Lyrium_Potion,1,consumables.lyrium_potions
+gxa_im_qck_mana_fade,Ethereal Lyrium Potion,daoa,,,https://dragonage.fandom.com/wiki/Ethereal_Lyrium_Potion,1,consumables.lyrium_potions
+coa100ip_poison,Poison,daoa,,,,1,consumables.poisons
+gxa_im_qck_stamina_101,Lesser Stamina Draught,daoa,,,https://dragonage.fandom.com/wiki/Lesser_Stamina_Draught,1,consumables.potions
+gxa_im_qck_stamina_201,Stamina Draught,daoa,,,https://dragonage.fandom.com/wiki/Stamina_Draught_(Awakening),1,consumables.potions
+gxa_im_qck_stamina_301,Greater Stamina Draught,daoa,,,https://dragonage.fandom.com/wiki/Greater_Stamina_Draught,1,consumables.potions
+gxa_im_qck_stamina_401,Potent Stamina Draught,daoa,,,https://dragonage.fandom.com/wiki/Potent_Stamina_Draught,1,consumables.potions
+gxa_im_qck_stamina_402,Superb Stamina Draught,daoa,,,https://dragonage.fandom.com/wiki/Superb_Stamina_Draught,1,consumables.potions
+gxa_im_qck_stamina_403,Master Stamina Draught,daoa,,,https://dragonage.fandom.com/wiki/Master_Stamina_Draught,1,consumables.potions
+gxa_im_qck_stamina_fade,Ethereal Stamina Draught,daoa,,,https://dragonage.fandom.com/wiki/Ethereal_Stamina_Draught,1,consumables.potions
+gxa_im_qck_trap_401,Dispel Trap,daoa,,,https://dragonage.fandom.com/wiki/Dispel_Trap,1,consumables.traps
+gxa_im_qck_trap_402,Elemental Trap,daoa,,,https://dragonage.fandom.com/wiki/Elemental_Trap,1,consumables.traps
+gxa_im_qck_trap_403,Gravity Trap,daoa,,,https://dragonage.fandom.com/wiki/Gravity_Trap,1,consumables.traps
+gxa_im_qck_trap_404,Misdirection Cloud Trap,daoa,,,https://dragonage.fandom.com/wiki/Misdirection_Cloud_Trap,1,consumables.traps
+gxa_im_qck_coating_401,Dispel Coating,daoa,,,https://dragonage.fandom.com/wiki/Dispel_Coating,1,consumables.weapon_coating
+gxa_im_qck_coating_402,Elemental Coating,daoa,,,https://dragonage.fandom.com/wiki/Elemental_Coating,1,consumables.weapon_coating
+coa140ar_sigrun_gift3,Potted Plant,daoa,,,,0,crafting.recipes
+gxa_im_cft_hrb_101,Lesser Stamina Draught Recipe,daoa,,,https://dragonage.fandom.com/wiki/Lesser_Stamina_Draught_Recipe,0,crafting.recipes
+gxa_im_cft_hrb_201,Stamina Draught Recipe,daoa,,,https://dragonage.fandom.com/wiki/Stamina_Draught_Recipe,0,crafting.recipes
+gxa_im_cft_hrb_301,Greater Stamina Draught Recipe,daoa,,,https://dragonage.fandom.com/wiki/Greater_Stamina_Draught_Recipe,0,crafting.recipes
+gxa_im_cft_hrb_401,Potent Stamina Draught Recipe,daoa,,,https://dragonage.fandom.com/wiki/Potent_Stamina_Draught_Recipe,0,crafting.recipes
+gxa_im_cft_hrb_402,Superb Health Poultice Recipe,daoa,,,https://dragonage.fandom.com/wiki/Superb_Health_Poultice_Recipe,0,crafting.recipes
+gxa_im_cft_hrb_403,Superb Lyrium Potion Recipe,daoa,,,https://dragonage.fandom.com/wiki/Superb_Lyrium_Potion_Recipe,0,crafting.recipes
+gxa_im_cft_hrb_404,Superb Stamina Draught Recipe,daoa,,,https://dragonage.fandom.com/wiki/Superb_Stamina_Draught_Recipe,0,crafting.recipes
+gxa_im_cft_hrb_405,Master Health Poultice Recipe,daoa,,,https://dragonage.fandom.com/wiki/Master_Health_Poultice_Recipe,0,crafting.recipes
+gxa_im_cft_hrb_406,Master Lyrium Potion Recipe,daoa,,,https://dragonage.fandom.com/wiki/Master_Lyrium_Potion_Recipe,0,crafting.recipes
+gxa_im_cft_hrb_407,Master Stamina Draught Recipe,daoa,,,https://dragonage.fandom.com/wiki/Master_Stamina_Draught_Recipe,0,crafting.recipes
+gxa_im_cft_psn_401,Dispel Grenade Recipe,daoa,,,https://dragonage.fandom.com/wiki/Dispel_Grenade_Recipe,0,crafting.recipes
+gxa_im_cft_psn_402,Dispel Poison Recipe,daoa,,,https://dragonage.fandom.com/wiki/Dispel_Poison_Recipe,0,crafting.recipes
+gxa_im_cft_psn_403,Elemental Grenade Recipe,daoa,,,https://dragonage.fandom.com/wiki/Elemental_Grenade_Recipe,0,crafting.recipes
+gxa_im_cft_psn_404,Elemental Poison Recipe,daoa,,,https://dragonage.fandom.com/wiki/Elemental_Poison_Recipe,0,crafting.recipes
+gxa_im_cft_trp_401,Dispel Trap Plans,daoa,,,https://dragonage.fandom.com/wiki/Dispel_Trap_Plans,0,crafting.recipes
+gxa_im_cft_trp_402,Elemental Trap Plans,daoa,,,https://dragonage.fandom.com/wiki/Elemental_Trap_Plans,0,crafting.recipes
+gxa_im_cft_trp_403,Gravity Trap Plans,daoa,,,https://dragonage.fandom.com/wiki/Gravity_Trap_Plans,0,crafting.recipes
+gxa_im_cft_trp_404,Misdirection Cloud Trap Plans,daoa,,,https://dragonage.fandom.com/wiki/Misdirection_Cloud_Trap_Plans,0,crafting.recipes
+gxa_im_cft_reg_blankrune,Blank Runestone,daoa,,,https://dragonage.fandom.com/wiki/Blank_Runestone,1,crafting.resources
+gxa_im_cft_reg_bldlotus,Blood Lotus,daoa,,,https://dragonage.fandom.com/wiki/Blood_Lotus_(Origins),1,crafting.resources
+gxa_im_cft_reg_madcap,Madcap Bulb,daoa,,,https://dragonage.fandom.com/wiki/Madcap_Bulb,1,crafting.resources
+gxa_im_cft_reg_rashvine,Rashvine Nettle,daoa,,,https://dragonage.fandom.com/wiki/Rashvine_Nettle,1,crafting.resources
+gxa_im_cft_reg_reduction,Etching Agent,daoa,,,https://dragonage.fandom.com/wiki/Etching_Agent,1,crafting.resources
+gxaip_herb_11,Rashvine,daoa,,,,1,crafting.resources
+gxaip_herb_12,Madcap,daoa,,,,1,crafting.resources
+gxaip_herb_13,Blood Lotus,daoa,,,,1,crafting.resources
+gxa_im_gem_diamond_flawless,Flawless Diamond,daoa,,,https://dragonage.fandom.com/wiki/Flawless_Diamond,0,gems
+gxa_im_gem_emr_flawless,Flawless Emerald,daoa,,,https://dragonage.fandom.com/wiki/Flawless_Emerald,0,gems
+gxa_im_gem_sapphire_flawles,Flawless Sapphire,daoa,,,https://dragonage.fandom.com/wiki/Flawless_Sapphire,0,gems
+gxa_im_gift_anders_1,Knitted Scarf,daoa,,,https://dragonage.fandom.com/wiki/Knitted_Scarf,0,gifts
+gxa_im_gift_anders_2,Gold Earring,daoa,,,https://dragonage.fandom.com/wiki/Gold_Earring,0,gifts
+gxa_im_gift_anders_3,Engraved Silver Bracers,daoa,,,https://dragonage.fandom.com/wiki/Engraved_Silver_Bracers,0,gifts
+gxa_im_gift_anders_4,Bell Collar,daoa,,,https://dragonage.fandom.com/wiki/Bell_Collar,0,gifts
+gxa_im_gift_anders_5,Phylacteries: A History Written in Blood,daoa,,,https://dragonage.fandom.com/wiki/Phylacteries:_A_History_Written_in_Blood,0,gifts
+gxa_im_gift_anders_kitten,Kitten,daoa,,,https://dragonage.fandom.com/wiki/Kitten,0,gifts
+gxa_im_gift_grandfather_bow,Howe Bow,daoa,,,https://dragonage.fandom.com/wiki/Howe_Bow_(gift),0,gifts
+gxa_im_gift_justice_1,Lyrium: The Voice of the Maker,daoa,,,https://dragonage.fandom.com/wiki/Lyrium:_The_Voice_of_the_Maker,0,gifts
+gxa_im_gift_justice_2,Kristoff's Locket,daoa,,,https://dragonage.fandom.com/wiki/Kristoff%27s_Locket,0,gifts
+gxa_im_gift_justice_3,Verses of Dreams,daoa,,,https://dragonage.fandom.com/wiki/Verses_of_Dreams,0,gifts
+gxa_im_gift_justice_4,Kristoff's Mementos,daoa,,,https://dragonage.fandom.com/wiki/Kristoff%27s_Mementos,0,gifts
+gxa_im_gift_justice_5,Elven Prayer for the Dead,daoa,,,https://dragonage.fandom.com/wiki/Elven_Prayer_for_the_Dead,0,gifts
+gxa_im_gift_lyrium_ring,Lyrium Ring,daoa,,,https://dragonage.fandom.com/wiki/Lyrium_Ring,0,gifts
+gxa_im_gift_nathaniel_1,Delilah Howe's Letters,daoa,,,https://dragonage.fandom.com/wiki/Delilah_Howe%27s_Letters,0,gifts
+gxa_im_gift_nathaniel_2,Locksmith's Tools,daoa,,,https://dragonage.fandom.com/wiki/Locksmith%27s_Tools,0,gifts
+gxa_im_gift_nathaniel_3,Bronze Sextant,daoa,,,https://dragonage.fandom.com/wiki/Bronze_Sextant,0,gifts
+gxa_im_gift_nathaniel_4,Golden Vase,daoa,,,https://dragonage.fandom.com/wiki/Golden_Vase,0,gifts
+gxa_im_gift_nathaniel_5,Whetstone,daoa,,,https://dragonage.fandom.com/wiki/Whetstone,0,gifts
+gxa_im_gift_oghren_1,Mackay's Epic Single Malt,daoa,,,https://dragonage.fandom.com/wiki/Mackay%27s_Epic_Single_Malt,0,gifts
+gxa_im_gift_oghren_2,"""Dragon Piss""",daoa,,,https://dragonage.fandom.com/wiki/%22Dragon_Piss%22,0,gifts
+gxa_im_gift_oghren_3,Hirol's Lava Burst,daoa,,,https://dragonage.fandom.com/wiki/Hirol%27s_Lava_Burst,0,gifts
+gxa_im_gift_oghren_4,West Hill Brandy,daoa,,,https://dragonage.fandom.com/wiki/West_Hill_Brandy,0,gifts
+gxa_im_gift_oghren_5,Aqua Magus,daoa,,,https://dragonage.fandom.com/wiki/Aqua_Magus,0,gifts
+gxa_im_gift_oghren_pony,Toy Horse,daoa,,,https://dragonage.fandom.com/wiki/Toy_Horse,0,gifts
+gxa_im_gift_sigrun_1,Snow Globe,daoa,,,https://dragonage.fandom.com/wiki/Snow_Globe,0,gifts
+gxa_im_gift_sigrun_2,Toy Chariot,daoa,,,https://dragonage.fandom.com/wiki/Toy_Chariot,0,gifts
+gxa_im_gift_sigrun_3,Potted Plant,daoa,,,https://dragonage.fandom.com/wiki/Potted_Plant,0,gifts
+gxa_im_gift_sigrun_4,The Warrior's Heart,daoa,,,https://dragonage.fandom.com/wiki/The_Warrior%27s_Heart,0,gifts
+gxa_im_gift_sigrun_5,Soap on a Rope,daoa,,,https://dragonage.fandom.com/wiki/Soap_on_a_Rope,0,gifts
+gxa_im_gift_sigrun_spyglass,Spyglass,daoa,,,https://dragonage.fandom.com/wiki/Spyglass,0,gifts
+gxa_im_gift_velanna_1,Discarded Journal,daoa,,,https://dragonage.fandom.com/wiki/Discarded_Journal,0,gifts
+gxa_im_gift_velanna_2,Shiny Malachite,daoa,,,https://dragonage.fandom.com/wiki/Shiny_Malachite,0,gifts
+gxa_im_gift_velanna_3,Ornate Silver Bowl,daoa,,,https://dragonage.fandom.com/wiki/Ornate_Silver_Bowl,0,gifts
+gxa_im_gift_velanna_4,Elven Runestone,daoa,,,https://dragonage.fandom.com/wiki/Elven_Runestone,0,gifts
+gxa_im_gift_velanna_5,Carved Greenstone,daoa,,,https://dragonage.fandom.com/wiki/Carved_Greenstone,0,gifts
+gxa_im_gift_velanna_book,Blank Journal,daoa,,,https://dragonage.fandom.com/wiki/Blank_Journal,0,gifts
+gxa_im_cth_mag_001,Lorekeeper's Robe,daoa,,,https://dragonage.fandom.com/wiki/Lorekeeper%27s_Robe,0,mage_robes
+gxa_im_cth_mag_002,Blood Promise,daoa,,,https://dragonage.fandom.com/wiki/Blood_Promise,0,mage_robes
+gxa_im_cth_mag_003,Vestments of Urthemiel,daoa,,,https://dragonage.fandom.com/wiki/Vestments_of_Urthemiel,0,mage_robes
+gxa_im_cth_mag_004,Spellminder,daoa,,,https://dragonage.fandom.com/wiki/Spellminder,0,mage_robes
+gxa_im_cth_mag_005,Robes of the Architect,daoa,,,https://dragonage.fandom.com/wiki/Robes_of_the_Architect,0,mage_robes
+gxa_im_cth_mag_pl2,Grey Warden Robes,daoa,,,https://dragonage.fandom.com/wiki/Grey_Warden_Robes,0,mage_robes
+gxa_im_cth_mag_pla,Robes of the Orlesian Magister,daoa,,,https://dragonage.fandom.com/wiki/Robes_of_the_Orlesian_Magister,0,mage_robes
+gxa_im_cth_mag_vel,Skins of the Keeper,daoa,,,https://dragonage.fandom.com/wiki/Skins_of_the_Keeper,0,mage_robes
+prc_im_ep1_reward3,Vestments of the Seer,daoa,,,https://dragonage.fandom.com/wiki/Vestments_of_the_Seer_(Awakening),0,mage_robes
+str_im_robes,Vestments of the Seer,daoa,,,https://dragonage.fandom.com/wiki/Vestments_of_the_Seer_(Awakening),0,mage_robes
+gxa_im_manual_battlemage,Manual: Battlemage,daoa,,,https://dragonage.fandom.com/wiki/Manual:_Battlemage,0,manuals
+gxa_im_manual_bloodmage,Manual: Blood Mage,daoa,,,https://dragonage.fandom.com/wiki/Manual:_Blood_Mage,0,manuals
+gxa_im_manual_guardian,Manual: Guardian,daoa,,,https://dragonage.fandom.com/wiki/Manual:_Guardian,0,manuals
+gxa_im_manual_keeper,Manual: Keeper,daoa,,,https://dragonage.fandom.com/wiki/Manual:_Keeper,0,manuals
+gxa_im_manual_legionnaire,Manual: Legionnaire Scout,daoa,,,https://dragonage.fandom.com/wiki/Manual:_Legionnaire_Scout,0,manuals
+gxa_im_manual_reaver,Manual: Reaver,daoa,,,https://dragonage.fandom.com/wiki/Manual:_Reaver,0,manuals
+gxa_im_manual_shadow,Manual: Shadow,daoa,,,https://dragonage.fandom.com/wiki/Manual:_Shadow,0,manuals
+gxa_im_manual_spiritwarrior,Manual: Spirit Warrior,daoa,,,https://dragonage.fandom.com/wiki/Manual:_Spirit_Warrior,0,manuals
+gxa_im_anders_kitten,Ser Pounce-a-lot,daoa,,,https://dragonage.fandom.com/wiki/Ser_Pounce-a-lot,0,miscellaneous
+coa100im_guardhouse_key,Guardhouse Key,daoa,,,https://dragonage.fandom.com/wiki/Guardhouse_Key,0,plot_items
+coa100im_orphans_hammer,Hammer,daoa,,,https://dragonage.fandom.com/wiki/Hammer,0,plot_items
+coa100im_orphans_pie,Pie,daoa,,,https://dragonage.fandom.com/wiki/Pie,0,plot_items
+coa100im_orphans_pitchfork,Pitchfork,daoa,,,https://dragonage.fandom.com/wiki/Pitchfork,0,plot_items
+coa100im_orphans_scarecrow,Scarecrow,daoa,,,https://dragonage.fandom.com/wiki/Scarecrow,0,plot_items
+coa100im_orphans_toy,Doll,daoa,,,https://dragonage.fandom.com/wiki/Doll,0,plot_items
+coa100im_poison,Poison,daoa,,,https://dragonage.fandom.com/wiki/Poison,0,plot_items
+coa100im_sniper_cage_key,Cell Key,daoa,,,https://dragonage.fandom.com/wiki/Cell_Key_(Awakening),0,plot_items
+coa100ip_smugglers_key,Smugglers' Key,daoa,,,https://dragonage.fandom.com/wiki/Smugglers%27_Key,0,plot_items
+coa110im_kristoffs_room_key,Inn Key,daoa,,,https://dragonage.fandom.com/wiki/Inn_Key,0,plot_items
+coa110im_orphans_bottle,Antivan Brandy,daoa,,,https://dragonage.fandom.com/wiki/Antivan_Brandy,0,plot_items
+coa110im_orphans_irritant,Pouch of Herbs,daoa,,,https://dragonage.fandom.com/wiki/Pouch_of_Herbs,0,plot_items
+coa110im_orphans_knife,Kitchen Knife,daoa,,,https://dragonage.fandom.com/wiki/Kitchen_Knife,0,plot_items
+coa110im_orphans_soles,Shoe Soles,daoa,,,https://dragonage.fandom.com/wiki/Shoe_Soles,0,plot_items
+coa140im_orphans_flowers,Flowers,daoa,,,https://dragonage.fandom.com/wiki/Flowers,0,plot_items
+coa140im_orphans_sermons,The Sermons of Justinia II,daoa,,,https://dragonage.fandom.com/wiki/The_Sermons_of_Justinia_II_(item),0,plot_items
+coa150im_orphans_moonshine,Moonshine,daoa,,,https://dragonage.fandom.com/wiki/Moonshine,0,plot_items
+ltl300im_control_rod,Golem Control Rod,daoa,,,https://dragonage.fandom.com/wiki/Golem_Control_Rod_(Awakening),0,plot_items
+gxa_im_cft_run_101,Journeyman Dweomer Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Journeyman_Dweomer_Rune_Tracing,0,runes
+gxa_im_cft_run_102,Journeyman Flame Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Journeyman_Flame_Rune_Tracing,0,runes
+gxa_im_cft_run_103,Journeyman Frost Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Journeyman_Frost_Rune_Tracing,0,runes
+gxa_im_cft_run_104,Journeyman Paralyze Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Journeyman_Paralyze_Rune_Tracing,0,runes
+gxa_im_cft_run_105,Journeyman Lightning Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Journeyman_Lightning_Rune_Tracing,0,runes
+gxa_im_cft_run_106,Journeyman Cold Iron Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Journeyman_Cold_Iron_Rune_Tracing,0,runes
+gxa_im_cft_run_107,Journeyman Hale Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Journeyman_Hale_Rune_Tracing,0,runes
+gxa_im_cft_run_108,Journeyman Silverite Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Journeyman_Silverite_Rune_Tracing,0,runes
+gxa_im_cft_run_109,Journeyman Slow Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Journeyman_Slow_Rune_Tracing,0,runes
+gxa_im_cft_run_110,Journeyman Barrier Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Journeyman_Barrier_Rune_Tracing,0,runes
+gxa_im_cft_run_111,Journeyman Stout Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Journeyman_Stout_Rune_Tracing,0,runes
+gxa_im_cft_run_112,Journeyman Tempest Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Journeyman_Tempest_Rune_Tracing,0,runes
+gxa_im_cft_run_113,Journeyman Immunity Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Journeyman_Immunity_Rune_Tracing,0,runes
+gxa_im_cft_run_114,Journeyman Reservoir Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Journeyman_Reservoir_Rune_Tracing,0,runes
+gxa_im_cft_run_115,Diligence Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Diligence_Rune_Tracing,0,runes
+gxa_im_cft_run_116,Menacing Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Menacing_Rune_Tracing,0,runes
+gxa_im_cft_run_201,Expert Dweomer Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Expert_Dweomer_Rune_Tracing,0,runes
+gxa_im_cft_run_202,Expert Flame Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Expert_Flame_Rune_Tracing,0,runes
+gxa_im_cft_run_203,Expert Frost Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Expert_Frost_Rune_Tracing,0,runes
+gxa_im_cft_run_204,Expert Paralyze Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Expert_Paralyze_Rune_Tracing,0,runes
+gxa_im_cft_run_205,Expert Lightning Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Expert_Lightning_Rune_Tracing,0,runes
+gxa_im_cft_run_206,Expert Cold Iron Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Expert_Cold_Iron_Rune_Tracing,0,runes
+gxa_im_cft_run_207,Expert Hale Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Expert_Hale_Rune_Tracing,0,runes
+gxa_im_cft_run_208,Expert Silverite Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Expert_Silverite_Rune_Tracing,0,runes
+gxa_im_cft_run_209,Expert Slow Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Expert_Slow_Rune_Tracing,0,runes
+gxa_im_cft_run_210,Expert Barrier Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Expert_Barrier_Rune_Tracing,0,runes
+gxa_im_cft_run_211,Expert Stout Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Expert_Stout_Rune_Tracing,0,runes
+gxa_im_cft_run_212,Expert Tempest Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Expert_Tempest_Rune_Tracing,0,runes
+gxa_im_cft_run_213,Expert Immunity Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Expert_Immunity_Rune_Tracing,0,runes
+gxa_im_cft_run_214,Expert Reservoir Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Expert_Reservoir_Rune_Tracing,0,runes
+gxa_im_cft_run_215,Endurance Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Endurance_Rune_Tracing,0,runes
+gxa_im_cft_run_216,Intensifying Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Intensifying_Rune_Tracing,0,runes
+gxa_im_cft_run_301,Master Dweomer Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Master_Dweomer_Rune_Tracing,0,runes
+gxa_im_cft_run_302,Master Flame Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Master_Flame_Rune_Tracing,0,runes
+gxa_im_cft_run_303,Master Frost Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Master_Frost_Rune_Tracing,0,runes
+gxa_im_cft_run_304,Master Paralyze Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Master_Paralyze_Rune_Tracing,0,runes
+gxa_im_cft_run_305,Master Lightning Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Master_Lightning_Rune_Tracing,0,runes
+gxa_im_cft_run_306,Master Cold Iron Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Master_Cold_Iron_Rune_Tracing,0,runes
+gxa_im_cft_run_307,Master Hale Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Master_Hale_Rune_Tracing,0,runes
+gxa_im_cft_run_308,Master Silverite Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Master_Silverite_Rune_Tracing,0,runes
+gxa_im_cft_run_309,Master Slow Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Master_Slow_Rune_Tracing,0,runes
+gxa_im_cft_run_310,Master Barrier Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Master_Barrier_Rune_Tracing,0,runes
+gxa_im_cft_run_311,Master Stout Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Master_Stout_Rune_Tracing,0,runes
+gxa_im_cft_run_312,Master Tempest Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Master_Tempest_Rune_Tracing,0,runes
+gxa_im_cft_run_313,Master Immunity Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Master_Immunity_Rune_Tracing,0,runes
+gxa_im_cft_run_314,Master Reservoir Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Master_Reservoir_Rune_Tracing,0,runes
+gxa_im_cft_run_315,Amplification Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Amplification_Rune_Tracing,0,runes
+gxa_im_cft_run_316,Elemental Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Elemental_Rune_Tracing,0,runes
+gxa_im_cft_run_401,Grandmaster Dweomer Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Grandmaster_Dweomer_Rune_Tracing,0,runes
+gxa_im_cft_run_402,Grandmaster Flame Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Grandmaster_Flame_Rune_Tracing,0,runes
+gxa_im_cft_run_403,Grandmaster Frost Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Grandmaster_Frost_Rune_Tracing,0,runes
+gxa_im_cft_run_404,Grandmaster Paralyze Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Grandmaster_Paralyze_Rune_Tracing,0,runes
+gxa_im_cft_run_405,Grandmaster Lightning Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Grandmaster_Lightning_Rune_Tracing,0,runes
+gxa_im_cft_run_406,Grandmaster Cold Iron Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Grandmaster_Cold_Iron_Rune_Tracing,0,runes
+gxa_im_cft_run_407,Grandmaster Hale Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Grandmaster_Hale_Rune_Tracing,0,runes
+gxa_im_cft_run_408,Grandmaster Silverite Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Grandmaster_Silverite_Rune_Tracing,0,runes
+gxa_im_cft_run_409,Grandmaster Slow Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Grandmaster_Slow_Rune_Tracing,0,runes
+gxa_im_cft_run_410,Grandmaster Barrier Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Grandmaster_Barrier_Rune_Tracing,0,runes
+gxa_im_cft_run_411,Grandmaster Stout Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Grandmaster_Stout_Rune_Tracing,0,runes
+gxa_im_cft_run_412,Grandmaster Tempest Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Grandmaster_Tempest_Rune_Tracing,0,runes
+gxa_im_cft_run_413,Grandmaster Immunity Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Grandmaster_Immunity_Rune_Tracing,0,runes
+gxa_im_cft_run_414,Grandmaster Reservoir Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Grandmaster_Reservoir_Rune_Tracing,0,runes
+gxa_im_cft_run_415,Evasion Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Evasion_Rune_Tracing,0,runes
+gxa_im_cft_run_416,Momentum Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Momentum_Rune_Tracing,0,runes
+gxa_im_cft_run_501,Masterpiece Dweomer Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Masterpiece_Dweomer_Rune_Tracing,0,runes
+gxa_im_cft_run_502,Masterpiece Flame Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Masterpiece_Flame_Rune_Tracing,0,runes
+gxa_im_cft_run_503,Masterpiece Frost Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Masterpiece_Frost_Rune_Tracing,0,runes
+gxa_im_cft_run_504,Masterpiece Paralyze Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Masterpiece_Paralyze_Rune_Tracing,0,runes
+gxa_im_cft_run_505,Masterpiece Lightning Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Masterpiece_Lightning_Rune_Tracing,0,runes
+gxa_im_cft_run_506,Masterpiece Cold Iron Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Masterpiece_Cold_Iron_Rune_Tracing,0,runes
+gxa_im_cft_run_507,Masterpiece Hale Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Masterpiece_Hale_Rune_Tracing,0,runes
+gxa_im_cft_run_508,Masterpiece Silverite Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Masterpiece_Silverite_Rune_Tracing,0,runes
+gxa_im_cft_run_509,Masterpiece Slow Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Masterpiece_Slow_Rune_Tracing,0,runes
+gxa_im_cft_run_510,Masterpiece Barrier Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Masterpiece_Barrier_Rune_Tracing,0,runes
+gxa_im_cft_run_511,Masterpiece Stout Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Masterpiece_Stout_Rune_Tracing,0,runes
+gxa_im_cft_run_512,Masterpiece Tempest Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Masterpiece_Tempest_Rune_Tracing,0,runes
+gxa_im_cft_run_513,Masterpiece Immunity Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Masterpiece_Immunity_Rune_Tracing,0,runes
+gxa_im_cft_run_514,Masterpiece Reservoir Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Masterpiece_Reservoir_Rune_Tracing,0,runes
+gxa_im_cft_run_601,Paragon Dweomer Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Paragon_Dweomer_Rune_Tracing,0,runes
+gxa_im_cft_run_602,Paragon Flame Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Paragon_Flame_Rune_Tracing,0,runes
+gxa_im_cft_run_603,Paragon Frost Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Paragon_Frost_Rune_Tracing,0,runes
+gxa_im_cft_run_604,Paragon Paralyze Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Paragon_Paralyze_Rune_Tracing,0,runes
+gxa_im_cft_run_605,Paragon Lightning Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Paragon_Lightning_Rune_Tracing,0,runes
+gxa_im_cft_run_606,Paragon Cold Iron Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Paragon_Cold_Iron_Rune_Tracing,0,runes
+gxa_im_cft_run_607,Paragon Hale Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Paragon_Hale_Rune_Tracing,0,runes
+gxa_im_cft_run_608,Paragon Silverite Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Paragon_Silverite_Rune_Tracing,0,runes
+gxa_im_cft_run_609,Paragon Slow Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Paragon_Slow_Rune_Tracing,0,runes
+gxa_im_cft_run_610,Paragon Barrier Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Paragon_Barrier_Rune_Tracing,0,runes
+gxa_im_cft_run_611,Paragon Stout Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Paragon_Stout_Rune_Tracing,0,runes
+gxa_im_cft_run_612,Paragon Tempest Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Paragon_Tempest_Rune_Tracing,0,runes
+gxa_im_cft_run_613,Paragon Immunity Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Paragon_Immunity_Rune_Tracing,0,runes
+gxa_im_cft_run_614,Paragon Reservoir Rune Tracing,daoa,,,https://dragonage.fandom.com/wiki/Paragon_Reservoir_Rune_Tracing,0,runes
+gxa_im_upg_run_ar1_arm,Novice Barrier Rune,daoa,,,https://dragonage.fandom.com/wiki/Novice_Barrier_Rune,0,runes.armor_runes
+gxa_im_upg_run_ar1_con,Novice Stout Rune,daoa,,,https://dragonage.fandom.com/wiki/Novice_Stout_Rune,0,runes.armor_runes
+gxa_im_upg_run_ar1_mis,Novice Tempest Rune,daoa,,,https://dragonage.fandom.com/wiki/Novice_Tempest_Rune,0,runes.armor_runes
+gxa_im_upg_run_ar1_rst,Novice Immunity Rune,daoa,,,https://dragonage.fandom.com/wiki/Novice_Immunity_Rune,0,runes.armor_runes
+gxa_im_upg_run_ar1_spl,Novice Reservoir Rune,daoa,,,https://dragonage.fandom.com/wiki/Novice_Reservoir_Rune,0,runes.armor_runes
+gxa_im_upg_run_ar2_arm,Journeyman Barrier Rune,daoa,,,https://dragonage.fandom.com/wiki/Journeyman_Barrier_Rune,0,runes.armor_runes
+gxa_im_upg_run_ar2_con,Journeyman Stout Rune,daoa,,,https://dragonage.fandom.com/wiki/Journeyman_Stout_Rune,0,runes.armor_runes
+gxa_im_upg_run_ar2_mis,Journeyman Tempest Rune,daoa,,,https://dragonage.fandom.com/wiki/Journeyman_Tempest_Rune,0,runes.armor_runes
+gxa_im_upg_run_ar2_rst,Journeyman Immunity Rune,daoa,,,https://dragonage.fandom.com/wiki/Journeyman_Immunity_Rune,0,runes.armor_runes
+gxa_im_upg_run_ar2_spl,Journeyman Reservoir Rune,daoa,,,https://dragonage.fandom.com/wiki/Journeyman_Reservoir_Rune,0,runes.armor_runes
+gxa_im_upg_run_ar3_arm,Expert Barrier Rune,daoa,,,https://dragonage.fandom.com/wiki/Expert_Barrier_Rune,0,runes.armor_runes
+gxa_im_upg_run_ar3_con,Expert Stout Rune,daoa,,,https://dragonage.fandom.com/wiki/Expert_Stout_Rune,0,runes.armor_runes
+gxa_im_upg_run_ar3_mis,Expert Tempest Rune,daoa,,,https://dragonage.fandom.com/wiki/Expert_Tempest_Rune,0,runes.armor_runes
+gxa_im_upg_run_ar3_rst,Expert Immunity Rune,daoa,,,https://dragonage.fandom.com/wiki/Expert_Immunity_Rune,0,runes.armor_runes
+gxa_im_upg_run_ar3_spl,Expert Reservoir Rune,daoa,,,https://dragonage.fandom.com/wiki/Expert_Reservoir_Rune,0,runes.armor_runes
+gxa_im_upg_run_ar4_arm,Master Barrier Rune,daoa,,,https://dragonage.fandom.com/wiki/Master_Barrier_Rune,0,runes.armor_runes
+gxa_im_upg_run_ar4_con,Master Stout Rune,daoa,,,https://dragonage.fandom.com/wiki/Master_Stout_Rune,0,runes.armor_runes
+gxa_im_upg_run_ar4_mis,Master Tempest Rune,daoa,,,https://dragonage.fandom.com/wiki/Master_Tempest_Rune,0,runes.armor_runes
+gxa_im_upg_run_ar4_rst,Master Immunity Rune,daoa,,,https://dragonage.fandom.com/wiki/Master_Immunity_Rune,0,runes.armor_runes
+gxa_im_upg_run_ar4_spl,Master Reservoir Rune,daoa,,,https://dragonage.fandom.com/wiki/Master_Reservoir_Rune,0,runes.armor_runes
+gxa_im_upg_run_ar5_arm,Grandmaster Barrier Rune,daoa,,,https://dragonage.fandom.com/wiki/Grandmaster_Barrier_Rune,0,runes.armor_runes
+gxa_im_upg_run_ar5_con,Grandmaster Stout Rune,daoa,,,https://dragonage.fandom.com/wiki/Grandmaster_Stout_Rune,0,runes.armor_runes
+gxa_im_upg_run_ar5_mis,Grandmaster Tempest Rune,daoa,,,https://dragonage.fandom.com/wiki/Grandmaster_Tempest_Rune,0,runes.armor_runes
+gxa_im_upg_run_ar5_rst,Grandmaster Immunity Rune,daoa,,,https://dragonage.fandom.com/wiki/Grandmaster_Immunity_Rune,0,runes.armor_runes
+gxa_im_upg_run_ar5_spl,Grandmaster Reservoir Rune,daoa,,,https://dragonage.fandom.com/wiki/Grandmaster_Reservoir_Rune,0,runes.armor_runes
+gxa_im_upg_run_ar6_arm,Masterpiece Barrier Rune,daoa,,,https://dragonage.fandom.com/wiki/Masterpiece_Barrier_Rune,0,runes.armor_runes
+gxa_im_upg_run_ar6_con,Masterpiece Stout Rune,daoa,,,https://dragonage.fandom.com/wiki/Masterpiece_Stout_Rune,0,runes.armor_runes
+gxa_im_upg_run_ar6_mis,Masterpiece Tempest Rune,daoa,,,https://dragonage.fandom.com/wiki/Masterpiece_Tempest_Rune,0,runes.armor_runes
+gxa_im_upg_run_ar6_rst,Masterpiece Immunity Rune,daoa,,,https://dragonage.fandom.com/wiki/Masterpiece_Immunity_Rune,0,runes.armor_runes
+gxa_im_upg_run_ar6_spl,Masterpiece Reservoir Rune,daoa,,,https://dragonage.fandom.com/wiki/Masterpiece_Reservoir_Rune,0,runes.armor_runes
+gxa_im_upg_run_ar7_arm,Paragon Barrier Rune,daoa,,,https://dragonage.fandom.com/wiki/Paragon_Barrier_Rune,0,runes.armor_runes
+gxa_im_upg_run_ar7_con,Paragon Stout Rune,daoa,,,https://dragonage.fandom.com/wiki/Paragon_Stout_Rune,0,runes.armor_runes
+gxa_im_upg_run_ar7_mis,Paragon Tempest Rune,daoa,,,https://dragonage.fandom.com/wiki/Paragon_Tempest_Rune,0,runes.armor_runes
+gxa_im_upg_run_ar7_rst,Paragon Immunity Rune,daoa,,,https://dragonage.fandom.com/wiki/Paragon_Immunity_Rune,0,runes.armor_runes
+gxa_im_upg_run_ar7_spl,Paragon Reservoir Rune,daoa,,,https://dragonage.fandom.com/wiki/Paragon_Reservoir_Rune,0,runes.armor_runes
+gxa_im_upg_run_uni_dis,Evasion Rune,daoa,,,https://dragonage.fandom.com/wiki/Evasion_Rune,0,runes.armor_runes
+gxa_im_upg_run_uni_ele,Amplification Rune,daoa,,,https://dragonage.fandom.com/wiki/Amplification_Rune,0,runes.armor_runes
+gxa_im_upg_run_uni_fat,Endurance Rune,daoa,,,https://dragonage.fandom.com/wiki/Endurance_Rune,0,runes.armor_runes
+gxa_im_upg_run_uni_flk,Diligence Rune,daoa,,,https://dragonage.fandom.com/wiki/Diligence_Rune,0,runes.armor_runes
+gxa_im_upg_cry_uni_crt,Intensifying Rune,daoa,,,https://dragonage.fandom.com/wiki/Intensifying_Rune,0,runes.weapon_runes
+gxa_im_upg_cry_uni_ele,Elemental Rune,daoa,,,https://dragonage.fandom.com/wiki/Elemental_Rune,0,runes.weapon_runes
+gxa_im_upg_cry_uni_has,Momentum Rune,daoa,,,https://dragonage.fandom.com/wiki/Momentum_Rune,0,runes.weapon_runes
+gxa_im_upg_cry_uni_thr,Menacing Rune,daoa,,,https://dragonage.fandom.com/wiki/Menacing_Rune,0,runes.weapon_runes
+gxa_im_upg_run_wp6_chr,Masterpiece Lightning Rune,daoa,,,https://dragonage.fandom.com/wiki/Masterpiece_Lightning_Rune,0,runes.weapon_runes
+gxa_im_upg_run_wp6_cir,Masterpiece Cold Iron Rune,daoa,,,https://dragonage.fandom.com/wiki/Masterpiece_Cold_Iron_Rune,0,runes.weapon_runes
+gxa_im_upg_run_wp6_dwe,Masterpiece Dweomer Rune,daoa,,,https://dragonage.fandom.com/wiki/Masterpiece_Dweomer_Rune,0,runes.weapon_runes
+gxa_im_upg_run_wp6_flm,Masterpiece Flame Rune,daoa,,,https://dragonage.fandom.com/wiki/Masterpiece_Flame_Rune,0,runes.weapon_runes
+gxa_im_upg_run_wp6_frs,Masterpiece Frost Rune,daoa,,,https://dragonage.fandom.com/wiki/Masterpiece_Frost_Rune,0,runes.weapon_runes
+gxa_im_upg_run_wp6_hal,Masterpiece Hale Rune,daoa,,,https://dragonage.fandom.com/wiki/Masterpiece_Hale_Rune,0,runes.weapon_runes
+gxa_im_upg_run_wp6_par,Masterpiece Paralyze Rune,daoa,,,https://dragonage.fandom.com/wiki/Masterpiece_Paralyze_Rune,0,runes.weapon_runes
+gxa_im_upg_run_wp6_sil,Masterpiece Silverite Rune,daoa,,,https://dragonage.fandom.com/wiki/Masterpiece_Silverite_Rune,0,runes.weapon_runes
+gxa_im_upg_run_wp6_slw,Masterpiece Slow Rune,daoa,,,https://dragonage.fandom.com/wiki/Masterpiece_Slow_Rune,0,runes.weapon_runes
+gxa_im_upg_run_wp7_chr,Paragon Lightning Rune,daoa,,,https://dragonage.fandom.com/wiki/Paragon_Lightning_Rune,0,runes.weapon_runes
+gxa_im_upg_run_wp7_cir,Paragon Cold Iron Rune,daoa,,,https://dragonage.fandom.com/wiki/Paragon_Cold_Iron_Rune,0,runes.weapon_runes
+gxa_im_upg_run_wp7_dwe,Paragon Dweomer Rune,daoa,,,https://dragonage.fandom.com/wiki/Paragon_Dweomer_Rune,0,runes.weapon_runes
+gxa_im_upg_run_wp7_flm,Paragon Flame Rune,daoa,,,https://dragonage.fandom.com/wiki/Paragon_Flame_Rune,0,runes.weapon_runes
+gxa_im_upg_run_wp7_frs,Paragon Frost Rune,daoa,,,https://dragonage.fandom.com/wiki/Paragon_Frost_Rune,0,runes.weapon_runes
+gxa_im_upg_run_wp7_hal,Paragon Hale Rune,daoa,,,https://dragonage.fandom.com/wiki/Paragon_Hale_Rune,0,runes.weapon_runes
+gxa_im_upg_run_wp7_par,Paragon Paralyze Rune,daoa,,,https://dragonage.fandom.com/wiki/Paragon_Paralyze_Rune,0,runes.weapon_runes
+gxa_im_upg_run_wp7_sil,Paragon Silverite Rune,daoa,,,https://dragonage.fandom.com/wiki/Paragon_Silverite_Rune,0,runes.weapon_runes
+gxa_im_upg_run_wp7_slw,Paragon Slow Rune,daoa,,,https://dragonage.fandom.com/wiki/Paragon_Slow_Rune,0,runes.weapon_runes
+gxa_im_her_shd_aeducan,Heraldry: Aeducan,daoa,,,https://dragonage.fandom.com/wiki/Heraldry:_Aeducan,0,shield_heraldries
+gxa_im_her_shd_amaranthine,Heraldry: City of Amaranthine,daoa,,,https://dragonage.fandom.com/wiki/Heraldry:_City_of_Amaranthine,0,shield_heraldries
+gxa_im_her_shd_bear_paw,Heraldry: Bear's Paw,daoa,,,https://dragonage.fandom.com/wiki/Heraldry:_Bear%27s_Paw,0,shield_heraldries
+gxa_im_her_shd_cousland,Heraldry: Cousland,daoa,,,https://dragonage.fandom.com/wiki/Heraldry:_Cousland,0,shield_heraldries
+gxa_im_her_shd_cross,Heraldry: Cross,daoa,,,https://dragonage.fandom.com/wiki/Heraldry:_Cross,0,shield_heraldries
+gxa_im_her_shd_crows,Heraldry: Antivan Crows,daoa,,,https://dragonage.fandom.com/wiki/Heraldry:_Antivan_Crows,0,shield_heraldries
+gxa_im_her_shd_dragonmount,Heraldry: Dragon's Peak Bannorn,daoa,,,https://dragonage.fandom.com/wiki/Heraldry:_Dragon%27s_Peak_Bannorn,0,shield_heraldries
+gxa_im_her_shd_grey_wardens,Heraldry: Grey Wardens,daoa,,,https://dragonage.fandom.com/wiki/Heraldry:_Grey_Wardens,0,shield_heraldries
+gxa_im_her_shd_legion,Heraldry: Legion of the Dead,daoa,,,https://dragonage.fandom.com/wiki/Heraldry:_Legion_of_the_Dead,0,shield_heraldries
+gxa_im_her_shd_templars,Heraldry: Templars,daoa,,,https://dragonage.fandom.com/wiki/Heraldry:_Templars,0,shield_heraldries
+prm000im_ep1_bulwarktk,Bulwark of the True King (Awakening),daoa,,,https://dragonage.fandom.com/wiki/Bulwark_of_the_True_King_(Awakening),0,shields
+gxa_im_arm_shd_sml_drk,Small Darkspawn Shield,daoa,,shield,https://dragonage.fandom.com/wiki/Small_Darkspawn_Shield_(Awakening),0,shields.bucklers
+gxa_im_arm_shd_twr_001,Partha,daoa,,shield,https://dragonage.fandom.com/wiki/Partha,0,shields.heavy
+gxa_im_arm_shd_kit_001,Landsmeet Shield,daoa,,shield,https://dragonage.fandom.com/wiki/Landsmeet_Shield,0,shields.kite
+gxa_im_arm_shd_kit_jus,Griffon's Crest,daoa,,shield,https://dragonage.fandom.com/wiki/Griffon%27s_Crest,0,shields.kite
+gxa_im_arm_shd_lrg_001,Mage-Hunter,daoa,,shield,https://dragonage.fandom.com/wiki/Mage-Hunter,0,shields.targes
+gxa_im_arm_shd_lrg_drk,Large Darkspawn Shield,daoa,,shield,https://dragonage.fandom.com/wiki/Large_Darkspawn_Shield_(Awakening),0,shields.targes
+gxa_im_arm_shd_lrg_pl2,Large Grey Warden Shield,daoa,,shield,https://dragonage.fandom.com/wiki/Large_Grey_Warden_Shield,0,shields.targes
+gxa_im_tome_unlearning,Manual of Focus,daoa,,,https://dragonage.fandom.com/wiki/Manual_of_Focus,0,tomes
+aoa100ar_city_siege,City of Amaranthine,daoa,,,,0,uncategorized
+aoa100cr_captain_aidan,Constable Aidan,daoa,,,,0,uncategorized
+aoa100cr_city_guard_cap,City Guard Commander,daoa,,,,0,uncategorized
+aoa100cr_darkmessenger,Disciple Messenger,daoa,,,,0,uncategorized
+aoa100cr_ds_catapult,Darkspawn Commander,daoa,,,,0,uncategorized
+aoa100cr_ds_general_1,Disciple General,daoa,,,,0,uncategorized
+aoa100cr_ds_general_2,Disciple General,daoa,,,,0,uncategorized
+aoa100cr_ds_general_3,Disciple General,daoa,,,,0,uncategorized
+aoa100cr_enchanter,Enchanter,daoa,,,,0,uncategorized
+aoa100cr_garevel,Captain Garevel,daoa,,,,0,uncategorized
+aoa100cr_militia_army_a,City Guard,daoa,,,,0,uncategorized
+aoa100cr_militia_army_b,City Guard,daoa,,,,0,uncategorized
+aoa100cr_militia_army_fem_a,City Guard,daoa,,,,0,uncategorized
+aoa100cr_militia_army_fem_b,City Guard,daoa,,,,0,uncategorized
+aoa100cr_sergeant,Sergeant,daoa,,,,0,uncategorized
+aoa100cr_survivor_1,Survivor,daoa,,,,0,uncategorized
+aoa100cr_survivor_1_f,Noble,daoa,,,,0,uncategorized
+aoa100cr_survivor_1_m,Patron,daoa,,,,0,uncategorized
+aoa100cr_survivor_2,Survivor,daoa,,,,0,uncategorized
+aoa100ip_catwalk_door,Door,daoa,,,,0,uncategorized
+aoa100ip_chantry_door,Chantry of Our Lady Redeemer,daoa,,,,0,uncategorized
+aoa100ip_to_amaranthine,City of Amaranthine,daoa,,,,0,uncategorized
+aoa100ip_to_inn,The Crown and Lion,daoa,,,,0,uncategorized
+aoa100ip_to_smugglers_cove,Smuggler's Cove,daoa,,,,0,uncategorized
+aoa110ar_inn_siege,The Crown and Lion,daoa,,,,0,uncategorized
+aoa130ar_smugglers_cove_sg,Smuggler's Cove,daoa,,,,0,uncategorized
+aoa130ip_to_city,City of Amaranthine,daoa,,,,0,uncategorized
+aoa130ip_to_inn,The Crown and Lion,daoa,,,,0,uncategorized
+aoa140ar_chantry,Chantry of Our Lady Redeemer,daoa,,,,0,uncategorized
+aoa140cr_alarmed_man,City Guard,daoa,,,,0,uncategorized
+aoa140cr_priestess,Chantry Sister,daoa,,,,0,uncategorized
+aoa140ip_to_amaranthine,City of Amaranthine,daoa,,,,0,uncategorized
+coa100ar_city,City of Amaranthine,daoa,,,,0,uncategorized
+coa100cr_apostate_1,Mumbling Man,daoa,,,,0,uncategorized
+coa100cr_apostate_2,Rambling Elf,daoa,,,,0,uncategorized
+coa100cr_apostate_4,Apostate Mage,daoa,,,,0,uncategorized
+coa100cr_captain_aidan,Constable Aidan,daoa,,,,0,uncategorized
+coa100cr_chanter,Chanter,daoa,,,,0,uncategorized
+coa100cr_citizen_1,Noble,daoa,,,,0,uncategorized
+coa100cr_citizen_2,Noble,daoa,,,,0,uncategorized
+coa100cr_citizen_3,Commoner,daoa,,,,0,uncategorized
+coa100cr_citizen_4,Commoner,daoa,,,,0,uncategorized
+coa100cr_colbert,Colbert,daoa,,,,0,uncategorized
+coa100cr_dark_wolf,Suspicious Guard,daoa,,,,0,uncategorized
+coa100cr_derren,Ser Derren,daoa,,,,0,uncategorized
+coa100cr_dwarfmerch,Glassric the Weaponsmith,daoa,,,,0,uncategorized
+coa100cr_eddelbrek,Lord Eddelbrek,daoa,,,,0,uncategorized
+coa100cr_esmerelle,Bann Esmerelle,daoa,,,,0,uncategorized
+coa100cr_guard_checkpoint,Guard,daoa,,,,0,uncategorized
+coa100cr_guard_female_01,City Guard,daoa,,,,0,uncategorized
+coa100cr_guard_female_02,City Guard,daoa,,,,0,uncategorized
+coa100cr_guard_female_03,City Guard,daoa,,,,0,uncategorized
+coa100cr_guard_gate_1,Guard,daoa,,,,0,uncategorized
+coa100cr_guard_gate_2,Guard,daoa,,,,0,uncategorized
+coa100cr_guard_key,Sergeant,daoa,,,,0,uncategorized
+coa100cr_guard_key_fake,Sergeant,daoa,,,,0,uncategorized
+coa100cr_guard_male_01,City Guard,daoa,,,,0,uncategorized
+coa100cr_guard_male_02,City Guard,daoa,,,,0,uncategorized
+coa100cr_guard_male_03,City Guard,daoa,,,,0,uncategorized
+coa100cr_hired_goon_1,Hired Goon,daoa,,,,0,uncategorized
+coa100cr_hired_goon_2,Hired Goon,daoa,,,,0,uncategorized
+coa100cr_hired_goon_leader1,Hired Goon Leader,daoa,,,,0,uncategorized
+coa100cr_kendrick,Kendrick,daoa,,,,0,uncategorized
+coa100cr_lieutenant,Lieutenant,daoa,,,,0,uncategorized
+coa100cr_market_smuggler,Suspicious Character,daoa,,,,0,uncategorized
+coa100cr_merchant_1,Master Henley,daoa,,,,0,uncategorized
+coa100cr_merchant_2,Octham the Grocer,daoa,,,,0,uncategorized
+coa100cr_mervis,Mervis,daoa,,,,0,uncategorized
+coa100cr_micah,Micah,daoa,,,,0,uncategorized
+coa100cr_nida,Nida,daoa,,,,0,uncategorized
+coa100cr_nidafriend,Bran,daoa,,,,0,uncategorized
+coa100cr_refugee_f,Refugee,daoa,,,,0,uncategorized
+coa100cr_refugee_m,Refugee,daoa,,,,0,uncategorized
+coa100cr_shady_figure,Shady Character,daoa,,,,0,uncategorized
+coa100cr_shady_figure_rep,Shady Character,daoa,,,,0,uncategorized
+coa100cr_sniper,Jacen,daoa,,,,0,uncategorized
+coa100cr_steafan,Steafan,daoa,,,,0,uncategorized
+coa100cr_survivor_1,Refugee,daoa,,,,0,uncategorized
+coa100cr_survivor_2,Refugee,daoa,,,,0,uncategorized
+coa100cr_templar,Rylock,daoa,,,,0,uncategorized
+coa100cr_thug_1,Thug,daoa,,,,0,uncategorized
+coa100cr_thug_2,Thug,daoa,,,,0,uncategorized
+coa100cr_thug_3,Thug,daoa,,,,0,uncategorized
+coa100cr_villager_1,Villager,daoa,,,,0,uncategorized
+coa100cr_villager_2,Villager,daoa,,,,0,uncategorized
+coa100cr_wynne,Wynne,daoa,,,,0,uncategorized
+coa100im_aura_letter,A Letter from Aura,daoa,,,,0,uncategorized
+coa100im_suicide_note_f3,Second Note Fragment,daoa,,,,0,uncategorized
+coa100im_suicide_note_f4,Third Note Fragment,daoa,,,,0,uncategorized
+coa100ip_anders_gift4,Homer's Toys,daoa,,,,0,uncategorized
+coa100ip_anders_tree,Tree,daoa,,,,0,uncategorized
+coa100ip_catwalk_door,Stairs to Battlements,daoa,,,,0,uncategorized
+coa100ip_chanters_board,Chanter's Board,daoa,,,,0,uncategorized
+coa100ip_convoy_cart,Convoy Cart,daoa,,,,0,uncategorized
+coa100ip_excavator_cache,Packed Earth,daoa,,,,0,uncategorized
+coa100ip_guardhouse_door,Door,daoa,,,,0,uncategorized
+coa100ip_justice_statue,Statue,daoa,,,,0,uncategorized
+coa100ip_merchant_board,Merchants' Guild Board,daoa,,,,0,uncategorized
+coa100ip_nathaniel_statue,Statue,daoa,,,,0,uncategorized
+coa100ip_oghren_board,Marketplace Handbills,daoa,,,,0,uncategorized
+coa100ip_orphans_flwrs_spot,Doorstep,daoa,,,,0,uncategorized
+coa100ip_orphans_hammer,Hammer,daoa,,,,0,uncategorized
+coa100ip_orphans_pie,Pie,daoa,,,,0,uncategorized
+coa100ip_orphans_pitchfork,Pitchfork,daoa,,,,0,uncategorized
+coa100ip_orphans_scarecrow,Scarecrow,daoa,,,,0,uncategorized
+coa100ip_orphans_scrow_spot,Soft Ground,daoa,,,,0,uncategorized
+coa100ip_orphans_soles,Shoe Soles,daoa,,,,0,uncategorized
+coa100ip_orphans_toy,Doll,daoa,,,,0,uncategorized
+coa100ip_sigrun_market,Market Stall,daoa,,,,0,uncategorized
+coa100ip_smugglers_door,Smuggler's Cove,daoa,,,,0,uncategorized
+coa100ip_sniper_cage,Cage,daoa,,,,0,uncategorized
+coa100ip_suicide_corpse,Karrem,daoa,,,,0,uncategorized
+coa100ip_suicide_note_3,Note Fragment,daoa,,,,0,uncategorized
+coa100ip_to_chantry,Chantry of Our Lady Redeemer,daoa,,,,0,uncategorized
+coa100ip_to_inn,The Crown and Lion,daoa,,,,0,uncategorized
+coa100ip_to_moonshine_den,Hubert's Den,daoa,,,,0,uncategorized
+coa100ip_to_warehouse,Abandoned Warehouse,daoa,,,,0,uncategorized
+coa100ip_velanna_gift1,Crate,daoa,,,,0,uncategorized
+coa100ip_velanna_oak,Tree,daoa,,,,0,uncategorized
+coa100ip_wool_padding,Chest,daoa,,,,0,uncategorized
+coa110ar_inn,The Crown and Lion,daoa,,,,0,uncategorized
+coa110cr_bartender,Bartender,daoa,,,,0,uncategorized
+coa110cr_commenter_1,Patron,daoa,,,,0,uncategorized
+coa110cr_commenter_2,Patron,daoa,,,,0,uncategorized
+coa110cr_innkeeper,Innkeeper,daoa,,,,0,uncategorized
+coa110cr_prankster_1,Patron,daoa,,,,0,uncategorized
+coa110cr_prankster_2,Patron,daoa,,,,0,uncategorized
+coa110cr_rat,Ferret,daoa,,,,0,uncategorized
+coa110cr_sorcha,Sorcha,daoa,,,,0,uncategorized
+coa110im_suicide_note_f2,Note Fragment,daoa,,,,0,uncategorized
+coa110ip_blackmarsh_map,Map of Ferelden,daoa,,,,0,uncategorized
+coa110ip_justice_gift4,Chest,daoa,,,,0,uncategorized
+coa110ip_kristoff_chest,Chest,daoa,,,,0,uncategorized
+coa110ip_kristoffs_door,Door,daoa,,,,0,uncategorized
+coa110ip_oghren_gift1,Crate,daoa,,,,0,uncategorized
+coa110ip_oil,Oil,daoa,,,,0,uncategorized
+coa110ip_orphan_donate,"""Blight Orfans Donashun Tin""",daoa,,,,0,uncategorized
+coa110ip_orphan_donate_2,"""Blight Orfans Donashun Box""",daoa,,,,0,uncategorized
+coa110ip_orphans_board,"""Blight Orfans Notis Bord""",daoa,,,,0,uncategorized
+coa110ip_orphans_irritant,Herbs,daoa,,,,0,uncategorized
+coa110ip_orphans_knife,Kitchen Knife,daoa,,,,0,uncategorized
+coa110ip_suicide_note_2,Note Fragment,daoa,,,,0,uncategorized
+coa110ip_to_city,City of Amaranthine,daoa,,,,0,uncategorized
+coa120cr_thief_01,Thief,daoa,,,,0,uncategorized
+coa120cr_thief_02,Thief,daoa,,,,0,uncategorized
+coa120cr_thief_03,Thief,daoa,,,,0,uncategorized
+coa120cr_thief_leader,Thief,daoa,,,,0,uncategorized
+coa130ar_smugglers_cove,Smuggler's Cove,daoa,,,,0,uncategorized
+coa130cr_emissary,Genlock Emissary,daoa,,,,0,uncategorized
+coa130cr_smuggler,Smuggler,daoa,,,,0,uncategorized
+coa130cr_smuggler_leader,Smuggler Leader,daoa,,,,0,uncategorized
+coa130ip_exit,City of Amaranthine,daoa,,,,0,uncategorized
+coa130ip_exit_tavern,The Crown and Lion,daoa,,,,0,uncategorized
+coa130ip_nathaniel_gift2,Crate,daoa,,,,0,uncategorized
+coa130ip_sigrun_gift2,Toy Box,daoa,,,,0,uncategorized
+coa130ip_treasure_1,Smuggler's Cache,daoa,,,,0,uncategorized
+coa130ip_treasure_2,Smuggler's Cache,daoa,,,,0,uncategorized
+coa140ar_chantry,Chantry of Our Lady Redeemer,daoa,,,,0,uncategorized
+coa140cr_grieving_widow,Alma,daoa,,,,0,uncategorized
+coa140cr_revered_mother,Revered Mother,daoa,,,,0,uncategorized
+coa140cr_templar_apostate,Ser Rylien,daoa,,,,0,uncategorized
+coa140ip_anders_gift1,Lost and Found,daoa,,,,0,uncategorized
+coa140ip_excavator_records,Records,daoa,,,,0,uncategorized
+coa140ip_orphans_dresser,Mother Leanna's Bed,daoa,,,,0,uncategorized
+coa140ip_orphans_flowers,Flowers,daoa,,,,0,uncategorized
+coa140ip_orphans_sermons,The Sermons of Justinia II,daoa,,,,0,uncategorized
+coa140ip_to_amaranthine,City of Amaranthine,daoa,,,,0,uncategorized
+coa140ip_velanna_book,Books,daoa,,,,0,uncategorized
+coa150ar_moonshine_den,Hubert's Den,daoa,,,,0,uncategorized
+coa150cr_moonshine_goon_1,Moonshiner,daoa,,,,0,uncategorized
+coa150cr_moonshine_goon_2,Moonshiner,daoa,,,,0,uncategorized
+coa150cr_moonshine_leader,Moonshiner,daoa,,,,0,uncategorized
+coa150ip_moonshine_crate,Crate of Moonshine,daoa,,,,0,uncategorized
+coa150ip_oghren_gift2,Crate,daoa,,,,0,uncategorized
+coa150ip_to_amaranthine,City of Amaranthine,daoa,,,,0,uncategorized
+coa160ar_anders_warehouse,Abandoned Warehouse,daoa,,,,0,uncategorized
+coa160cr_templar_f,Templar,daoa,,,,0,uncategorized
+coa160cr_templar_m,Templar,daoa,,,,0,uncategorized
+coa160ip_armoire,Armoire,daoa,,,,0,uncategorized
+coa160ip_justice_gift1,Bookshelf,daoa,,,,0,uncategorized
+coa160ip_oghren_gift5,Crate,daoa,,,,0,uncategorized
+coa160ip_phylactery_shelf,Shelf,daoa,,,,0,uncategorized
+coa160ip_to_city,City of Amaranthine,daoa,,,,0,uncategorized
+coa160ip_to_phylactery,Door,daoa,,,,0,uncategorized
+gxa000cr_anders_namaya,Namaya,daoa,,,,0,uncategorized
+gxa000cr_justice_aura,Aura,daoa,,,,0,uncategorized
+gxa000cr_nathaniel_delilah,Delilah,daoa,,,,0,uncategorized
+gxa000cr_nathaniel_grounds,Groundskeeper Samuel,daoa,,,,0,uncategorized
+gxa000cr_oghren_felsi,Felsi,daoa,,,,0,uncategorized
+gxa000cr_sigrun_barton,Mischa,daoa,,,,0,uncategorized
+gxa000cr_velanna_garos,Garos,daoa,,,,0,uncategorized
+gxa000cr_velanna_marren,Marren,daoa,,,,0,uncategorized
+gxa000cr_velanna_nella,Nella,daoa,,,,0,uncategorized
+gxa000fl_anders,Anders,daoa,,,,0,uncategorized
+gxa000fl_justice,Justice,daoa,,,,0,uncategorized
+gxa000fl_nathaniel,Nathaniel,daoa,,,,0,uncategorized
+gxa000fl_oghren,Oghren,daoa,,,,0,uncategorized
+gxa000fl_sigrun,Sigrun,daoa,,,,0,uncategorized
+gxa000fl_velanna,Velanna,daoa,,,,0,uncategorized
+gxa000ip_blocker_text,Path Blocked,daoa,,,,0,uncategorized
+gxa000ip_herb_great_nature,Pile of Books,daoa,,,,0,uncategorized
+gxa000ip_herb_great_stamina,Scrolls,daoa,,,,0,uncategorized
+gxa000ip_herb_potent_lyrium,Scrolls,daoa,,,,0,uncategorized
+gxa000ip_pois_elemental,Pile of Books,daoa,,,,0,uncategorized
+gxa000ip_pois_soulrot_coat,Pile of Books,daoa,,,,0,uncategorized
+gxa000ip_rune_cold_iron,Scrolls,daoa,,,,0,uncategorized
+gxa000ip_rune_flame,Scrolls,daoa,,,,0,uncategorized
+gxa000ip_rune_grandmaster,Shelves,daoa,,,,0,uncategorized
+gxa000ip_rune_hale,Pile of Books,daoa,,,,0,uncategorized
+gxa000ip_rune_paralyze,Scrolls,daoa,,,,0,uncategorized
+gxa000ip_rune_spc_elemental,Scrolls,daoa,,,,0,uncategorized
+gxa000ip_rune_tempest,Scrolls,daoa,,,,0,uncategorized
+gxa000ip_trap_dispel,Pile of Books,daoa,,,,0,uncategorized
+gxa000ip_trap_elemental,Pile of Books,daoa,,,,0,uncategorized
+gxa000ip_trap_gravity,Scrolls,daoa,,,,0,uncategorized
+gxa000ip_world_map,World Map,daoa,,,,0,uncategorized
+gxa000ip_world_map_wide,World Map,daoa,,,,0,uncategorized
+gxaip_door_coffin_1_l,Coffin,daoa,,,,0,uncategorized
+gxaip_door_coffin_1_r,Coffin,daoa,,,,0,uncategorized
+gxaip_door_coffin_2_l,Coffin,daoa,,,,0,uncategorized
+gxaip_door_coffin_2_r,Coffin,daoa,,,,0,uncategorized
+gxaip_gate_metal,Gate,daoa,,,,0,uncategorized
+gxaip_gate_metal_r,Gate,daoa,,,,0,uncategorized
+gxaip_trap_crafted_401,Dispel Trap,daoa,,,,0,uncategorized
+gxaip_trap_crafted_402,Chromatic Trap,daoa,,,,0,uncategorized
+gxaip_trap_crafted_403,Black Hole Trap,daoa,,,,0,uncategorized
+gxaip_trap_crafted_404,Misdirection Cloud Trap,daoa,,,,0,uncategorized
+prc_im_ep1_reward2,The Sorrows of Arlathan,daoa,,,https://dragonage.fandom.com/wiki/The_Sorrows_of_Arlathan_(Awakening),0,uncategorized
+str_im_longbow,The Sorrows of Arlathan,daoa,,,https://dragonage.fandom.com/wiki/The_Sorrows_of_Arlathan_(Awakening),0,uncategorized
+gxa_im_wep_mel_bax_001,Frenzy,daoa,metal,weapon,https://dragonage.fandom.com/wiki/Frenzy,0,weapons.battleaxes
+gxa_im_wep_mel_bax_002,Darkspawn Ravager,daoa,metal,weapon,https://dragonage.fandom.com/wiki/Darkspawn_Ravager,0,weapons.battleaxes
+gxa_im_wep_mel_bax_drk,Darkspawn Battleaxe,daoa,metal,weapon,https://dragonage.fandom.com/wiki/Darkspawn_Battleaxe_(Awakening),0,weapons.battleaxes
+prc_im_ep1_reward1,Dragonbone Cleaver,daoa,,,https://dragonage.fandom.com/wiki/Dragonbone_Cleaver_(Awakening),0,weapons.battleaxes
+str_im_battleaxe,Dragonbone Cleaver,daoa,,,https://dragonage.fandom.com/wiki/Dragonbone_Cleaver_(Awakening),0,weapons.battleaxes
+gxa_im_wep_rng_cbw_001,Beastmaster,daoa,wood,shield,https://dragonage.fandom.com/wiki/Beastmaster,0,weapons.crossbows
+gxa_im_wep_rng_cbw_002,Longshot,daoa,wood,shield,https://dragonage.fandom.com/wiki/Longshot,0,weapons.crossbows
+gxa_im_wep_rng_cbw_drk,Darkspawn Crossbow,daoa,wood,shield,https://dragonage.fandom.com/wiki/Darkspawn_Crossbow_(Awakening),0,weapons.crossbows
+gxa_im_wep_mel_dag_001,Dumat's Claw,daoa,metal,weapon,https://dragonage.fandom.com/wiki/Dumat%27s_Claw,0,weapons.daggers
+gxa_im_wep_mel_dag_002,Talon of the Skies,daoa,metal,weapon,https://dragonage.fandom.com/wiki/Talon_of_the_Skies,0,weapons.daggers
+gxa_im_wep_mel_dag_003,Tooth of the Mountain-Father,daoa,metal,weapon,https://dragonage.fandom.com/wiki/Tooth_of_the_Mountain-Father,0,weapons.daggers
+gxa_im_wep_mel_dag_004,Voice of Velvet,daoa,metal,weapon,https://dragonage.fandom.com/wiki/Voice_of_Velvet,0,weapons.daggers
+gxa_im_wep_mel_dag_drk,Darkspawn Dagger,daoa,metal,weapon,https://dragonage.fandom.com/wiki/Darkspawn_Dagger_(Awakening),0,weapons.daggers
+gxa_im_wep_mel_dag_pl2,Twinblade,daoa,metal,weapon,https://dragonage.fandom.com/wiki/Twinblade,0,weapons.daggers
+gxa_im_wep_mel_dag_sig,Scout's Dirk,daoa,metal,weapon,https://dragonage.fandom.com/wiki/Scout%27s_Dirk,0,weapons.daggers
+gxa_im_wep_mel_gsw_001,Ser Alvard's Sword,daoa,metal,weapon,https://dragonage.fandom.com/wiki/Ser_Alvard%27s_Sword,0,weapons.greatswords
+gxa_im_wep_mel_gsw_002,Dragonbrand,daoa,metal,weapon,https://dragonage.fandom.com/wiki/Dragonbrand,0,weapons.greatswords
+gxa_im_wep_mel_gsw_003,The Mother's Chosen,daoa,metal,weapon,https://dragonage.fandom.com/wiki/The_Mother%27s_Chosen,0,weapons.greatswords
+gxa_im_wep_mel_gsw_drk,Darkspawn Greatsword,daoa,metal,weapon,https://dragonage.fandom.com/wiki/Darkspawn_Greatsword_(Awakening),0,weapons.greatswords
+gxa_im_wep_mel_gsw_pl2,Warden's Reach,daoa,metal,weapon,https://dragonage.fandom.com/wiki/Warden%27s_Reach,0,weapons.greatswords
+gxa_im_wep_rng_lbw_001,Chasind Arm,daoa,wood,shield,https://dragonage.fandom.com/wiki/Chasind_Arm,0,weapons.longbows
+gxa_im_wep_rng_lbw_002,Misery,daoa,wood,shield,https://dragonage.fandom.com/wiki/Misery,0,weapons.longbows
+gxa_im_wep_rng_lbw_drk,Darkspawn Longbow,daoa,wood,shield,https://dragonage.fandom.com/wiki/Darkspawn_Longbow_(Awakening),0,weapons.longbows
+gxa_im_wep_rng_lbw_nthnl,Howe Bow,daoa,wood,shield,https://dragonage.fandom.com/wiki/Howe_Bow,0,weapons.longbows
+gxa_im_wep_rng_lbw_pl2,Commission,daoa,wood,shield,https://dragonage.fandom.com/wiki/Commission,0,weapons.longbows
+prm000im_ep1_griffbeak,Bregan's Bow (Awakening),daoa,,,https://dragonage.fandom.com/wiki/Bregan%27s_Bow_(Awakening),0,weapons.longbows
+gxa_im_wep_mel_lsw_001,Dumat's Spine,daoa,metal,weapon,https://dragonage.fandom.com/wiki/Dumat%27s_Spine,0,weapons.longswords
+gxa_im_wep_mel_lsw_002,The Winter Blade,daoa,metal,weapon,https://dragonage.fandom.com/wiki/The_Winter_Blade,0,weapons.longswords
+gxa_im_wep_mel_lsw_003,Kallak,daoa,metal,weapon,https://dragonage.fandom.com/wiki/Kallak,0,weapons.longswords
+gxa_im_wep_mel_lsw_drk,Darkspawn Longsword,daoa,metal,weapon,https://dragonage.fandom.com/wiki/Darkspawn_Longsword_(Awakening),0,weapons.longswords
+gxa_im_wep_mel_lsw_pla,Warden's Companion,daoa,metal,weapon,https://dragonage.fandom.com/wiki/Warden%27s_Companion,0,weapons.longswords
+prc_im_wep_mel_lsw_drk_ep1,Blightblood,daoa,metal,weapon,https://dragonage.fandom.com/wiki/Blightblood_(Awakening),0,weapons.longswords
+gxa_im_wep_mac_torch,Torch,daoa,metal,weapon,,0,weapons.maces
+gxa_im_wep_mel_mac_001,Skullcrusher,daoa,metal,weapon,https://dragonage.fandom.com/wiki/Skullcrusher,0,weapons.maces
+gxa_im_wep_mel_mac_drk,Darkspawn Mace,daoa,metal,weapon,https://dragonage.fandom.com/wiki/Darkspawn_Mace_(Awakening),0,weapons.maces
+gxa_im_wep_mel_mac_jus,The Lamented,daoa,metal,weapon,https://dragonage.fandom.com/wiki/The_Lamented,0,weapons.maces
+prc_im_gib_wep_mac_ep1,The Reaper's Cudgel,daoa,metal,weapon,https://dragonage.fandom.com/wiki/The_Reaper%27s_Cudgel_(Awakening),0,weapons.maces
+gxa_im_wep_mel_mal_001,Demonslayer,daoa,metal,weapon,https://dragonage.fandom.com/wiki/Demonslayer,0,weapons.mauls
+gxa_im_wep_mel_mal_002,Valos Atredum,daoa,metal,weapon,https://dragonage.fandom.com/wiki/Valos_Atredum_(Awakening),0,weapons.mauls
+gxa_im_wep_mel_mal_drk,Darkspawn Maul,daoa,metal,weapon,https://dragonage.fandom.com/wiki/Darkspawn_Maul_(Awakening),0,weapons.mauls
+gxa_im_wep_rng_sbw_001,Dragonspite,daoa,wood,shield,https://dragonage.fandom.com/wiki/Dragonspite,0,weapons.shortbows
+gxa_im_wep_rng_sbw_drk,Darkspawn Shortbow,daoa,wood,shield,https://dragonage.fandom.com/wiki/Darkspawn_Shortbow_(Awakening),0,weapons.shortbows
+gxa_im_wep_mag_sta_001,Charlatan's Walking Stick,daoa,wood,weapon,https://dragonage.fandom.com/wiki/Charlatan%27s_Walking_Stick,0,weapons.staves
+gxa_im_wep_mag_sta_002,Flemeth's Broomstick,daoa,wood,weapon,https://dragonage.fandom.com/wiki/Flemeth%27s_Broomstick,0,weapons.staves
+gxa_im_wep_mag_sta_003,Lightning Rod,daoa,wood,weapon,https://dragonage.fandom.com/wiki/Lightning_Rod_(Awakening),0,weapons.staves
+gxa_im_wep_mag_sta_004,Lamppost in Winter,daoa,wood,weapon,https://dragonage.fandom.com/wiki/Lamppost_in_Winter,0,weapons.staves
+gxa_im_wep_mag_sta_005,Call of the Inferno,daoa,wood,weapon,https://dragonage.fandom.com/wiki/Call_of_the_Inferno,0,weapons.staves
+gxa_im_wep_mag_sta_006,Staff of the Lost,daoa,wood,weapon,https://dragonage.fandom.com/wiki/Staff_of_the_Lost,0,weapons.staves
+gxa_im_wep_mag_sta_007,Staff of Vigor,daoa,wood,weapon,https://dragonage.fandom.com/wiki/Staff_of_Vigor,0,weapons.staves
+gxa_im_wep_mag_sta_008,Spellfury,daoa,wood,weapon,https://dragonage.fandom.com/wiki/Spellfury,0,weapons.staves
+gxa_im_wep_mag_sta_drk,Darkspawn Staff,daoa,wood,weapon,https://dragonage.fandom.com/wiki/Darkspawn_Staff_(Awakening),0,weapons.staves
+gxa_im_wep_mag_sta_pl2,Staff of Shadows,daoa,wood,weapon,https://dragonage.fandom.com/wiki/Staff_of_Shadows,0,weapons.staves
+gxa_im_wep_mag_sta_pla,The Dragon's Call,daoa,wood,weapon,https://dragonage.fandom.com/wiki/The_Dragon%27s_Call,0,weapons.staves
+gxa_im_wep_mag_sta_vel,Heart of the Forest,daoa,wood,weapon,https://dragonage.fandom.com/wiki/Heart_of_the_Forest_(staff),0,weapons.staves
+gxa_im_wep_mel_axe_001,Heirsplitter,daoa,metal,weapon,https://dragonage.fandom.com/wiki/Heirsplitter,0,weapons.waraxes
+gxa_im_wep_mel_axe_002,Daisycutter,daoa,metal,weapon,https://dragonage.fandom.com/wiki/Daisycutter,0,weapons.waraxes
+gxa_im_wep_mel_axe_drk,Darkspawn Waraxe,daoa,metal,weapon,https://dragonage.fandom.com/wiki/Darkspawn_Waraxe_(Awakening),0,weapons.waraxes
+gxa_im_wep_mel_axe_sig,Ancient Dwarven Axe,daoa,metal,weapon,https://dragonage.fandom.com/wiki/Ancient_Dwarven_Axe,0,weapons.waraxes

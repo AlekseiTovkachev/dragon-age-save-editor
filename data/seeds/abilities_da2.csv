@@ -1,0 +1,424 @@
+id,name,core_id,tree,type,game
+100000,Warrior Class,,Class Talent Codes,Class,da2
+101000,Weapon and Shield,,Weapon and Shield,Talent,da2
+101001,Weapon and Shield (Base Talent),101000,Weapon and Shield,Talent,da2
+101010,Shield Bash,101001,Weapon and Shield,Talent,da2
+101011,Pummel,101010,Weapon and Shield,Talent,da2
+101020,Assault,101001,Weapon and Shield,Talent,da2
+101021,Battery,101020,Weapon and Shield,Talent,da2
+101030,Scatter,101001,Weapon and Shield,Talent,da2
+101031,Disperse,101030,Weapon and Shield,Talent,da2
+101040,Shield Defense,101001,Weapon and Shield,Talent,da2
+101041,Shield Wall,101040,Weapon and Shield,Talent,da2
+101050,Perception,101001,Weapon and Shield,Talent,da2
+101060,Safeguard,101001,Weapon and Shield,Talent,da2
+102000,Two-Handed,,Two-Handed,Talent,da2
+102001,Two-Handed (Base Talent),102000,Two-Handed,Talent,da2
+102010,Mighty Blow,102001,Two-Handed,Talent,da2
+102011,Shattering Blow,102010,Two-Handed,Talent,da2
+102012,Killer Blow,102011,Two-Handed,Talent,da2
+102020,Scythe,102001,Two-Handed,Talent,da2
+102021,Reaper,102020,Two-Handed,Talent,da2
+102030,Whirlwind,102001,Two-Handed,Talent,da2
+102031,Tornado,102030,Two-Handed,Talent,da2
+102032,Cyclone,102031,Two-Handed,Talent,da2
+102040,Giant's Reach,102001,Two-Handed,Talent,da2
+102050,Sunder,102001,Two-Handed,Talent,da2
+103000,Vanguard,,Vanguard,Talent,da2
+103001,Vanguard (Base Talent),103000,Vanguard,Talent,da2
+103010,Cleave,103001,Vanguard,Talent,da2
+103011,Claymore,103010,Vanguard,Talent,da2
+103020,Assail,103001,Vanguard,Talent,da2
+103021,Besiege,103020,Vanguard,Talent,da2
+103030,Control,103001,Vanguard,Talent,da2
+103031,Command,103030,Vanguard,Talent,da2
+103040,Might,103001,Vanguard,Talent,da2
+103041,Muscle,103040,Vanguard,Talent,da2
+103050,Destroyer,103001,Vanguard,Talent,da2
+103060,Massacre,103001,Vanguard,Talent,da2
+104000,Defender,,Defender,Talent,da2
+104001,Defender (Base Talent),104000,Defender,Talent,da2
+104010,Stonewall,104001,Defender,Talent,da2
+104011,Bulwark,104010,Defender,Talent,da2
+104020,Turn the Blade,104001,Defender,Talent,da2
+104021,Raise the Guard,104020,Defender,Talent,da2
+104022,Steady the Foot,104021,Defender,Talent,da2
+104030,Elemental Aegis,104001,Defender,Talent,da2
+104031,Elemental Shroud,104030,Defender,Talent,da2
+104040,Adamant,104001,Defender,Talent,da2
+104050,Resilience,104001,Defender,Talent,da2
+104060,Resolute,104001,Defender,Talent,da2
+105000,Warmonger,,Warmonger,Talent,da2
+105001,Warmonger (Base Talent),105000,Warmonger,Talent,da2
+105010,Taunt,105001,Warmonger,Talent,da2
+105011,Bellow,105010,Warmonger,Talent,da2
+105020,Pommel Strike,105001,Warmonger,Talent,da2
+105021,Pommel Blow,105020,Warmonger,Talent,da2
+105030,Tremor,105001,Warmonger,Talent,da2
+105031,Quake,105030,Warmonger,Talent,da2
+105032,Aftershock,105031,Warmonger,Talent,da2
+105040,Bravery,105001,Warmonger,Talent,da2
+105041,Bravado,105040,Warmonger,Talent,da2
+105042,Bravura,105041,Warmonger,Talent,da2
+106000,Battlemaster,,Battlemaster,Talent,da2
+106001,Battlemaster (Base Talent),106000,Battlemaster,Talent,da2
+106010,Rally,106001,Battlemaster,Talent,da2
+106011,Unite,106010,Battlemaster,Talent,da2
+106020,Bolster,106001,Battlemaster,Talent,da2
+106030,Second Wind,106001,Battlemaster,Talent,da2
+106031,Last Push,106030,Battlemaster,Talent,da2
+106032,Deep Breath,106031,Battlemaster,Talent,da2
+106040,Battle Synergy,106001,Battlemaster,Talent,da2
+106041,Fearless Synergy,106040,Battlemaster,Talent,da2
+106042,Hero's Synergy,106041,Battlemaster,Talent,da2
+106050,Deep Reserves,106001,Battlemaster,Talent,da2
+107000,Templar,,Templar,Talent,da2
+107001,Templar (Base Talent),107000,Templar,Talent,da2
+107010,Holy Smite,107001,Templar,Talent,da2
+107011,Righteous Smite,107010,Templar,Talent,da2
+107012,Staggering Smite,107011,Templar,Talent,da2
+107020,Cleanse,107001,Templar,Talent,da2
+107021,Cleansing Wave,107020,Templar,Talent,da2
+107022,Lasting Cleanse,107021,Templar,Talent,da2
+107030,Silence,107001,Templar,Talent,da2
+107031,Lingering Silence,107030,Templar,Talent,da2
+107040,Righteous Strike,107001,Templar,Talent,da2
+107050,Annulment,107001,Templar,Talent,da2
+109000,Reaver,,Reaver,Talent,da2
+109001,Reaver (Base Talent),109000,Reaver,Talent,da2
+109010,Devour,109001,Reaver,Talent,da2
+109011,Voracious,109010,Reaver,Talent,da2
+109012,Insatiable,109011,Reaver,Talent,da2
+109020,Sacrificial Frenzy,109001,Reaver,Talent,da2
+109021,Sustained Frenzy,109020,Reaver,Talent,da2
+109030,Aura of Pain,109001,Reaver,Talent,da2
+109031,Frenzy of Pain,109030,Reaver,Talent,da2
+109032,Torrent of Pain,109031,Reaver,Talent,da2
+109040,Blood Frenzy,109001,Reaver,Talent,da2
+109050,Fervor,109001,Reaver,Talent,da2
+110000,Berserker,,Berserker,Talent,da2
+110001,Berserker (Base Talent),110000,Berserker,Talent,da2
+110010,Adrenaline,110001,Berserker,Talent,da2
+110011,Adrenaline Rage,110010,Berserker,Talent,da2
+110012,Adrenaline Rush,110011,Berserker,Talent,da2
+110020,Barrage,110001,Berserker,Talent,da2
+110021,Unrelenting Barrage,110020,Berserker,Talent,da2
+110022,Resilient Barrage,110021,Berserker,Talent,da2
+110030,Berserk,110001,Berserker,Talent,da2
+110031,Endless Berserk,110030,Berserker,Talent,da2
+110032,Savage Berserk,110031,Berserker,Talent,da2
+110040,Death Blow,110001,Berserker,Talent,da2
+111000,Guardian,,Guardian,Talent,da2
+111001,Guardian (Base Talent),111000,Guardian,Talent,da2
+111010,Bodyguard,111001,Guardian,Talent,da2
+111011,Elite Bodyguard,111010,Guardian,Talent,da2
+111020,Retaliation,111001,Guardian,Talent,da2
+111021,Retribution,111020,Guardian,Talent,da2
+111030,Thick Skin,111001,Guardian,Talent,da2
+111040,Serve And Protect,111001,Guardian,Talent,da2
+111050,Watchful Eye,111001,Guardian,Talent,da2
+111060,Immovable,111001,Guardian,Talent,da2
+111061,Unstoppable,111060,Guardian,Talent,da2
+111070,Indomitable,111001,Guardian,Talent,da2
+112000,Tevinter Fugitive,,Tevinter Fugitive,Talent,da2
+112001,Tevinter Fugitive (Base Talent),112000,Tevinter Fugitive,Talent,da2
+112010,Spirit Pulse,112001,Tevinter Fugitive,Talent,da2
+112011,Spirit Flux,112010,Tevinter Fugitive,Talent,da2
+112020,Lyrium Ghost,112001,Tevinter Fugitive,Talent,da2
+112021,Lyrium Specter,112020,Tevinter Fugitive,Talent,da2
+112030,Deflect,112001,Tevinter Fugitive,Talent,da2
+112040,Kindred Spirits,112001,Tevinter Fugitive,Talent,da2
+112050,Enemy of my Enemy,112001,Tevinter Fugitive,Talent,da2
+112060,Veneer of Calm,112001,Tevinter Fugitive,Talent,da2
+112070,Battle Tempo,112001,Tevinter Fugitive,Talent,da2
+112080,Inner Reserves,112001,Tevinter Fugitive,Talent,da2
+200000,Rogue Class,,Class Talent Codes,Class,da2
+201000,Dual Weapon,,Dual Weapon,Talent,da2
+201001,Dual Weapon (Base Talent),201000,Dual Weapon,Talent,da2
+201010,Backstab,201001,Dual Weapon,Talent,da2
+201011,Perforate,201010,Dual Weapon,Talent,da2
+201012,Murder,201011,Dual Weapon,Talent,da2
+201020,Explosive Strike,201001,Dual Weapon,Talent,da2
+201021,Merciless Strike,201020,Dual Weapon,Talent,da2
+201030,Twin Fang,201001,Dual Weapon,Talent,da2
+201031,Reversed Grip,201030,Dual Weapon,Talent,da2
+201040,Lacerate,201001,Dual Weapon,Talent,da2
+201041,Maim,201040,Dual Weapon,Talent,da2
+201050,Unforgiving Chain,201001,Dual Weapon,Talent,da2
+202000,Archery,,Archery,Talent,da2
+202001,Archery (Base Talent),202000,Archery,Talent,da2
+202010,Pinning Shot,202001,Archery,Talent,da2
+202011,Rapid Pinning Shot,202010,Archery,Talent,da2
+202012,Disorienting Shot,202011,Archery,Talent,da2
+202020,Bursting Arrow,202001,Archery,Talent,da2
+202021,Shattering Arrow,202020,Archery,Talent,da2
+202022,Smoking Arrow,202021,Archery,Talent,da2
+202030,Archer's Lance,202001,Archery,Talent,da2
+202031,Punishing Lance,202030,Archery,Talent,da2
+202040,Hail of Arrows,202001,Archery,Talent,da2
+202041,Storm of Arrows,202040,Archery,Talent,da2
+203000,Sabotage,,Sabotage,Talent,da2
+203001,Sabotage (Base Talent),203000,Sabotage,Talent,da2
+203010,Rush,203001,Sabotage,Talent,da2
+203011,Charge,203010,Sabotage,Talent,da2
+203012,Blitz,203011,Sabotage,Talent,da2
+203020,Miasmic Flask,203001,Sabotage,Talent,da2
+203021,Improved Formula,203020,Sabotage,Talent,da2
+203030,Fatiguing Fog,203001,Sabotage,Talent,da2
+203031,Overpowering Fog,203030,Sabotage,Talent,da2
+203032,Impenetrable Fog,203031,Sabotage,Talent,da2
+203040,Confusion,203001,Sabotage,Talent,da2
+203041,Chaos,203040,Sabotage,Talent,da2
+204000,Specialist,,Specialist,Talent,da2
+204001,Specialist (Base Talent),204000,Specialist,Talent,da2
+204010,Speed,204001,Specialist,Talent,da2
+204011,Lightning Speed,204010,Specialist,Talent,da2
+204012,Energizing Speed,204011,Specialist,Talent,da2
+204020,Precision,204001,Specialist,Talent,da2
+204021,Precise Attack,204020,Specialist,Talent,da2
+204022,Precise Criticals,204021,Specialist,Talent,da2
+204030,Power,204001,Specialist,Talent,da2
+204031,Stunning Power,204030,Specialist,Talent,da2
+204032,Slashing Power,204031,Specialist,Talent,da2
+204040,Harmony,204001,Specialist,Talent,da2
+205000,Scoundrel,,Scoundrel,Talent,da2
+205001,Scoundrel (Base Talent),205000,Scoundrel,Talent,da2
+205010,Goad,205001,Scoundrel,Talent,da2
+205011,Corral,205010,Scoundrel,Talent,da2
+205020,Back-to-Back,205001,Scoundrel,Talent,da2
+205021,Invisible Friend,205020,Scoundrel,Talent,da2
+205030,Armistice,205001,Scoundrel,Talent,da2
+205031,Truce,205030,Scoundrel,Talent,da2
+205040,Brand,205001,Scoundrel,Talent,da2
+205050,Blindside,205001,Scoundrel,Talent,da2
+205060,Twist the Knife,205001,Scoundrel,Talent,da2
+205070,Follow-through,205001,Scoundrel,Talent,da2
+206000,Subterfuge,,Subterfuge,Talent,da2
+206001,Subterfuge (Base Talent),206000,Subterfuge,Talent,da2
+206010,Stealth,206001,Subterfuge,Talent,da2
+206011,Silent Running,206010,Subterfuge,Talent,da2
+206012,Camouflage,206011,Subterfuge,Talent,da2
+206020,Evade,206001,Subterfuge,Talent,da2
+206021,Tactical Withdrawal,206020,Subterfuge,Talent,da2
+206030,Chameleon's Breath,206001,Subterfuge,Talent,da2
+206031,Chameleon's Cloud,206030,Subterfuge,Talent,da2
+206040,Ambush,206001,Subterfuge,Talent,da2
+206050,Lingering Shroud,206001,Subterfuge,Talent,da2
+206060,Subtlety,206001,Subterfuge,Talent,da2
+207000,Shadow,,Shadow,Talent,da2
+207001,Shadow (Base Talent),207000,Shadow,Talent,da2
+207010,Inconspicuous,207001,Shadow,Talent,da2
+207011,Indiscernible,207010,Shadow,Talent,da2
+207012,Imperceptible,207011,Shadow,Talent,da2
+207020,Decoy,207001,Shadow,Talent,da2
+207021,Sturdy Decoy,207020,Shadow,Talent,da2
+207022,Rigged Decoy,207021,Shadow,Talent,da2
+207030,Pinpoint Precision,207001,Shadow,Talent,da2
+207040,Disorienting Criticals,207001,Shadow,Talent,da2
+207050,Predator,207001,Shadow,Talent,da2
+207060,Shadow Veil,207001,Shadow,Talent,da2
+208000,Duelist,,Duelist,Talent,da2
+208001,Duelist (Base Talent),208000,Duelist,Talent,da2
+208010,Vendetta,208001,Duelist,Talent,da2
+208011,Blood Feud,208010,Duelist,Talent,da2
+208020,Throw the Gauntlet,208001,Duelist,Talent,da2
+208021,To the Death,208020,Duelist,Talent,da2
+208022,Cutting Barbs,208021,Duelist,Talent,da2
+208030,Parry,208001,Duelist,Talent,da2
+208031,Riposte,208030,Duelist,Talent,da2
+208032,En Garde,208031,Duelist,Talent,da2
+208040,Sure Strikes,208001,Duelist,Talent,da2
+208050,Evasive Maneuvers,208001,Duelist,Talent,da2
+210000,Assassin,,Assassin,Talent,da2
+210001,Assassin (Base Talent),210000,Assassin,Talent,da2
+210010,Pinpoint Strikes,210001,Assassin,Talent,da2
+210011,Relentless Strikes,210010,Assassin,Talent,da2
+210020,Assassinate,210001,Assassin,Talent,da2
+210021,Annihilate,210020,Assassin,Talent,da2
+210022,Overkill,210021,Assassin,Talent,da2
+210030,Mark of Death,210001,Assassin,Talent,da2
+210031,Enduring Mark,210030,Assassin,Talent,da2
+210032,Mark of Doom,210031,Assassin,Talent,da2
+210040,Devious Harm,210001,Assassin,Talent,da2
+210050,Bloodlust,210001,Assassin,Talent,da2
+211000,Swashbuckler,,Swashbuckler,Talent,da2
+211001,Swashbuckler (Base Talent),211000,Swashbuckler,Talent,da2
+211010,All Hands On Deck,211001,Swashbuckler,Talent,da2
+211011,Shore Leave,211010,Swashbuckler,Talent,da2
+211020,Savvy,211001,Swashbuckler,Talent,da2
+211021,Buccaneer's Savvy,211020,Swashbuckler,Talent,da2
+211030,Sea Legs,211001,Swashbuckler,Talent,da2
+211040,Thumbs Up,211001,Swashbuckler,Talent,da2
+211041,Thumbs Up(Hawke),211040,Swashbuckler,Talent,da2
+211050,Stick in the Mud,211001,Swashbuckler,Talent,da2
+211060,Across the Bow,211001,Swashbuckler,Talent,da2
+211061,Below the Waterline,211060,Swashbuckler,Talent,da2
+211070,Experienced Hand,211001,Swashbuckler,Talent,da2
+212000,Marksman,,Marksman,Talent,da2
+212001,Marksman (Base Talent),212000,Marksman,Talent,da2
+212010,Rhyming Triplet,212001,Marksman,Talent,da2
+212011,Nameless Graces,212010,Marksman,Talent,da2
+212020,Kickback,212001,Marksman,Talent,da2
+212021,Backlash,212020,Marksman,Talent,da2
+212030,Well-Oiled,212001,Marksman,Talent,da2
+212040,Authorized Biographer,212001,Marksman,Talent,da2
+212050,Unauthorized Biographer,212001,Marksman,Talent,da2
+212060,Bianca's Song,212001,Marksman,Talent,da2
+212061,Embellishment,212060,Marksman,Talent,da2
+212070,Overtime,212001,Marksman,Talent,da2
+213000,Royal Archer,,Royal Archer,Talent,da2
+213001,Royal Archer (Base Talent),213000,Royal Archer,Talent,da2
+213010,Arrow of Judgement,213001,Royal Archer,Talent,da2
+213020,Wounding Arrow,213001,Royal Archer,Talent,da2
+213021,Debilitating Arrow,213020,Royal Archer,Talent,da2
+213030,Righteous Chain,213001,Royal Archer,Talent,da2
+213040,Disciple's Discipline,213001,Royal Archer,Talent,da2
+213050,Man of the Cloth,213001,Royal Archer,Talent,da2
+213060,Man of the Crown,213001,Royal Archer,Talent,da2
+213070,Holy Precision,213001,Royal Archer,Talent,da2
+213080,Guardian Angel,213001,Royal Archer,Talent,da2
+213090,Maferath's Advance,213001,Royal Archer,Talent,da2
+214000,Infiltrator,,Infiltrator,Talent,da2
+214001,Infiltrator (Base Talent),214000,Infiltrator,Talent,da2
+214010,Cover Up,214001,Infiltrator,Talent,da2
+214020,Cloak,214001,Infiltrator,Talent,da2
+214021,Dagger,214020,Infiltrator,Talent,da2
+214030,Drop Dead,214001,Infiltrator,Talent,da2
+214031,Dead Drop,214030,Infiltrator,Talent,da2
+214032,Magic Touch,214031,Infiltrator,Talent,da2
+214040,Hard to Get,214001,Infiltrator,Talent,da2
+214050,Poise,214001,Infiltrator,Talent,da2
+300000,Mage Class,,Class Talent Codes,Class,da2
+301000,Elemental,,Elemental,Spell,da2
+301001,Elemental (Base Talent),301000,Elemental,Spell,da2
+301010,Winter's Grasp,301001,Elemental,Spell,da2
+301011,Winter's Blast,301010,Elemental,Spell,da2
+301020,Cone of Cold,301001,Elemental,Spell,da2
+301021,Deep Freeze,301020,Elemental,Spell,da2
+301030,Fireball,301001,Elemental,Spell,da2
+301031,Searing Fireball,301030,Elemental,Spell,da2
+301040,Firestorm,301001,Elemental,Spell,da2
+301041,Apocalyptic Firestorm,301040,Elemental,Spell,da2
+301050,Pyromancer,301001,Elemental,Spell,da2
+301060,Elemental Mastery,301001,Elemental,Spell,da2
+302000,Primal,,Primal,Spell,da2
+302001,Primal (Base Talent),302000,Primal,Spell,da2
+302010,Stonefist,302001,Primal,Spell,da2
+302011,Golem's Fist,302010,Primal,Spell,da2
+302020,Petrify,302001,Primal,Spell,da2
+302021,Desiccate,302020,Primal,Spell,da2
+302030,Chain Lightning,302001,Primal,Spell,da2
+302031,Chain Reaction,302030,Primal,Spell,da2
+302040,Tempest,302001,Primal,Spell,da2
+302041,Strikes Twice,302040,Primal,Spell,da2
+302050,Rock Armor,302001,Primal,Spell,da2
+302060,Galvanism,302001,Primal,Spell,da2
+303000,Spirit,,Spirit,Spell,da2
+303001,Spirit (Base Talent),303000,Spirit,Spell,da2
+303010,Spirit Bolt,303001,Spirit,Spell,da2
+303011,Spirit Strike,303010,Spirit,Spell,da2
+303020,Dispel Magic,303001,Spirit,Spell,da2
+303021,Transmutation,303020,Spirit,Spell,da2
+303030,Walking Bomb,303001,Spirit,Spell,da2
+303031,Corrosive Walking Bomb,303030,Spirit,Spell,da2
+303032,Virulent Walking Bomb,303031,Spirit,Spell,da2
+303040,Death Syphon,303001,Spirit,Spell,da2
+303041,Death Vortex,303040,Spirit,Spell,da2
+303050,Spirit Mastery,303001,Spirit,Spell,da2
+304000,Arcane,,Arcane,Spell,da2
+304001,Arcane (Base Talent),304000,Arcane,Spell,da2
+304010,Mind Blast,304001,Arcane,Spell,da2
+304011,Stunning Blast,304010,Arcane,Spell,da2
+304020,Barrier,304001,Arcane,Spell,da2
+304021,Arcane Fortress,304020,Arcane,Spell,da2
+304030,Crushing Prison,304001,Arcane,Spell,da2
+304031,Paralyzing Prison,304030,Arcane,Spell,da2
+304040,Arcane Shield,304001,Arcane,Spell,da2
+304041,Arcane Wall,304040,Arcane,Spell,da2
+304042,Elemental Shield,304041,Arcane,Spell,da2
+304050,Elemental Weapons,304001,Arcane,Spell,da2
+305000,Entropy,,Entropy,Spell,da2
+305001,Entropy (Base Talent),305000,Entropy,Spell,da2
+305010,Hex of Torment,305001,Entropy,Spell,da2
+305011,Death Hex,305010,Entropy,Spell,da2
+305020,Horror,305001,Entropy,Spell,da2
+305021,Despair,305020,Entropy,Spell,da2
+305030,Misdirection Hex,305001,Entropy,Spell,da2
+305031,Shackling Hex,305030,Entropy,Spell,da2
+305040,Sleep,305001,Entropy,Spell,da2
+305041,Coma,305040,Entropy,Spell,da2
+305050,Entropic Cloud,305001,Entropy,Spell,da2
+305051,Death Cloud,305050,Entropy,Spell,da2
+306000,Creation,,Creation,Spell,da2
+306001,Creation (Base Talent),306000,Creation,Spell,da2
+306010,Glyph of Paralysis,306001,Creation,Spell,da2
+306011,Glyph of Binding,306010,Creation,Spell,da2
+306020,Heal,306001,Creation,Spell,da2
+306021,Greater Heal,306020,Creation,Spell,da2
+306030,Glyph of Repulsion,306001,Creation,Spell,da2
+306031,Glyph of Defiance,306030,Creation,Spell,da2
+306040,Haste,306001,Creation,Spell,da2
+306041,Great Haste,306040,Creation,Spell,da2
+306050,Heroic Aura,306001,Creation,Spell,da2
+306051,Valiant Aura,306050,Creation,Spell,da2
+307000,Force Mage,,Force Mage,Spell,da2
+307001,Force Mage (Base Talent),307000,Force Mage,Spell,da2
+307010,Pull of the Abyss,307001,Force Mage,Spell,da2
+307011,Edge of the Abyss,307010,Force Mage,Spell,da2
+307020,Telekinetic Burst,307001,Force Mage,Spell,da2
+307021,Telekinetic Blast,307020,Force Mage,Spell,da2
+307030,Fist of the Maker,307001,Force Mage,Spell,da2
+307031,Maker's Hammer,307030,Force Mage,Spell,da2
+307032,Maker's Fury,307031,Force Mage,Spell,da2
+307040,Gravitic Ring,307001,Force Mage,Spell,da2
+307041,Gravitic Sphere,307040,Force Mage,Spell,da2
+307050,Unshakable,307001,Force Mage,Spell,da2
+308000,Spirit Healer,,Spirit Healer,Spell,da2
+308001,Spirit Healer (Base Talent),308000,Spirit Healer,Spell,da2
+308010,Group Heal,308001,Spirit Healer,Spell,da2
+308011,Unity,308010,Spirit Healer,Spell,da2
+308020,Revival,308001,Spirit Healer,Spell,da2
+308021,Refusal,308020,Spirit Healer,Spell,da2
+308022,Renewal,308021,Spirit Healer,Spell,da2
+308030,Healing Aura,308001,Spirit Healer,Spell,da2
+308031,Faith,308030,Spirit Healer,Spell,da2
+308032,Radiance,308031,Spirit Healer,Spell,da2
+308040,Vitality,308001,Spirit Healer,Spell,da2
+308050,Second Chance,308001,Spirit Healer,Spell,da2
+309000,Blood Mage,,Blood Mage,Spell,da2
+309001,Blood Mage (Base Talent),309000,Blood Mage,Spell,da2
+309010,Sacrifice,309001,Blood Mage,Spell,da2
+309011,Grim Sacrifice,309010,Blood Mage,Spell,da2
+309020,Hemorrhage,309001,Blood Mage,Spell,da2
+309021,Paralyzing Hemorrhage,309020,Blood Mage,Spell,da2
+309030,Grave Robber,309001,Blood Mage,Spell,da2
+309031,One Foot In,309030,Blood Mage,Spell,da2
+309040,Bloodslave,309001,Blood Mage,Spell,da2
+309041,Blood Spatter,309040,Blood Mage,Spell,da2
+309050,Blood Magic,309001,Blood Mage,Spell,da2
+309051,Bloodlust,309050,Blood Mage,Spell,da2
+311000,Vengeance,,Vengeance,Spell,da2
+311001,Vengeance (Base Talent),311000,Vengeance,Spell,da2
+311010,Martyr,311001,Vengeance,Spell,da2
+311020,Vengeance,311001,Vengeance,Spell,da2
+311021,Wrath,311020,Vengeance,Spell,da2
+311030,Swift Justice,311001,Vengeance,Spell,da2
+311040,Blood of my Enemy,311001,Vengeance,Spell,da2
+311050,Eye to Eye,311001,Vengeance,Spell,da2
+311060,No Compromises,311001,Vengeance,Spell,da2
+311070,Panacea,311001,Vengeance,Spell,da2
+311080,Aid Allies,311001,Vengeance,Spell,da2
+311090,Regroup,311001,Vengeance,Spell,da2
+312000,Dalish Pariah,,Dalish Pariah,Spell,da2
+312001,Dalish Pariah (Base Talent),312000,Dalish Pariah,Spell,da2
+312010,Ensnare,312001,Dalish Pariah,Spell,da2
+312020,Stone's Throw,312001,Dalish Pariah,Spell,da2
+312030,Wrath of the Elvhen,312001,Dalish Pariah,Spell,da2
+312031,Arlathan's Grace,312030,Dalish Pariah,Spell,da2
+312032,Loss of the Dales,312031,Dalish Pariah,Spell,da2
+312040,Solidarity,312001,Dalish Pariah,Spell,da2
+312050,Outcast,312001,Dalish Pariah,Spell,da2
+312060,Blood of the First,312001,Dalish Pariah,Spell,da2
+312070,Wounds of the Past,312001,Dalish Pariah,Spell,da2
+312071,Deep Wounds,312070,Dalish Pariah,Spell,da2
+700000,Summon Mabari,,-Dog- Summon Mabari,Talent,da2
