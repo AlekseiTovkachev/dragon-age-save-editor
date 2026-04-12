@@ -5,12 +5,24 @@ from __future__ import annotations
 
 import re
 import sqlite3
+import sys
+from collections import defaultdict
+from csv import DictReader
 from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[2]
 DB_PATH = ROOT / "data" / "gamedata.db"
 ITEM_RS = ROOT / "src" / "domain" / "item.rs"
+SEED_DIR = ROOT / "data" / "seeds"
+
+EXPECTED_SEEDS = {
+    "abilities": ["abilities_dao.csv", "abilities_da2.csv"],
+    "items": ["items_dao.csv", "items_daoa.csv", "items_da2.csv"],
+    "item_properties": ["item_properties.csv"],
+    "material_codes": ["material_codes.csv"],
+    "properties": ["properties.csv"],
+}
 
 VALID_GAMES = {"dao", "daoa", "da2"}
 MOJIBAKE_PATTERNS = ("â", "Ã", "�")
@@ -50,10 +62,57 @@ def fail(message: str) -> None:
     raise SystemExit(message)
 
 
+def seed_row_counts() -> dict[str, dict[str, int]]:
+    counts: dict[str, dict[str, int]] = defaultdict(dict)
+    for table, filenames in EXPECTED_SEEDS.items():
+        for filename in filenames:
+            path = SEED_DIR / filename
+            if not path.exists():
+                fail(f"Missing expected seed file: {path.relative_to(ROOT)}")
+            with path.open(newline="", encoding="utf-8") as file:
+                reader = DictReader(file)
+                count = sum(1 for _ in reader)
+            counts[table][filename] = count
+    return counts
+
+
+def database_row_counts(conn: sqlite3.Connection) -> dict[str, int]:
+    return {
+        table: conn.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0]
+        for table in EXPECTED_SEEDS
+    }
+
+
+def verify_seed_counts(conn: sqlite3.Connection) -> tuple[dict[str, dict[str, int]], dict[str, int]]:
+    seed_counts = seed_row_counts()
+    db_counts = database_row_counts(conn)
+    for table, filenames in seed_counts.items():
+        seed_total = sum(filenames.values())
+        if seed_total != db_counts[table]:
+            fail(f"Seed/DB row count mismatch for {table}: seed={seed_total} db={db_counts[table]}")
+    return seed_counts, db_counts
+
+
+def print_report(conn: sqlite3.Connection, seed_counts: dict[str, dict[str, int]], db_counts: dict[str, int]) -> None:
+    print("gamedata row counts")
+    for table in sorted(db_counts):
+        print(f"  {table}: {db_counts[table]}")
+        for filename, count in sorted(seed_counts[table].items()):
+            print(f"    {filename}: {count}")
+    print("items by game")
+    for row in conn.execute("SELECT game, COUNT(*) AS count FROM items GROUP BY game ORDER BY game"):
+        print(f"  {row['game']}: {row['count']}")
+    print("abilities by game")
+    for row in conn.execute("SELECT game, COUNT(*) AS count FROM abilities GROUP BY game ORDER BY game"):
+        print(f"  {row['game']}: {row['count']}")
+
+
 def main() -> None:
+    report = "--report" in sys.argv[1:]
     allowed_categories = item_category_values()
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
+    seed_counts, db_counts = verify_seed_counts(conn)
 
     games = {
         row["game"]
@@ -111,9 +170,13 @@ def main() -> None:
                     fail(f"Potential mojibake in {table}.{column}: {pattern}")
 
     for row in conn.execute("SELECT resref, game, wiki_url FROM items WHERE wiki_url IS NOT NULL"):
-        if not str(row["wiki_url"]).startswith(("https://dragonage.fandom.com/", "https://dragonage.miraheze.org/")):
+        if not str(row["wiki_url"]).startswith(
+            ("https://dragonage.fandom.com/", "https://dragonage.miraheze.org/")
+        ):
             fail(f"Unexpected wiki URL for {row['game']}:{row['resref']}: {row['wiki_url']}")
 
+    if report:
+        print_report(conn, seed_counts, db_counts)
     print("gamedata verification passed")
 
 

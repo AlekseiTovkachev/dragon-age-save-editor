@@ -1,0 +1,158 @@
+.app-shell {
+  min-height: 100vh;
+  height: 100vh;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  overflow: hidden;
+}
+
+.topbar,
+.statusbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  background: rgba(24, 20, 18, 0.94);
+}
+
+.topbar {
+  border-bottom: 1px solid #403223;
+}
+
+.topbar-preview {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  outline: none;
+}
+
+.topbar-preview-image {
+  max-width: 48px;
+  max-height: 48px;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  display: block;
+}
+
+.topbar-preview-popover {
+  display: none;
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  z-index: 20;
+  padding: 0.75rem;
+  background: #1d1815;
+  border: 1px solid #55412d;
+  box-shadow: 0 1rem 2.5rem rgba(0, 0, 0, 0.5);
+}
+
+.topbar-preview:hover .topbar-preview-popover,
+.topbar-preview:focus-within .topbar-preview-popover,
+.topbar-preview:focus .topbar-preview-popover {
+  display: block;
+}
+
+.topbar-preview-popover img {
+  max-width: 320px;
+  max-height: 320px;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  display: block;
+}
+
+.topbar-preview-empty {
+  color: #b9ac99;
+  border: 1px solid #4c4030;
+  padding: 0.45rem 0.6rem;
+  white-space: nowrap;
+}
+
+.topbar h1,
+.panel h2,
+.panel h3 {
+  margin: 0;
+}
+
+.topbar p {
+  margin: 0.3rem 0 0;
+  color: #b9ac99;
+}
+
+.workspace {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.content {
+  padding: 1rem;
+  min-height: 0;
+  overflow: auto;
+}
+
+.panel {
+  padding: 1rem;
+}
+
+.empty-state {
+  display: grid;
+  place-items: center;
+  min-height: 340px;
+}
+
+.split-section {
+  grid-template-columns: 280px 1fr;
+  min-height: 0;
+  height: 100%;
+}
+
+.inventory-layout {
+  grid-template-columns: 320px 1fr;
+}
+
+.inventory-money-panel {
+  display: grid;
+  gap: 0.75rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #463626;
+}
+
+.muted,
+.statusbar,
+.finding-path {
+  color: #b9ac99;
+}
+
+.list-panel,
+.detail-panel {
+  overflow: hidden;
+}
+
+.scroll-panel {
+  display: grid;
+  grid-template-rows: auto 1fr;
+}
+
+.panel-scroll-body {
+  min-height: 0;
+  overflow: auto;
+  padding-right: 0.35rem;
+}
+
+.editor-help {
+  margin: 0;
+  font-size: 0.92rem;
+}
+
+.scroll-region {
+  min-height: 0;
+  overflow: auto;
+  padding-right: 0.3rem;
+}
+

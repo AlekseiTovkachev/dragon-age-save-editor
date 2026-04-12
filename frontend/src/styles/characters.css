@@ -1,0 +1,138 @@
+.panel,
+.section-panel,
+.finding-card,
+.ability-panel,
+.replacement-box {
+  background: rgba(29, 24, 21, 0.94);
+  border: 1px solid #493a2b;
+}
+
+.field-grid,
+.ability-grid,
+.split-section {
+  display: grid;
+  gap: 1rem;
+}
+
+.character-field-section {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.character-field-section + .character-field-section {
+  margin-top: 1.25rem;
+}
+
+.character-field-section h3 {
+  margin: 0;
+  color: #f1d7a9;
+  font-size: 0.95rem;
+}
+
+.ability-grid {
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  align-items: start;
+}
+
+.character-heading {
+  align-items: flex-start;
+}
+
+.character-tabbar {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.character-tabbar .nav-link {
+  min-width: 110px;
+  text-align: center;
+}
+
+.character-equipment-layout {
+  display: grid;
+  grid-template-columns: minmax(220px, 300px) 1fr;
+  gap: 1rem;
+  min-height: 0;
+  height: 100%;
+}
+
+.equipment-detail {
+  min-height: 0;
+  overflow: hidden;
+  padding: 1rem;
+  border: 1px solid #493a2b;
+  background: rgba(29, 24, 21, 0.94);
+}
+
+.section-panel,
+.finding-card,
+.ability-panel,
+.replacement-box {
+  padding: 1rem;
+}
+
+.toolbar,
+.button-row,
+.inline-form,
+.character-tabbar,
+.panel-heading,
+.statusbar,
+.finding-header {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.list-panel,
+.detail-panel,
+.ability-panel {
+  min-height: 0;
+}
+
+.ability-preview {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #463626;
+  color: #cdbfae;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.ability-group {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.ability-group h4 {
+  margin: 0;
+  color: #f1d7a9;
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.ability-entry {
+  display: grid;
+  gap: 0.2rem;
+  min-height: 5.5rem;
+  align-content: start;
+  padding: 0.6rem 0.7rem;
+  background: rgba(72, 56, 36, 0.16);
+  border: 1px solid #433526;
+}
+
+.ability-entry-header,
+.ability-add-row {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ability-panel {
+  display: grid;
+  grid-template-rows: auto auto auto 1fr;
+  min-height: 0;
+}
+

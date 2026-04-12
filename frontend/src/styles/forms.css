@@ -1,0 +1,25 @@
+.field-link {
+  display: block;
+  width: 100%;
+  border: 1px solid #4c4030;
+  background: #221d19;
+  color: #f1d7a9;
+  padding: 0.55rem 0.65rem;
+  text-decoration: none;
+}
+
+.field-link:hover,
+.field-link:focus {
+  color: #f8edd7;
+  border-color: #6a5436;
+}
+
+.field-grid {
+  grid-template-columns: repeat(2, minmax(180px, 1fr));
+}
+
+label span,
+.panel h3,
+.panel h2 {
+  text-transform: none;
+}

@@ -1,0 +1,30 @@
+.main-tabbar {
+  display: flex;
+  gap: 0.45rem;
+  padding: 0.75rem 1rem 0;
+  background: rgba(19, 16, 15, 0.9);
+  overflow-x: auto;
+}
+
+.main-tabbar .nav-link {
+  min-width: 130px;
+  text-align: center;
+}
+
+.nav-link,
+.list-row {
+  text-align: left;
+  background: #241d19;
+}
+
+.nav-link.active,
+.list-row.active {
+  background: linear-gradient(180deg, #85612f 0%, #5a4017 100%);
+}
+
+.list-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+

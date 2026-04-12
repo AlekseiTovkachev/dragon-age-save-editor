@@ -1,0 +1,25 @@
+.recipe-checklist {
+  display: grid;
+  gap: 1rem;
+}
+
+.check-row {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2rem;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid #493a2b;
+  background: rgba(21, 17, 15, 0.55);
+}
+
+.check-row input {
+  width: auto;
+}
+
+.recipe-group {
+  display: grid;
+  gap: 0.35rem;
+}
+

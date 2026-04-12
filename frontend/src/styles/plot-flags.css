@@ -1,0 +1,57 @@
+.plot-flags-layout {
+  display: grid;
+  grid-template-columns: minmax(260px, 340px) 1fr;
+  gap: 1rem;
+  align-items: start;
+}
+
+.plot-choice-list,
+.plot-boolean-list,
+.plot-group {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.plot-group h4 {
+  margin: 0.5rem 0 0;
+  color: #f1d7a9;
+}
+
+.plot-radio-group {
+  display: grid;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0.75rem;
+  border: 1px solid #493a2b;
+  background: rgba(21, 17, 15, 0.55);
+}
+
+.plot-radio-group legend {
+  padding: 0 0.35rem;
+  color: #f1d7a9;
+}
+
+.radio-row {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.radio-row input {
+  width: auto;
+}
+
+.plot-flag-code {
+  display: block;
+  margin-top: 0.15rem;
+  color: #9f927f;
+  font-size: 0.82rem;
+}
+
+@media (max-width: 900px) {
+  .plot-flags-layout {
+    grid-template-columns: 1fr;
+  }
+}
+

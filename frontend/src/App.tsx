@@ -2,10 +2,14 @@ import { useEffect, useMemo, useState } from "react";
 import { open, save } from "@tauri-apps/plugin-dialog";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { executeCommand, hasDocument, openDocument, toErrorMessage } from "./api";
+import { MainTabs } from "./components/MainTabs";
+import { Topbar } from "./components/Topbar";
 import { abilityLabel, cloneAbilities, groupedAbilities, isUselessDa2Talent } from "./lib/abilityUtils";
 import { gameLabel, parseNumber, titleCase } from "./lib/format";
 import { itemLabel, MAIN_TARGET, targetKey, toItemPropertyDrafts } from "./lib/itemUtils";
 import type { ItemPropertyDraft } from "./lib/itemUtils";
+import { CHARACTER_TAB_TITLES, CHARACTER_TABS, SECTIONS } from "./lib/navigation";
+import type { CharacterTab, Section } from "./lib/navigation";
 import type {
   Ability,
   AbilityListKind,
@@ -21,23 +25,6 @@ import type {
   SelectableItemProperty,
   SaveSummary,
 } from "./types";
-
-type Section = "characters" | "inventory" | "recipes" | "plot_flags";
-type CharacterTab = "overview" | "abilities" | "equipment";
-
-const SECTIONS: Section[] = ["characters", "inventory", "recipes", "plot_flags"];
-const SECTION_TITLES: Record<Section, string> = {
-  characters: "Characters",
-  inventory: "Inventory",
-  recipes: "Recipes",
-  plot_flags: "Plot Flags",
-};
-const CHARACTER_TABS: CharacterTab[] = ["overview", "abilities", "equipment"];
-const CHARACTER_TAB_TITLES: Record<CharacterTab, string> = {
-  overview: "Overview",
-  abilities: "Abilities",
-  equipment: "Equipment",
-};
 
 function App() {
   const [section, setSection] = useState<Section>("characters");
@@ -1150,38 +1137,16 @@ function App() {
 
   return (
     <div className="app-shell">
-      <header className="topbar">
-        <div>
-          <h1>Dragon Age Save Editor</h1>
-          <p>Open, edit, and save as a new file.</p>
-        </div>
-        <div className="toolbar">
-          {summary && screenshotDataUrl ? (
-            <div className="topbar-preview" tabIndex={0}>
-              <img className="topbar-preview-image" src={screenshotDataUrl} alt="Save screenshot" />
-              <div className="topbar-preview-popover">
-                <img src={screenshotDataUrl} alt="Save screenshot full preview" />
-              </div>
-            </div>
-          ) : null}
-          {summary && !screenshotDataUrl ? <span className="topbar-preview-empty">No screenshot</span> : null}
-          <button onClick={() => void handleOpen()} disabled={busy}>Open Save</button>
-          <button onClick={() => void handleSaveAs()} disabled={busy || !summary}>Save As</button>
-        </div>
-      </header>
+      <Topbar
+        summary={summary}
+        screenshotDataUrl={screenshotDataUrl}
+        busy={busy}
+        onOpen={() => void handleOpen()}
+        onSaveAs={() => void handleSaveAs()}
+      />
 
       <div className="workspace">
-        <nav className="main-tabbar">
-          {visibleSections.map((entry) => (
-            <button
-              key={entry}
-              className={section === entry ? "nav-link active" : "nav-link"}
-              onClick={() => setSection(entry)}
-            >
-              {SECTION_TITLES[entry]}
-            </button>
-          ))}
-        </nav>
+        <MainTabs sections={visibleSections} activeSection={section} onSelect={setSection} />
 
         <main className="content">
           {!summary ? (
