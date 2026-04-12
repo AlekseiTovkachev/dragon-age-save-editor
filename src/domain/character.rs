@@ -8,6 +8,7 @@ pub struct Character {
     pub template_resref: Option<String>,
     pub approval: Option<i32>,
     pub level: Option<u32>,
+    pub experience: Option<u32>,
     pub core_stats: CoreStats,
     pub point_pools: PointPools,
     pub equipment: Vec<Item>,

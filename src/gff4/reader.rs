@@ -1,5 +1,5 @@
-use crate::gff4::header::{read_raw_header, real_version, Header};
-use crate::gff4::schema::{resolve_header, BaseType, FieldDef, ResolvedHeader, ValueType};
+use crate::gff4::header::{Header, read_raw_header, real_version};
+use crate::gff4::schema::{BaseType, FieldDef, ResolvedHeader, ValueType, resolve_header};
 use crate::gff4::value::{FieldValue, GffStruct, Value};
 use crate::gff4::writer;
 use std::fs;
@@ -149,11 +149,10 @@ impl Reader {
     }
 
     fn read_struct(&self, struct_index: usize, base_offset: usize) -> io::Result<GffStruct> {
-        let struct_def = self
-            .header
-            .structs
-            .get(struct_index)
-            .ok_or_else(|| io::Error::new(io::ErrorKind::InvalidData, "invalid struct index"))?;
+        let struct_def =
+            self.header.structs.get(struct_index).ok_or_else(|| {
+                io::Error::new(io::ErrorKind::InvalidData, "invalid struct index")
+            })?;
 
         let mut fields = Vec::with_capacity(struct_def.fields.len());
 
@@ -197,12 +196,7 @@ impl Reader {
         }
     }
 
-    fn read_list(
-        &self,
-        base: &BaseType,
-        indirect: bool,
-        field_offset: usize,
-    ) -> io::Result<Value> {
+    fn read_list(&self, base: &BaseType, indirect: bool, field_offset: usize) -> io::Result<Value> {
         let address = self.read_u32(field_offset)?;
         if address == NULLPTR {
             return Ok(Value::List(Vec::new()));
@@ -377,10 +371,7 @@ impl Reader {
                             .string_cache
                             .get(address as usize)
                             .ok_or_else(|| {
-                                io::Error::new(
-                                    io::ErrorKind::InvalidData,
-                                    "invalid string index",
-                                )
+                                io::Error::new(io::ErrorKind::InvalidData, "invalid string index")
                             })?
                             .clone();
                         return Ok(Value::ECString(s));
@@ -584,9 +575,7 @@ impl Reader {
             let s = self
                 .string_cache
                 .get(address as usize)
-                .ok_or_else(|| {
-                    io::Error::new(io::ErrorKind::InvalidData, "invalid string index")
-                })?
+                .ok_or_else(|| io::Error::new(io::ErrorKind::InvalidData, "invalid string index"))?
                 .clone();
             Ok(Value::ECString(s))
         } else {
@@ -612,9 +601,7 @@ impl Reader {
             let s = self
                 .string_cache
                 .get(address as usize)
-                .ok_or_else(|| {
-                    io::Error::new(io::ErrorKind::InvalidData, "invalid string index")
-                })?
+                .ok_or_else(|| io::Error::new(io::ErrorKind::InvalidData, "invalid string index"))?
                 .clone();
 
             Ok(Value::TlkString {

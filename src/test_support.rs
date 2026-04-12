@@ -17,11 +17,13 @@ pub fn da2_save_path() -> PathBuf {
 #[cfg(test)]
 pub fn camp_save_path() -> PathBuf {
     let flat = PathBuf::from(SAMPLE_SAVES_DIR).join("Camptesting2.das");
-    if flat.exists() {
-        flat
-    } else {
-        dao_save_path()
-    }
+    if flat.exists() { flat } else { dao_save_path() }
+}
+
+#[cfg(test)]
+pub fn flat_sample_save_path(name: &str) -> Option<PathBuf> {
+    let path = PathBuf::from(SAMPLE_SAVES_DIR).join(name);
+    path.exists().then_some(path)
 }
 
 #[cfg(test)]

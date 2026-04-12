@@ -64,10 +64,20 @@ pub fn validate_gff(file: &GffFile) -> ValidationReport {
     let root = &file.root;
     let ability_storage = infer_ability_storage(file);
 
-    let Some(party) = require_struct(root, SAVEGAME_PARTYLIST, "root.SAVEGAME_PARTYLIST", &mut report) else {
+    let Some(party) = require_struct(
+        root,
+        SAVEGAME_PARTYLIST,
+        "root.SAVEGAME_PARTYLIST",
+        &mut report,
+    ) else {
         return report;
     };
-    let Some(player) = require_struct_by_name(root, SAVEGAME_PLAYERCHAR_NAME, "root.SAVEGAME_PLAYERCHAR", &mut report) else {
+    let Some(player) = require_struct_by_name(
+        root,
+        SAVEGAME_PLAYERCHAR_NAME,
+        "root.SAVEGAME_PLAYERCHAR",
+        &mut report,
+    ) else {
         return report;
     };
     let Some(player_char) = require_struct_by_name(
@@ -79,14 +89,24 @@ pub fn validate_gff(file: &GffFile) -> ValidationReport {
         return report;
     };
 
-    require_numeric(party, SAVEGAME_MONEY, "root.SAVEGAME_PARTYLIST.SAVEGAME_MONEY", &mut report);
+    require_numeric(
+        party,
+        SAVEGAME_MONEY,
+        "root.SAVEGAME_PARTYLIST.SAVEGAME_MONEY",
+        &mut report,
+    );
     validate_character(
         player_char,
         "root.SAVEGAME_PLAYERCHAR.SAVEGAME_PLAYERCHAR_CHAR",
         ability_storage,
         &mut report,
     );
-    validate_item_list(party, SAVEGAME_BACKPACK, "root.SAVEGAME_PARTYLIST.SAVEGAME_BACKPACK", &mut report);
+    validate_item_list(
+        party,
+        SAVEGAME_BACKPACK,
+        "root.SAVEGAME_PARTYLIST.SAVEGAME_BACKPACK",
+        &mut report,
+    );
 
     if let Some(companions) = require_list(
         party,
@@ -150,13 +170,17 @@ fn validate_character(
                     require_numeric_by_name(
                         structure,
                         SAVEGAME_STATPROPERTY_INDEX_NAME,
-                        &format!("{path}.SAVEGAME_CREATURE_STATS.SAVEGAME_STATLIST[{index}].SAVEGAME_STATPROPERTY_INDEX"),
+                        &format!(
+                            "{path}.SAVEGAME_CREATURE_STATS.SAVEGAME_STATLIST[{index}].SAVEGAME_STATPROPERTY_INDEX"
+                        ),
                         report,
                     );
                     require_numeric_by_name(
                         structure,
                         SAVEGAME_STATPROPERTY_BASE_NAME,
-                        &format!("{path}.SAVEGAME_CREATURE_STATS.SAVEGAME_STATLIST[{index}].SAVEGAME_STATPROPERTY_BASE"),
+                        &format!(
+                            "{path}.SAVEGAME_CREATURE_STATS.SAVEGAME_STATLIST[{index}].SAVEGAME_STATPROPERTY_BASE"
+                        ),
                         report,
                     );
                 }
@@ -216,11 +240,9 @@ fn validate_item_list(source: &GffStruct, label: u32, path: &str, report: &mut V
     if let Some(items) = require_list(source, label, path, report) {
         for (index, value) in items.iter().enumerate() {
             match value {
-                Value::Struct(structure) => validate_item(
-                    structure,
-                    &format!("{path}[{index}]"),
-                    report,
-                ),
+                Value::Struct(structure) => {
+                    validate_item(structure, &format!("{path}[{index}]"), report)
+                }
                 Value::Null => {}
                 other => push(
                     report,
@@ -233,7 +255,12 @@ fn validate_item_list(source: &GffStruct, label: u32, path: &str, report: &mut V
     }
 }
 
-fn validate_optional_item_list(source: &GffStruct, label: u32, path: &str, report: &mut ValidationReport) {
+fn validate_optional_item_list(
+    source: &GffStruct,
+    label: u32,
+    path: &str,
+    report: &mut ValidationReport,
+) {
     let Some(value) = source.get(label) else {
         return;
     };
@@ -241,11 +268,9 @@ fn validate_optional_item_list(source: &GffStruct, label: u32, path: &str, repor
         Value::List(items) => {
             for (index, value) in items.iter().enumerate() {
                 match value {
-                    Value::Struct(structure) => validate_item(
-                        structure,
-                        &format!("{path}[{index}]"),
-                        report,
-                    ),
+                    Value::Struct(structure) => {
+                        validate_item(structure, &format!("{path}[{index}]"), report)
+                    }
                     Value::Null => {}
                     other => push(
                         report,
@@ -266,9 +291,18 @@ fn validate_optional_item_list(source: &GffStruct, label: u32, path: &str, repor
 }
 
 fn validate_item(source: &GffStruct, path: &str, report: &mut ValidationReport) {
-    let property_ids = optional_list_by_name(source, ITEM_PROPERTIES_NAME, &format!("{path}.ITEM_PROPERTIES"), report);
-    let property_powers =
-        optional_list_by_name(source, ITEM_PROPERTY_POWERS_NAME, &format!("{path}.ITEM_PROPERTY_POWERS"), report);
+    let property_ids = optional_list_by_name(
+        source,
+        ITEM_PROPERTIES_NAME,
+        &format!("{path}.ITEM_PROPERTIES"),
+        report,
+    );
+    let property_powers = optional_list_by_name(
+        source,
+        ITEM_PROPERTY_POWERS_NAME,
+        &format!("{path}.ITEM_PROPERTY_POWERS"),
+        report,
+    );
 
     match (property_ids, property_powers) {
         (None, None) => {}
@@ -290,7 +324,8 @@ fn validate_item(source: &GffStruct, path: &str, report: &mut ValidationReport) 
             report,
             ValidationCode::InvalidPropertyArrayParity,
             path.to_string(),
-            "ITEM_PROPERTIES and ITEM_PROPERTY_POWERS must both exist or both be absent".to_string(),
+            "ITEM_PROPERTIES and ITEM_PROPERTY_POWERS must both exist or both be absent"
+                .to_string(),
         ),
     }
 }
@@ -302,7 +337,12 @@ fn require_struct<'a>(
     report: &mut ValidationReport,
 ) -> Option<&'a GffStruct> {
     let value = source.get(label).or_else(|| {
-        push(report, ValidationCode::MissingField, path.to_string(), "missing field".to_string());
+        push(
+            report,
+            ValidationCode::MissingField,
+            path.to_string(),
+            "missing field".to_string(),
+        );
         None
     })?;
     match value {
@@ -326,7 +366,12 @@ fn require_struct_by_name<'a>(
     report: &mut ValidationReport,
 ) -> Option<&'a GffStruct> {
     let value = source.get_by_name(name).or_else(|| {
-        push(report, ValidationCode::MissingField, path.to_string(), "missing field".to_string());
+        push(
+            report,
+            ValidationCode::MissingField,
+            path.to_string(),
+            "missing field".to_string(),
+        );
         None
     })?;
     match value {
@@ -350,7 +395,12 @@ fn require_list<'a>(
     report: &mut ValidationReport,
 ) -> Option<&'a [Value]> {
     let value = source.get(label).or_else(|| {
-        push(report, ValidationCode::MissingField, path.to_string(), "missing field".to_string());
+        push(
+            report,
+            ValidationCode::MissingField,
+            path.to_string(),
+            "missing field".to_string(),
+        );
         None
     })?;
     match value {
@@ -390,7 +440,12 @@ fn optional_list_by_name<'a>(
 
 fn require_numeric(source: &GffStruct, label: u32, path: &str, report: &mut ValidationReport) {
     let Some(value) = source.get(label) else {
-        push(report, ValidationCode::MissingField, path.to_string(), "missing field".to_string());
+        push(
+            report,
+            ValidationCode::MissingField,
+            path.to_string(),
+            "missing field".to_string(),
+        );
         return;
     };
     if !is_numeric(value) {
@@ -403,9 +458,19 @@ fn require_numeric(source: &GffStruct, label: u32, path: &str, report: &mut Vali
     }
 }
 
-fn require_numeric_by_name(source: &GffStruct, name: &str, path: &str, report: &mut ValidationReport) {
+fn require_numeric_by_name(
+    source: &GffStruct,
+    name: &str,
+    path: &str,
+    report: &mut ValidationReport,
+) {
     let Some(value) = source.get_by_name(name) else {
-        push(report, ValidationCode::MissingField, path.to_string(), "missing field".to_string());
+        push(
+            report,
+            ValidationCode::MissingField,
+            path.to_string(),
+            "missing field".to_string(),
+        );
         return;
     };
     if !is_numeric(value) {
@@ -418,7 +483,12 @@ fn require_numeric_by_name(source: &GffStruct, name: &str, path: &str, report: &
     }
 }
 
-fn validate_optional_numeric_list(source: &GffStruct, label: u32, path: &str, report: &mut ValidationReport) {
+fn validate_optional_numeric_list(
+    source: &GffStruct,
+    label: u32,
+    path: &str,
+    report: &mut ValidationReport,
+) {
     let Some(value) = source.get(label) else {
         return;
     };
@@ -494,9 +564,9 @@ fn push(report: &mut ValidationReport, code: ValidationCode, path: String, messa
 
 #[cfg(test)]
 mod tests {
-    use super::{validate_gff, ValidationCode};
-    use crate::gff4::fields::{SAVEGAME_BACKPACK, SAVEGAME_PARTYLIST};
+    use super::{ValidationCode, validate_gff};
     use crate::gff4::GffFile;
+    use crate::gff4::fields::{SAVEGAME_BACKPACK, SAVEGAME_PARTYLIST};
     use crate::test_support::{da2_save_path, dao_save_path};
 
     #[test]
@@ -504,10 +574,12 @@ mod tests {
         let gff = GffFile::from_path(dao_save_path()).unwrap();
         let report = validate_gff(&gff);
         assert!(report.is_valid());
-        assert!(!report
-            .findings
-            .iter()
-            .any(|finding| finding.path.contains("SAVEGAME_ABILITYLIST")));
+        assert!(
+            !report
+                .findings
+                .iter()
+                .any(|finding| finding.path.contains("SAVEGAME_ABILITYLIST"))
+        );
     }
 
     #[test]
@@ -515,12 +587,14 @@ mod tests {
         let gff = GffFile::from_path(da2_save_path()).unwrap();
         let report = validate_gff(&gff);
         assert!(report.is_valid());
-        assert!(!report
-            .findings
-            .iter()
-            .any(|finding| finding.path.contains("SAVEGAME_SKILLLIST")
-                || finding.path.contains("SAVEGAME_TALENTLIST")
-                || finding.path.contains("SAVEGAME_SPELLLIST")));
+        assert!(
+            !report
+                .findings
+                .iter()
+                .any(|finding| finding.path.contains("SAVEGAME_SKILLLIST")
+                    || finding.path.contains("SAVEGAME_TALENTLIST")
+                    || finding.path.contains("SAVEGAME_SPELLLIST"))
+        );
     }
 
     #[test]
@@ -531,26 +605,32 @@ mod tests {
         let report = validate_gff(&gff);
 
         assert!(!report.is_valid());
-        assert!(report
-            .findings
-            .iter()
-            .any(|finding| finding.code == ValidationCode::InvalidPropertyArrayParity));
+        assert!(
+            report
+                .findings
+                .iter()
+                .any(|finding| finding.code == ValidationCode::InvalidPropertyArrayParity)
+        );
     }
 
     #[test]
     fn reports_missing_backpack_field() {
         let mut gff = GffFile::from_path(dao_save_path()).unwrap();
         let party = gff.root_mut().get_struct_mut(SAVEGAME_PARTYLIST).unwrap();
-        party.fields.retain(|field| field.label != SAVEGAME_BACKPACK);
+        party
+            .fields
+            .retain(|field| field.label != SAVEGAME_BACKPACK);
 
         let report = validate_gff(&gff);
 
         assert!(!report.is_valid());
-        assert!(report
-            .findings
-            .iter()
-            .any(|finding| finding.code == ValidationCode::MissingField
-                && finding.path == "root.SAVEGAME_PARTYLIST.SAVEGAME_BACKPACK"));
+        assert!(
+            report
+                .findings
+                .iter()
+                .any(|finding| finding.code == ValidationCode::MissingField
+                    && finding.path == "root.SAVEGAME_PARTYLIST.SAVEGAME_BACKPACK")
+        );
     }
 
     fn corrupt_first_backpack_property_power_list(gff: &mut GffFile) {

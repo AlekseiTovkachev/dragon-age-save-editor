@@ -2,12 +2,16 @@ use crate::domain::ability::{AbilityKind, AbilityRef};
 use crate::domain::character::Character;
 use crate::domain::gamedata::{GameDataLookup, GameId};
 use crate::domain::item::{Item, ItemProperty, MaterialProfile};
-use crate::domain::save::{ExtractError, SaveGame};
+use crate::domain::save::{
+    ExtractError, SaveGame, WORLD_VAULT_BOOLEANS_LABEL, WORLD_VAULT_ID_LABEL,
+    WORLD_VAULT_INTS_LABEL, WORLD_VAULT_LABEL, WORLD_VAULT_VALUE_LABEL,
+};
 use crate::domain::stats::{CoreStat, CoreStatsPatch, PointPoolsPatch};
 use crate::gff4::fields::{
-    ITEM_COST, SAVEGAME_BACKPACK, SAVEGAME_EQUIPMENT_ITEMS, SAVEGAME_ITEM_MATERIALTYPE,
-    SAVEGAME_MONEY, SAVEGAME_OBJECT_PLOT, SAVEGAME_PARTYLIST, SAVEGAME_SKILLLIST,
-    SAVEGAME_SPELLLIST, SAVEGAME_TALENTLIST,
+    ITEM_COST, ITEM_STACKSIZE, OBJECT_ID, SAVEGAME_BACKPACK, SAVEGAME_CRAFTING_RECIPE_LIST,
+    SAVEGAME_EQUIPMENT_ITEMS, SAVEGAME_ITEM_MATERIALTYPE, SAVEGAME_MONEY, SAVEGAME_OBJECT_PLOT,
+    SAVEGAME_PARTYLIST, SAVEGAME_SKILLLIST, SAVEGAME_SPELLLIST, SAVEGAME_TALENTLIST,
+    SAVEGAME_WORLDDATABASE,
 };
 use crate::gff4::{FieldValue, GffFile, GffStruct, Value};
 use std::collections::BTreeSet;
@@ -26,8 +30,11 @@ const SAVEGAME_STATPROPERTY_BASE_NAME: &str = "SAVEGAME_STATPROPERTY_BASE";
 const ITEM_PROPERTIES_NAME: &str = "ITEM_PROPERTIES";
 const ITEM_PROPERTY_POWERS_NAME: &str = "ITEM_PROPERTY_POWERS";
 const SAVEGAME_PARTY_APPROVAL_LIST_NAME: &str = "SAVEGAME_PARTY_APPROVAL_LIST";
+const SAVEGAME_PARTY_APPROVAL_ID_NAME: &str = "SAVEGAME_PARTY_APPROVAL_ID";
 const SAVEGAME_PARTY_APPROVAL_LEVEL_NAME: &str = "SAVEGAME_PARTY_APPROVAL_LEVEL";
 const SAVEGAME_ABILITYLIST_NAME: &str = "SAVEGAME_ABILITYLIST";
+const SAVEGAME_WORLDDB_LASTID: u32 = 16502;
+const MAX_ITEM_STACK_SIZE: u32 = 99;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum CharacterTarget {
@@ -69,6 +76,18 @@ pub struct BackpackItemReplacement {
     pub item_level: Option<u8>,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct PlotBooleanPatch {
+    pub id: u16,
+    pub value: bool,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct PlotIntegerPatch {
+    pub id: u16,
+    pub value: i32,
+}
+
 #[derive(Debug)]
 pub struct SaveEditor {
     raw: GffFile,
@@ -79,7 +98,9 @@ pub struct SaveEditor {
 pub enum EditError {
     Extract(ExtractError),
     Io(io::Error),
-    InvalidTarget { target: CharacterTarget },
+    InvalidTarget {
+        target: CharacterTarget,
+    },
     MissingField {
         path: String,
     },
@@ -141,6 +162,21 @@ pub enum EditError {
         ids_len: usize,
         powers_len: usize,
     },
+    UnsupportedGameForClone {
+        game: Option<GameId>,
+    },
+    ItemIsStackable {
+        index: usize,
+    },
+    ItemIsNotStackable {
+        index: usize,
+    },
+    InvalidStackSize {
+        stack_size: u32,
+    },
+    UnsupportedPlotFlags {
+        game: Option<GameId>,
+    },
 }
 
 impl fmt::Display for EditError {
@@ -148,13 +184,18 @@ impl fmt::Display for EditError {
         match self {
             EditError::Extract(err) => write!(f, "{err}"),
             EditError::Io(err) => write!(f, "{err}"),
-            EditError::InvalidTarget { target } => write!(f, "invalid character target: {target:?}"),
+            EditError::InvalidTarget { target } => {
+                write!(f, "invalid character target: {target:?}")
+            }
             EditError::MissingField { path } => write!(f, "missing field at {path}"),
             EditError::TypeMismatch {
                 path,
                 expected,
                 actual,
-            } => write!(f, "type mismatch at {path}: expected {expected}, found {actual}"),
+            } => write!(
+                f,
+                "type mismatch at {path}: expected {expected}, found {actual}"
+            ),
             EditError::MissingStatRow { target, stat_id } => {
                 write!(f, "missing stat row {stat_id} for target {target:?}")
             }
@@ -164,8 +205,12 @@ impl fmt::Display for EditError {
             EditError::NumericRange { path, detail } => {
                 write!(f, "numeric range error at {path}: {detail}")
             }
-            EditError::LookupFailed { path, detail } => write!(f, "lookup failed at {path}: {detail}"),
-            EditError::UnknownAbility { ability_id } => write!(f, "unknown ability id {ability_id}"),
+            EditError::LookupFailed { path, detail } => {
+                write!(f, "lookup failed at {path}: {detail}")
+            }
+            EditError::UnknownAbility { ability_id } => {
+                write!(f, "unknown ability id {ability_id}")
+            }
             EditError::InvalidAbilityKind {
                 ability_id,
                 expected,
@@ -213,6 +258,22 @@ impl fmt::Display for EditError {
                 f,
                 "invalid property array parity for item {item_index} in {container:?}: ITEM_PROPERTIES has {ids_len}, ITEM_PROPERTY_POWERS has {powers_len}"
             ),
+            EditError::UnsupportedGameForClone { game } => {
+                write!(f, "backpack item cloning is not supported for {game:?}")
+            }
+            EditError::ItemIsStackable { index } => {
+                write!(f, "backpack item {index} is stackable and cannot be cloned")
+            }
+            EditError::ItemIsNotStackable { index } => {
+                write!(f, "backpack item {index} is not stackable")
+            }
+            EditError::InvalidStackSize { stack_size } => write!(
+                f,
+                "invalid stack size {stack_size}; stack size must be between 1 and {MAX_ITEM_STACK_SIZE}"
+            ),
+            EditError::UnsupportedPlotFlags { game } => {
+                write!(f, "plot flag editing is not supported for {game:?}")
+            }
         }
     }
 }
@@ -298,6 +359,10 @@ impl SaveEditor {
         &self.save.backpack
     }
 
+    pub fn crafting_recipes(&self) -> &[u32] {
+        &self.save.crafting_recipes
+    }
+
     pub fn equipment_items(&self, target: CharacterTarget) -> Result<&[Item], EditError> {
         Ok(&self.character(target)?.equipment)
     }
@@ -361,8 +426,29 @@ impl SaveEditor {
         level: u32,
     ) -> Result<(), EditError> {
         let raw_character = raw_character_mut(&mut self.raw, target)?;
-        set_character_stat_row_value(raw_character, 15, level, target)?;
+        set_character_stat_row_value(
+            raw_character,
+            level_stat_id(self.save.preferred_game),
+            level,
+            target,
+        )?;
         self.character_mut(target)?.level = Some(level);
+        Ok(())
+    }
+
+    pub fn set_character_experience(
+        &mut self,
+        target: CharacterTarget,
+        experience: u32,
+    ) -> Result<(), EditError> {
+        let raw_character = raw_character_mut(&mut self.raw, target)?;
+        set_or_insert_character_stat_row_value(
+            raw_character,
+            experience_stat_id(self.save.preferred_game),
+            experience,
+            target,
+        )?;
+        self.character_mut(target)?.experience = Some(experience);
         Ok(())
     }
 
@@ -372,16 +458,16 @@ impl SaveEditor {
         patch: PointPoolsPatch,
     ) -> Result<(), EditError> {
         if let Some(value) = patch.attribute_points {
-            self.set_character_point_pool(target, 34, value)?;
+            self.set_character_point_pool(target, PointPoolKind::Attribute, value)?;
         }
         if let Some(value) = patch.skill_points {
-            self.set_character_point_pool(target, 35, value)?;
+            self.set_character_point_pool(target, PointPoolKind::Skill, value)?;
         }
         if let Some(value) = patch.talent_points {
-            self.set_character_point_pool(target, 36, value)?;
+            self.set_character_point_pool(target, PointPoolKind::Talent, value)?;
         }
         if let Some(value) = patch.specialization_points {
-            self.set_character_point_pool(target, 38, value)?;
+            self.set_character_point_pool(target, PointPoolKind::Specialization, value)?;
         }
         Ok(())
     }
@@ -391,16 +477,34 @@ impl SaveEditor {
         target: CharacterTarget,
         approval: i32,
     ) -> Result<(), EditError> {
-        let CharacterTarget::Companion(index) = target else {
+        let CharacterTarget::Companion(_) = target else {
             return Err(EditError::InvalidTarget { target });
         };
+        let object_id = raw_character(&self.raw, target)?
+            .get(OBJECT_ID)
+            .and_then(value_to_i32)
+            .ok_or_else(|| EditError::MissingField {
+                path: "character.OBJECT_ID".to_string(),
+            })?;
         let party = raw_party_mut(&mut self.raw)?;
         let approvals = party
             .get_list_mut_by_name(SAVEGAME_PARTY_APPROVAL_LIST_NAME)
             .ok_or_else(|| EditError::MissingField {
                 path: "root.SAVEGAME_PARTYLIST.SAVEGAME_PARTY_APPROVAL_LIST".to_string(),
             })?;
-        let approval_row = nth_struct_mut(approvals, index).ok_or(EditError::InvalidTarget { target })?;
+        let approval_row = approvals
+            .iter_mut()
+            .filter_map(Value::as_struct_mut)
+            .find(|row| {
+                row.get_by_name(SAVEGAME_PARTY_APPROVAL_ID_NAME)
+                    .and_then(value_to_i32)
+                    == Some(object_id)
+            })
+            .ok_or_else(|| EditError::MissingField {
+                path: format!(
+                    "root.SAVEGAME_PARTYLIST.SAVEGAME_PARTY_APPROVAL_LIST[OBJECT_ID={object_id}]"
+                ),
+            })?;
         let value = approval_row
             .get_mut_by_name(SAVEGAME_PARTY_APPROVAL_LEVEL_NAME)
             .ok_or_else(|| EditError::MissingField {
@@ -436,7 +540,8 @@ impl SaveEditor {
             lookup,
             self.save.preferred_game,
         )?;
-        let uses_da2_ability_list = uses_da2_combined_ability_list(&self.raw, target, self.save.preferred_game)?;
+        let uses_da2_ability_list =
+            uses_da2_combined_ability_list(&self.raw, target, self.save.preferred_game)?;
         if uses_da2_ability_list {
             let merged_ids = merged_da2_ability_ids(self.character(target)?, list, ability_ids);
             let raw_character = raw_character_mut(&mut self.raw, target)?;
@@ -467,6 +572,68 @@ impl SaveEditor {
         }
 
         *self.character_ability_list_mut(target, list)? = replacement;
+        Ok(())
+    }
+
+    pub fn replace_crafting_recipes(&mut self, recipe_ids: &[u32]) -> Result<(), EditError> {
+        let party = raw_party_mut(&mut self.raw)?;
+        let values = party
+            .get_list_mut(SAVEGAME_CRAFTING_RECIPE_LIST)
+            .ok_or_else(|| EditError::MissingField {
+                path: "root.SAVEGAME_PARTYLIST.SAVEGAME_CRAFTING_RECIPE_LIST".to_string(),
+            })?;
+        replace_numeric_list(
+            values,
+            recipe_ids,
+            "root.SAVEGAME_PARTYLIST.SAVEGAME_CRAFTING_RECIPE_LIST",
+        )?;
+        self.save.crafting_recipes = recipe_ids.to_vec();
+        Ok(())
+    }
+
+    pub fn patch_plot_flags(
+        &mut self,
+        booleans: &[PlotBooleanPatch],
+        integers: &[PlotIntegerPatch],
+    ) -> Result<(), EditError> {
+        if !self.save.preferred_game.is_some_and(GameId::is_da2) {
+            return Err(EditError::UnsupportedPlotFlags {
+                game: self.save.preferred_game,
+            });
+        }
+
+        let world_vault = self
+            .raw
+            .root_mut()
+            .get_struct_mut(WORLD_VAULT_LABEL)
+            .ok_or_else(|| EditError::MissingField {
+                path: "root.WVLT".to_string(),
+            })?;
+
+        if !booleans.is_empty() {
+            let values = world_vault
+                .get_list_mut(WORLD_VAULT_BOOLEANS_LABEL)
+                .ok_or_else(|| EditError::MissingField {
+                    path: "root.WVLT.WVB1".to_string(),
+                })?;
+            for patch in booleans {
+                set_or_insert_world_vault_bool(values, *patch)?;
+                self.save.plot_flags.booleans.insert(patch.id, patch.value);
+            }
+        }
+
+        if !integers.is_empty() {
+            let values = world_vault
+                .get_list_mut(WORLD_VAULT_INTS_LABEL)
+                .ok_or_else(|| EditError::MissingField {
+                    path: "root.WVLT.WVI1".to_string(),
+                })?;
+            for patch in integers {
+                set_or_insert_world_vault_int(values, *patch)?;
+                self.save.plot_flags.integers.insert(patch.id, patch.value);
+            }
+        }
+
         Ok(())
     }
 
@@ -510,17 +677,94 @@ impl SaveEditor {
 
     pub fn remove_backpack_item(&mut self, index: usize) -> Result<(), EditError> {
         let party = raw_party_mut(&mut self.raw)?;
-        let items = party
-            .get_list_mut(SAVEGAME_BACKPACK)
-            .ok_or_else(|| EditError::MissingField {
-                path: "root.SAVEGAME_PARTYLIST.SAVEGAME_BACKPACK".to_string(),
-            })?;
+        let items =
+            party
+                .get_list_mut(SAVEGAME_BACKPACK)
+                .ok_or_else(|| EditError::MissingField {
+                    path: "root.SAVEGAME_PARTYLIST.SAVEGAME_BACKPACK".to_string(),
+                })?;
         let raw_index = nth_struct_index(items, index).ok_or(EditError::InvalidItemIndex {
             container: InventoryContainer::Backpack,
             index,
         })?;
         items.remove(raw_index);
         self.save.backpack.remove(index);
+        Ok(())
+    }
+
+    pub fn clone_backpack_item(&mut self, index: usize) -> Result<usize, EditError> {
+        if !self
+            .save
+            .preferred_game
+            .is_some_and(|game| game.is_dao_family() || game.is_da2())
+        {
+            return Err(EditError::UnsupportedGameForClone {
+                game: self.save.preferred_game,
+            });
+        }
+
+        let source_item = self
+            .save
+            .backpack
+            .get(index)
+            .ok_or(EditError::InvalidItemIndex {
+                container: InventoryContainer::Backpack,
+                index,
+            })?;
+        if source_item.stackable {
+            return Err(EditError::ItemIsStackable { index });
+        }
+        let mut cloned_item = source_item.clone();
+
+        let new_object_id = next_object_id(&self.raw)?;
+        let mut cloned_raw = raw_item(&self.raw, InventoryContainer::Backpack, index)?.clone();
+        set_object_id(&mut cloned_raw, new_object_id)?;
+        update_worlddb_last_id(&mut self.raw, new_object_id)?;
+
+        let party = raw_party_mut(&mut self.raw)?;
+        let items =
+            party
+                .get_list_mut(SAVEGAME_BACKPACK)
+                .ok_or_else(|| EditError::MissingField {
+                    path: "root.SAVEGAME_PARTYLIST.SAVEGAME_BACKPACK".to_string(),
+                })?;
+        items.push(Value::Struct(Box::new(cloned_raw)));
+
+        cloned_item.object_id =
+            Some(
+                i32::try_from(new_object_id).map_err(|_| EditError::NumericRange {
+                    path: "item.OBJECT_ID".to_string(),
+                    detail: format!("{new_object_id} does not fit into i32"),
+                })?,
+            );
+        self.save.backpack.push(cloned_item);
+        Ok(self.save.backpack.len() - 1)
+    }
+
+    pub fn set_backpack_item_stack_size(
+        &mut self,
+        index: usize,
+        stack_size: u32,
+    ) -> Result<(), EditError> {
+        if stack_size == 0 || stack_size > MAX_ITEM_STACK_SIZE {
+            return Err(EditError::InvalidStackSize { stack_size });
+        }
+
+        let item = self
+            .save
+            .backpack
+            .get(index)
+            .ok_or(EditError::InvalidItemIndex {
+                container: InventoryContainer::Backpack,
+                index,
+            })?;
+        if !item.stackable {
+            return Err(EditError::ItemIsNotStackable { index });
+        }
+
+        let raw_item = raw_item_mut(&mut self.raw, InventoryContainer::Backpack, index)?;
+        set_or_insert_stack_size(raw_item, stack_size)?;
+        self.save.backpack[index].item_stacksize = Some(stack_size);
         Ok(())
     }
 
@@ -537,14 +781,15 @@ impl SaveEditor {
                 container: InventoryContainer::Backpack,
                 index,
             })?;
-        let expected = current
-            .resref
-            .as_deref()
-            .map(clean_resref)
-            .ok_or(EditError::MissingItemResref {
-                container: InventoryContainer::Backpack,
-                index,
-            })?;
+        let expected =
+            current
+                .resref
+                .as_deref()
+                .map(clean_resref)
+                .ok_or(EditError::MissingItemResref {
+                    container: InventoryContainer::Backpack,
+                    index,
+                })?;
         let actual = clean_resref(&replacement.resref);
         if expected != actual {
             return Err(EditError::BackpackResrefMismatch {
@@ -573,10 +818,11 @@ impl SaveEditor {
         power: f32,
         lookup: Option<&dyn GameDataLookup>,
     ) -> Result<(), EditError> {
+        let preferred_game = self.save.preferred_game;
         let raw_item = raw_item_mut(&mut self.raw, container, index)?;
         let property_name = if let Some(lookup) = lookup {
             lookup
-                .item_property_name(property_id)
+                .item_property_name(property_id, preferred_game)
                 .map_err(|err| EditError::LookupFailed {
                     path: "item.ITEM_PROPERTIES".to_string(),
                     detail: err.to_string(),
@@ -586,13 +832,25 @@ impl SaveEditor {
         };
         let (property_ids, property_powers) =
             ensure_property_lists_mut(container, index, raw_item)?;
-        append_numeric_value(property_ids, property_id, "item.ITEM_PROPERTIES")?;
-        append_float_value(property_powers, power, "item.ITEM_PROPERTY_POWERS")?;
-        item_mut(&mut self.save, container, index)?.properties.push(ItemProperty {
-            id: property_id,
-            name: property_name,
+        append_property_id_value(
+            property_ids,
+            property_id,
+            self.save.preferred_game,
+            "item.ITEM_PROPERTIES",
+        )?;
+        append_property_power_value(
+            property_powers,
             power,
-        });
+            self.save.preferred_game,
+            "item.ITEM_PROPERTY_POWERS",
+        )?;
+        item_mut(&mut self.save, container, index)?
+            .properties
+            .push(ItemProperty {
+                id: property_id,
+                name: property_name,
+                power,
+            });
         Ok(())
     }
 
@@ -642,18 +900,29 @@ impl SaveEditor {
         }
         let raw_item = raw_item_mut(&mut self.raw, container, index)?;
         let (_, property_powers) = property_lists_mut(raw_item, container, index)?;
-        let value = property_powers.get_mut(property_index).ok_or(EditError::InvalidPropertyIndex {
-            container,
-            item_index: index,
-            property_index,
-        })?;
-        set_float_value(value, power, "item.ITEM_PROPERTY_POWERS")?;
+        let value =
+            property_powers
+                .get_mut(property_index)
+                .ok_or(EditError::InvalidPropertyIndex {
+                    container,
+                    item_index: index,
+                    property_index,
+                })?;
+        set_property_power_value(
+            value,
+            power,
+            self.save.preferred_game,
+            "item.ITEM_PROPERTY_POWERS",
+        )?;
         let properties = &mut item_mut(&mut self.save, container, index)?.properties;
-        let property = properties.get_mut(property_index).ok_or(EditError::InvalidPropertyIndex {
-            container,
-            item_index: index,
-            property_index,
-        })?;
+        let property =
+            properties
+                .get_mut(property_index)
+                .ok_or(EditError::InvalidPropertyIndex {
+                    container,
+                    item_index: index,
+                    property_index,
+                })?;
         property.power = power;
         Ok(())
     }
@@ -666,6 +935,7 @@ impl SaveEditor {
         property_id: u32,
         lookup: Option<&dyn GameDataLookup>,
     ) -> Result<(), EditError> {
+        let preferred_game = self.save.preferred_game;
         if property_index >= item_mut(&mut self.save, container, index)?.properties.len() {
             return Err(EditError::InvalidPropertyIndex {
                 container,
@@ -675,11 +945,14 @@ impl SaveEditor {
         }
         let raw_item = raw_item_mut(&mut self.raw, container, index)?;
         let (property_ids, _) = property_lists_mut(raw_item, container, index)?;
-        let value = property_ids.get_mut(property_index).ok_or(EditError::InvalidPropertyIndex {
-            container,
-            item_index: index,
-            property_index,
-        })?;
+        let value =
+            property_ids
+                .get_mut(property_index)
+                .ok_or(EditError::InvalidPropertyIndex {
+                    container,
+                    item_index: index,
+                    property_index,
+                })?;
         set_numeric_value(value, property_id, "item.ITEM_PROPERTIES")?;
         let property = item_mut(&mut self.save, container, index)?
             .properties
@@ -692,7 +965,7 @@ impl SaveEditor {
         property.id = property_id;
         property.name = if let Some(lookup) = lookup {
             lookup
-                .item_property_name(property_id)
+                .item_property_name(property_id, preferred_game)
                 .map_err(|err| EditError::LookupFailed {
                     path: "item.ITEM_PROPERTIES".to_string(),
                     detail: err.to_string(),
@@ -741,21 +1014,31 @@ impl SaveEditor {
     fn set_character_point_pool(
         &mut self,
         target: CharacterTarget,
-        stat_id: u32,
+        kind: PointPoolKind,
         value: u32,
     ) -> Result<(), EditError> {
+        let Some(stat_id) = point_pool_stat_id(kind, self.save.preferred_game) else {
+            return Ok(());
+        };
         let raw_character = raw_character_mut(&mut self.raw, target)?;
-        set_character_stat_row_value(raw_character, stat_id, value, target)?;
+        set_or_insert_character_stat_row_value(raw_character, stat_id, value, target)?;
         let point_pools = &mut self.character_mut(target)?.point_pools;
-        match stat_id {
-            34 => point_pools.attribute_points = Some(value),
-            35 => point_pools.skill_points = Some(value),
-            36 => point_pools.talent_points = Some(value),
-            38 => point_pools.specialization_points = Some(value),
-            _ => {}
+        match kind {
+            PointPoolKind::Attribute => point_pools.attribute_points = Some(value),
+            PointPoolKind::Skill => point_pools.skill_points = Some(value),
+            PointPoolKind::Talent => point_pools.talent_points = Some(value),
+            PointPoolKind::Specialization => point_pools.specialization_points = Some(value),
         }
         Ok(())
     }
+}
+
+#[derive(Debug, Clone, Copy)]
+enum PointPoolKind {
+    Attribute,
+    Skill,
+    Talent,
+    Specialization,
 }
 
 fn raw_party_mut(raw: &mut GffFile) -> Result<&mut GffStruct, EditError> {
@@ -782,12 +1065,11 @@ fn raw_character(raw: &GffFile, target: CharacterTarget) -> Result<&GffStruct, E
                 })
         }
         CharacterTarget::Companion(index) => {
-            let party = raw
-                .root()
-                .get_struct(SAVEGAME_PARTYLIST)
-                .ok_or_else(|| EditError::MissingField {
+            let party = raw.root().get_struct(SAVEGAME_PARTYLIST).ok_or_else(|| {
+                EditError::MissingField {
                     path: "root.SAVEGAME_PARTYLIST".to_string(),
-                })?;
+                }
+            })?;
             let companions = party
                 .get_list_by_name(SAVEGAME_PARTYPOOLMEMBERS_NAME)
                 .ok_or_else(|| EditError::MissingField {
@@ -803,7 +1085,10 @@ fn raw_character(raw: &GffFile, target: CharacterTarget) -> Result<&GffStruct, E
     }
 }
 
-fn raw_character_mut(raw: &mut GffFile, target: CharacterTarget) -> Result<&mut GffStruct, EditError> {
+fn raw_character_mut(
+    raw: &mut GffFile,
+    target: CharacterTarget,
+) -> Result<&mut GffStruct, EditError> {
     match target {
         CharacterTarget::MainCharacter => {
             let player = raw
@@ -841,6 +1126,35 @@ fn raw_character_mut(raw: &mut GffFile, target: CharacterTarget) -> Result<&mut 
     }
 }
 
+fn raw_item(
+    raw: &GffFile,
+    container: InventoryContainer,
+    index: usize,
+) -> Result<&GffStruct, EditError> {
+    let items = match container {
+        InventoryContainer::Backpack => raw
+            .root()
+            .get_struct(SAVEGAME_PARTYLIST)
+            .ok_or_else(|| EditError::MissingField {
+                path: "root.SAVEGAME_PARTYLIST".to_string(),
+            })?
+            .get_list(SAVEGAME_BACKPACK)
+            .ok_or_else(|| EditError::MissingField {
+                path: "root.SAVEGAME_PARTYLIST.SAVEGAME_BACKPACK".to_string(),
+            })?,
+        InventoryContainer::Equipment { target } => raw_character(raw, target)?
+            .get_list(SAVEGAME_EQUIPMENT_ITEMS)
+            .ok_or_else(|| EditError::MissingField {
+                path: "character.SAVEGAME_EQUIPMENT_ITEMS".to_string(),
+            })?,
+    };
+    let raw_index =
+        nth_struct_index(items, index).ok_or(EditError::InvalidItemIndex { container, index })?;
+    items[raw_index]
+        .as_struct()
+        .ok_or(EditError::InvalidItemIndex { container, index })
+}
+
 fn raw_item_mut(
     raw: &mut GffFile,
     container: InventoryContainer,
@@ -858,26 +1172,11 @@ fn raw_item_mut(
                 path: "character.SAVEGAME_EQUIPMENT_ITEMS".to_string(),
             })?,
     };
-    let raw_index = nth_struct_index(items, index).ok_or(EditError::InvalidItemIndex {
-        container,
-        index,
-    })?;
+    let raw_index =
+        nth_struct_index(items, index).ok_or(EditError::InvalidItemIndex { container, index })?;
     items[raw_index]
         .as_struct_mut()
         .ok_or(EditError::InvalidItemIndex { container, index })
-}
-
-fn nth_struct_mut(values: &mut [Value], index: usize) -> Option<&mut GffStruct> {
-    let mut current = 0usize;
-    for value in values {
-        if let Value::Struct(structure) = value {
-            if current == index {
-                return Some(structure.as_mut());
-            }
-            current += 1;
-        }
-    }
-    None
 }
 
 fn item_mut(
@@ -907,11 +1206,108 @@ fn item_mut(
     }
 }
 
+fn set_or_insert_world_vault_bool(
+    values: &mut Vec<Value>,
+    patch: PlotBooleanPatch,
+) -> Result<(), EditError> {
+    if let Some(entry) = values
+        .iter_mut()
+        .filter_map(Value::as_struct_mut)
+        .find(|entry| entry.get(WORLD_VAULT_ID_LABEL).and_then(value_to_u16) == Some(patch.id))
+    {
+        let value =
+            entry
+                .get_mut(WORLD_VAULT_VALUE_LABEL)
+                .ok_or_else(|| EditError::MissingField {
+                    path: format!("root.WVLT.WVB1[{}].value", patch.id),
+                })?;
+        set_world_vault_bool_value(value, patch.value)?;
+        return Ok(());
+    }
+
+    let struct_index = world_vault_struct_index(values).unwrap_or(65);
+    values.push(Value::Struct(Box::new(GffStruct {
+        struct_index,
+        fields: vec![
+            FieldValue {
+                label: WORLD_VAULT_ID_LABEL,
+                value: Value::UInt16(patch.id),
+            },
+            FieldValue {
+                label: WORLD_VAULT_VALUE_LABEL,
+                value: Value::UInt8(u8::from(patch.value)),
+            },
+        ],
+    })));
+    Ok(())
+}
+
+fn set_or_insert_world_vault_int(
+    values: &mut Vec<Value>,
+    patch: PlotIntegerPatch,
+) -> Result<(), EditError> {
+    if let Some(entry) = values
+        .iter_mut()
+        .filter_map(Value::as_struct_mut)
+        .find(|entry| entry.get(WORLD_VAULT_ID_LABEL).and_then(value_to_u16) == Some(patch.id))
+    {
+        let value =
+            entry
+                .get_mut(WORLD_VAULT_VALUE_LABEL)
+                .ok_or_else(|| EditError::MissingField {
+                    path: format!("root.WVLT.WVI1[{}].value", patch.id),
+                })?;
+        set_signed_numeric_value(value, patch.value, "root.WVLT.WVI1.value")?;
+        return Ok(());
+    }
+
+    let struct_index = world_vault_struct_index(values).unwrap_or(67);
+    values.push(Value::Struct(Box::new(GffStruct {
+        struct_index,
+        fields: vec![
+            FieldValue {
+                label: WORLD_VAULT_ID_LABEL,
+                value: Value::UInt16(patch.id),
+            },
+            FieldValue {
+                label: WORLD_VAULT_VALUE_LABEL,
+                value: Value::Int32(patch.value),
+            },
+        ],
+    })));
+    Ok(())
+}
+
+fn world_vault_struct_index(values: &[Value]) -> Option<usize> {
+    values.iter().find_map(|value| match value {
+        Value::Struct(structure) => Some(structure.struct_index),
+        _ => None,
+    })
+}
+
+fn set_world_vault_bool_value(value: &mut Value, new_value: bool) -> Result<(), EditError> {
+    match value {
+        Value::UInt8(value) => *value = u8::from(new_value),
+        Value::Int8(value) => *value = if new_value { 1 } else { 0 },
+        Value::UInt16(value) => *value = if new_value { 1 } else { 0 },
+        Value::Int16(value) => *value = if new_value { 1 } else { 0 },
+        Value::UInt32(value) => *value = if new_value { 1 } else { 0 },
+        Value::Int32(value) => *value = if new_value { 1 } else { 0 },
+        other => {
+            return Err(EditError::UnsupportedNumericValue {
+                path: "root.WVLT.WVB1.value".to_string(),
+                actual: other.type_name(),
+            });
+        }
+    }
+    Ok(())
+}
+
 fn load_validated_abilities(
     target: CharacterTarget,
     list: AbilityListKind,
     ability_ids: &[u32],
-    current_ids: &BTreeSet<u32>,
+    _current_ids: &BTreeSet<u32>,
     lookup: &dyn GameDataLookup,
     preferred_game: Option<GameId>,
 ) -> Result<Vec<AbilityRef>, EditError> {
@@ -938,67 +1334,32 @@ fn load_validated_abilities(
         abilities.push(ability);
     }
 
-    let mut required_core_ids = BTreeSet::new();
     for ability in &abilities {
+        let mut enforceable_core_ids = Vec::new();
         for &core_id in &ability.core_ids {
-            let Some(core_ability) = lookup
-                .ability(core_id, preferred_game)
-                .map_err(|err| EditError::LookupFailed {
-                    path: "character.ability_list".to_string(),
-                    detail: err.to_string(),
-                })?
+            let Some(core_ability) =
+                lookup
+                    .ability(core_id, preferred_game)
+                    .map_err(|err| EditError::LookupFailed {
+                        path: "character.ability_list".to_string(),
+                        detail: err.to_string(),
+                    })?
             else {
                 continue;
             };
             if should_enforce_core_ability(&core_ability, expected_kind) {
-                required_core_ids.insert(core_id);
+                enforceable_core_ids.push(core_id);
             }
         }
-    }
-    for &core_id in &required_core_ids {
-        if !replacement_ids.contains(&core_id) {
+        if !enforceable_core_ids.is_empty()
+            && !enforceable_core_ids
+                .iter()
+                .any(|core_id| replacement_ids.contains(core_id))
+        {
             return Err(EditError::MissingCoreAbility {
                 target,
                 list,
-                required_id: core_id,
-            });
-        }
-    }
-
-    let mut currently_owned_cores = BTreeSet::new();
-    for &ability_id in current_ids {
-        let Some(ability) = lookup
-            .ability(ability_id, preferred_game)
-            .map_err(|err| EditError::LookupFailed {
-                path: "character.ability_list".to_string(),
-                detail: err.to_string(),
-            })?
-        else {
-            continue;
-        };
-        for &core_id in &ability.core_ids {
-            let Some(core_ability) = lookup
-                .ability(core_id, preferred_game)
-                .map_err(|err| EditError::LookupFailed {
-                    path: "character.ability_list".to_string(),
-                    detail: err.to_string(),
-                })?
-            else {
-                continue;
-            };
-            if should_enforce_core_ability(&core_ability, expected_kind)
-                && current_ids.contains(&core_id)
-            {
-                currently_owned_cores.insert(core_id);
-            }
-        }
-    }
-    for core_id in currently_owned_cores {
-        if !replacement_ids.contains(&core_id) {
-            return Err(EditError::MissingCoreAbility {
-                target,
-                list,
-                required_id: core_id,
+                required_id: enforceable_core_ids[0],
             });
         }
     }
@@ -1007,13 +1368,6 @@ fn load_validated_abilities(
 }
 
 fn should_enforce_core_ability(core_ability: &AbilityRef, expected_kind: AbilityKind) -> bool {
-    if matches!(
-        core_ability.ability_type.as_deref().map(str::trim),
-        Some("Class") | Some("Specialization")
-    ) {
-        return false;
-    }
-
     core_ability.kind == expected_kind
 }
 
@@ -1052,7 +1406,7 @@ fn uses_da2_combined_ability_list(
     target: CharacterTarget,
     preferred_game: Option<GameId>,
 ) -> Result<bool, EditError> {
-    if preferred_game != Some(GameId::Da2) {
+    if !preferred_game.is_some_and(GameId::is_da2) {
         return Ok(false);
     }
 
@@ -1093,6 +1447,127 @@ fn nth_struct_index(values: &[Value], target_index: usize) -> Option<usize> {
     None
 }
 
+fn next_object_id(raw: &GffFile) -> Result<u32, EditError> {
+    let max_seen_object_id = max_object_id_in_struct(raw.root()).unwrap_or_default();
+    let worlddb_last_id = raw
+        .root()
+        .get(SAVEGAME_WORLDDATABASE)
+        .and_then(|value| find_field_value(value, SAVEGAME_WORLDDB_LASTID))
+        .and_then(value_to_u32)
+        .unwrap_or_default();
+    max_seen_object_id
+        .max(worlddb_last_id)
+        .checked_add(1)
+        .ok_or_else(|| EditError::NumericRange {
+            path: "SAVEGAME_WORLDDATABASE.SAVEGAME_WORLDDB_LASTID".to_string(),
+            detail: "next OBJECT_ID would overflow u32".to_string(),
+        })
+}
+
+fn update_worlddb_last_id(raw: &mut GffFile, new_object_id: u32) -> Result<(), EditError> {
+    let worlddb = raw
+        .root_mut()
+        .get_mut(SAVEGAME_WORLDDATABASE)
+        .ok_or_else(|| EditError::MissingField {
+            path: "root.SAVEGAME_WORLDDATABASE".to_string(),
+        })?;
+    let value = find_field_value_mut(worlddb, SAVEGAME_WORLDDB_LASTID).ok_or_else(|| {
+        EditError::MissingField {
+            path: "root.SAVEGAME_WORLDDATABASE.SAVEGAME_WORLDDB_LASTID".to_string(),
+        }
+    })?;
+    set_numeric_value(
+        value,
+        new_object_id,
+        "root.SAVEGAME_WORLDDATABASE.SAVEGAME_WORLDDB_LASTID",
+    )
+}
+
+fn set_object_id(item: &mut GffStruct, object_id: u32) -> Result<(), EditError> {
+    let value = item
+        .get_mut(OBJECT_ID)
+        .ok_or_else(|| EditError::MissingField {
+            path: "item.OBJECT_ID".to_string(),
+        })?;
+    set_numeric_value(value, object_id, "item.OBJECT_ID")
+}
+
+fn set_or_insert_stack_size(item: &mut GffStruct, stack_size: u32) -> Result<(), EditError> {
+    if let Some(value) = item.get_mut(ITEM_STACKSIZE) {
+        return set_numeric_value(value, stack_size, "item.ITEM_STACKSIZE");
+    }
+    item.fields.push(FieldValue {
+        label: ITEM_STACKSIZE,
+        value: Value::UInt32(stack_size),
+    });
+    Ok(())
+}
+
+fn find_field_value(value: &Value, label: u32) -> Option<&Value> {
+    match value {
+        Value::Struct(structure) => find_field_value_in_struct(structure, label),
+        Value::List(values) => values
+            .iter()
+            .find_map(|value| find_field_value(value, label)),
+        _ => None,
+    }
+}
+
+fn find_field_value_in_struct(structure: &GffStruct, label: u32) -> Option<&Value> {
+    if let Some(value) = structure.get(label) {
+        return Some(value);
+    }
+    structure
+        .fields
+        .iter()
+        .find_map(|field| find_field_value(&field.value, label))
+}
+
+fn find_field_value_mut(value: &mut Value, label: u32) -> Option<&mut Value> {
+    match value {
+        Value::Struct(structure) => find_field_value_mut_in_struct(structure, label),
+        Value::List(values) => values
+            .iter_mut()
+            .find_map(|value| find_field_value_mut(value, label)),
+        _ => None,
+    }
+}
+
+fn find_field_value_mut_in_struct(structure: &mut GffStruct, label: u32) -> Option<&mut Value> {
+    if let Some(index) = structure
+        .fields
+        .iter()
+        .position(|field| field.label == label)
+    {
+        return Some(&mut structure.fields[index].value);
+    }
+    structure
+        .fields
+        .iter_mut()
+        .find_map(|field| find_field_value_mut(&mut field.value, label))
+}
+
+fn max_object_id_in_struct(structure: &GffStruct) -> Option<u32> {
+    let mut max_id = structure
+        .get(OBJECT_ID)
+        .and_then(value_to_i32)
+        .and_then(|id| u32::try_from(id).ok());
+
+    for field in &structure.fields {
+        max_id = max_id.max(max_object_id_in_value(&field.value));
+    }
+
+    max_id
+}
+
+fn max_object_id_in_value(value: &Value) -> Option<u32> {
+    match value {
+        Value::Struct(structure) => max_object_id_in_struct(structure),
+        Value::List(values) => values.iter().filter_map(max_object_id_in_value).max(),
+        _ => None,
+    }
+}
+
 fn apply_item_metadata_patch_to_struct(
     item: &mut GffStruct,
     patch: ItemMetadataPatch,
@@ -1106,11 +1581,11 @@ fn apply_item_metadata_patch_to_struct(
         set_numeric_value(value, item_cost, "item.ITEM_COST")?;
     }
     if let Some(material) = patch.material {
-        let value = item
-            .get_mut(SAVEGAME_ITEM_MATERIALTYPE)
-            .ok_or_else(|| EditError::MissingField {
-                path: "item.SAVEGAME_ITEM_MATERIALTYPE".to_string(),
-            })?;
+        let value =
+            item.get_mut(SAVEGAME_ITEM_MATERIALTYPE)
+                .ok_or_else(|| EditError::MissingField {
+                    path: "item.SAVEGAME_ITEM_MATERIALTYPE".to_string(),
+                })?;
         set_numeric_value(value, material, "item.SAVEGAME_ITEM_MATERIALTYPE")?;
     }
     if let Some(item_level) = patch.item_level {
@@ -1141,19 +1616,24 @@ fn property_lists_mut(
     container: InventoryContainer,
     item_index: usize,
 ) -> Result<(&mut Vec<Value>, &mut Vec<Value>), EditError> {
-    let ids_label = crate::gff4::fields::field_id_by_name(ITEM_PROPERTIES_NAME).ok_or_else(|| {
-        EditError::MissingField {
-            path: "item.ITEM_PROPERTIES".to_string(),
-        }
-    })?;
-    let powers_label =
-        crate::gff4::fields::field_id_by_name(ITEM_PROPERTY_POWERS_NAME).ok_or_else(|| {
+    let ids_label =
+        crate::gff4::fields::field_id_by_name(ITEM_PROPERTIES_NAME).ok_or_else(|| {
             EditError::MissingField {
-                path: "item.ITEM_PROPERTY_POWERS".to_string(),
+                path: "item.ITEM_PROPERTIES".to_string(),
             }
         })?;
-    let ids_index = item.fields.iter().position(|field| field.label == ids_label);
-    let powers_index = item.fields.iter().position(|field| field.label == powers_label);
+    let powers_label = crate::gff4::fields::field_id_by_name(ITEM_PROPERTY_POWERS_NAME)
+        .ok_or_else(|| EditError::MissingField {
+            path: "item.ITEM_PROPERTY_POWERS".to_string(),
+        })?;
+    let ids_index = item
+        .fields
+        .iter()
+        .position(|field| field.label == ids_label);
+    let powers_index = item
+        .fields
+        .iter()
+        .position(|field| field.label == powers_label);
     let (Some(ids_index), Some(powers_index)) = (ids_index, powers_index) else {
         return Err(EditError::InvalidPropertyArrayParity {
             container,
@@ -1186,15 +1666,17 @@ fn property_lists_mut(
         expected: "List",
         actual: first_type,
     })?;
-    let second_list = second.as_list_mut().ok_or_else(|| EditError::TypeMismatch {
-        path: if ids_first {
-            "item.ITEM_PROPERTY_POWERS".to_string()
-        } else {
-            "item.ITEM_PROPERTIES".to_string()
-        },
-        expected: "List",
-        actual: second_type,
-    })?;
+    let second_list = second
+        .as_list_mut()
+        .ok_or_else(|| EditError::TypeMismatch {
+            path: if ids_first {
+                "item.ITEM_PROPERTY_POWERS".to_string()
+            } else {
+                "item.ITEM_PROPERTIES".to_string()
+            },
+            expected: "List",
+            actual: second_type,
+        })?;
     let (property_ids, property_powers) = if ids_first {
         (first_list, second_list)
     } else {
@@ -1230,27 +1712,29 @@ fn ensure_property_lists_mut(
                 item_index,
                 ids_len: if ids_exists { 1 } else { 0 },
                 powers_len: if powers_exists { 1 } else { 0 },
-            })
+            });
         }
     }
 
     if item.get_list_by_name(ITEM_PROPERTIES_NAME).is_none() {
-        let label = crate::gff4::fields::field_id_by_name(ITEM_PROPERTIES_NAME).ok_or_else(|| {
-            EditError::MissingField {
-                path: "item.ITEM_PROPERTIES".to_string(),
-            }
-        })?;
+        let label =
+            crate::gff4::fields::field_id_by_name(ITEM_PROPERTIES_NAME).ok_or_else(|| {
+                EditError::MissingField {
+                    path: "item.ITEM_PROPERTIES".to_string(),
+                }
+            })?;
         item.fields.push(FieldValue {
             label,
             value: Value::List(Vec::new()),
         });
     }
     if item.get_list_by_name(ITEM_PROPERTY_POWERS_NAME).is_none() {
-        let label = crate::gff4::fields::field_id_by_name(ITEM_PROPERTY_POWERS_NAME).ok_or_else(|| {
-            EditError::MissingField {
-                path: "item.ITEM_PROPERTY_POWERS".to_string(),
-            }
-        })?;
+        let label =
+            crate::gff4::fields::field_id_by_name(ITEM_PROPERTY_POWERS_NAME).ok_or_else(|| {
+                EditError::MissingField {
+                    path: "item.ITEM_PROPERTY_POWERS".to_string(),
+                }
+            })?;
         item.fields.push(FieldValue {
             label,
             value: Value::List(Vec::new()),
@@ -1259,16 +1743,28 @@ fn ensure_property_lists_mut(
     property_lists_mut(item, container, item_index)
 }
 
-fn append_numeric_value(values: &mut Vec<Value>, new_value: u32, path: &str) -> Result<(), EditError> {
+fn append_property_id_value(
+    values: &mut Vec<Value>,
+    new_value: u32,
+    preferred_game: Option<GameId>,
+    path: &str,
+) -> Result<(), EditError> {
     let kind = values
         .iter()
         .find_map(NumericValueKind::from_value)
-        .unwrap_or(NumericValueKind::UInt32);
+        .unwrap_or(match preferred_game {
+            Some(GameId::Da2) => NumericValueKind::Float32,
+            _ => NumericValueKind::UInt32,
+        });
     values.push(kind.build_value(new_value, path)?);
     Ok(())
 }
 
-fn append_float_value(values: &mut Vec<Value>, new_value: f32, path: &str) -> Result<(), EditError> {
+fn append_float_value(
+    values: &mut Vec<Value>,
+    new_value: f32,
+    path: &str,
+) -> Result<(), EditError> {
     let kind = values
         .iter()
         .find_map(FloatValueKind::from_value)
@@ -1279,7 +1775,39 @@ fn append_float_value(values: &mut Vec<Value>, new_value: f32, path: &str) -> Re
     Ok(())
 }
 
-fn replace_numeric_list(values: &mut Vec<Value>, new_values: &[u32], path: &str) -> Result<(), EditError> {
+fn append_property_power_value(
+    values: &mut Vec<Value>,
+    new_value: f32,
+    preferred_game: Option<GameId>,
+    path: &str,
+) -> Result<(), EditError> {
+    if preferred_game.is_some_and(GameId::is_da2) {
+        let kind = values
+            .iter()
+            .find_map(NumericValueKind::from_value)
+            .unwrap_or(NumericValueKind::UInt32);
+        let mut value = match kind {
+            NumericValueKind::UInt8 => Value::UInt8(0),
+            NumericValueKind::Int8 => Value::Int8(0),
+            NumericValueKind::UInt16 => Value::UInt16(0),
+            NumericValueKind::Int16 => Value::Int16(0),
+            NumericValueKind::UInt32 => Value::UInt32(0),
+            NumericValueKind::Int32 => Value::Int32(0),
+            NumericValueKind::Float32 => Value::Float32(0.0),
+            NumericValueKind::Float64 => Value::Float64(0.0),
+        };
+        set_property_power_value(&mut value, new_value, preferred_game, path)?;
+        values.push(value);
+        return Ok(());
+    }
+    append_float_value(values, new_value, path)
+}
+
+fn replace_numeric_list(
+    values: &mut Vec<Value>,
+    new_values: &[u32],
+    path: &str,
+) -> Result<(), EditError> {
     let kind = values
         .iter()
         .find_map(NumericValueKind::from_value)
@@ -1426,6 +1954,71 @@ fn set_character_stat_row_value(
     Err(EditError::MissingStatRow { target, stat_id })
 }
 
+fn set_or_insert_character_stat_row_value(
+    character: &mut GffStruct,
+    stat_id: u32,
+    new_value: u32,
+    target: CharacterTarget,
+) -> Result<(), EditError> {
+    match set_character_stat_row_value(character, stat_id, new_value, target) {
+        Ok(()) => Ok(()),
+        Err(EditError::MissingStatRow {
+            stat_id: missing_stat_id,
+            ..
+        }) if missing_stat_id == stat_id => {
+            insert_character_stat_row_value(character, stat_id, new_value)
+        }
+        Err(err) => Err(err),
+    }
+}
+
+fn insert_character_stat_row_value(
+    character: &mut GffStruct,
+    stat_id: u32,
+    new_value: u32,
+) -> Result<(), EditError> {
+    let stats = character
+        .get_struct_mut_by_name(SAVEGAME_CREATURE_STATS_NAME)
+        .ok_or_else(|| EditError::MissingField {
+            path: "character.SAVEGAME_CREATURE_STATS".to_string(),
+        })?;
+    let stat_list = stats
+        .get_list_mut_by_name(SAVEGAME_STATLIST_NAME)
+        .ok_or_else(|| EditError::MissingField {
+            path: "character.SAVEGAME_STATLIST".to_string(),
+        })?;
+    let template =
+        stat_list
+            .iter()
+            .find_map(Value::as_struct)
+            .ok_or_else(|| EditError::MissingField {
+                path: "character.SAVEGAME_STATLIST[]".to_string(),
+            })?;
+    let mut row = template.clone();
+    let index_value = row
+        .get_mut_by_name(SAVEGAME_STATPROPERTY_INDEX_NAME)
+        .ok_or_else(|| EditError::MissingField {
+            path: "character.SAVEGAME_STATLIST[].SAVEGAME_STATPROPERTY_INDEX".to_string(),
+        })?;
+    set_numeric_value(
+        index_value,
+        stat_id,
+        "character.SAVEGAME_STATLIST[].SAVEGAME_STATPROPERTY_INDEX",
+    )?;
+    let base_value = row
+        .get_mut_by_name(SAVEGAME_STATPROPERTY_BASE_NAME)
+        .ok_or_else(|| EditError::MissingField {
+            path: "character.SAVEGAME_STATLIST[].SAVEGAME_STATPROPERTY_BASE".to_string(),
+        })?;
+    set_numeric_value(
+        base_value,
+        new_value,
+        "character.SAVEGAME_STATLIST[].SAVEGAME_STATPROPERTY_BASE",
+    )?;
+    stat_list.push(Value::Struct(Box::new(row)));
+    Ok(())
+}
+
 fn set_numeric_value(value: &mut Value, new_value: u32, path: &str) -> Result<(), EditError> {
     match value {
         Value::UInt8(existing) => {
@@ -1482,7 +2075,11 @@ fn set_numeric_value(value: &mut Value, new_value: u32, path: &str) -> Result<()
     }
 }
 
-fn set_signed_numeric_value(value: &mut Value, new_value: i32, path: &str) -> Result<(), EditError> {
+fn set_signed_numeric_value(
+    value: &mut Value,
+    new_value: i32,
+    path: &str,
+) -> Result<(), EditError> {
     match value {
         Value::UInt8(existing) => {
             *existing = u8::try_from(new_value).map_err(|_| EditError::NumericRange {
@@ -1582,7 +2179,8 @@ fn set_float_value(value: &mut Value, new_value: f32, path: &str) -> Result<(), 
             }
         }
         Value::Int16(existing) => {
-            if new_value.is_finite() && new_value >= i16::MIN as f32 && new_value <= i16::MAX as f32 {
+            if new_value.is_finite() && new_value >= i16::MIN as f32 && new_value <= i16::MAX as f32
+            {
                 *existing = new_value as i16;
                 Ok(())
             } else {
@@ -1604,7 +2202,8 @@ fn set_float_value(value: &mut Value, new_value: f32, path: &str) -> Result<(), 
             }
         }
         Value::Int32(existing) => {
-            if new_value.is_finite() && new_value >= i32::MIN as f32 && new_value <= i32::MAX as f32 {
+            if new_value.is_finite() && new_value >= i32::MIN as f32 && new_value <= i32::MAX as f32
+            {
                 *existing = new_value as i32;
                 Ok(())
             } else {
@@ -1618,6 +2217,37 @@ fn set_float_value(value: &mut Value, new_value: f32, path: &str) -> Result<(), 
             path: path.to_string(),
             actual: other.type_name(),
         }),
+    }
+}
+
+fn set_property_power_value(
+    value: &mut Value,
+    new_value: f32,
+    preferred_game: Option<GameId>,
+    path: &str,
+) -> Result<(), EditError> {
+    if !preferred_game.is_some_and(GameId::is_da2) {
+        return set_float_value(value, new_value, path);
+    }
+
+    match value {
+        Value::UInt32(existing) => {
+            *existing = new_value.to_bits();
+            Ok(())
+        }
+        Value::Int32(existing) => {
+            *existing = i32::from_ne_bytes(new_value.to_bits().to_ne_bytes());
+            Ok(())
+        }
+        Value::UInt64(existing) => {
+            *existing = new_value.to_bits() as u64;
+            Ok(())
+        }
+        Value::Int64(existing) => {
+            *existing = new_value.to_bits() as i64;
+            Ok(())
+        }
+        _ => set_float_value(value, new_value, path),
     }
 }
 
@@ -1635,6 +2265,24 @@ fn value_to_u32(value: &Value) -> Option<u32> {
     }
 }
 
+fn value_to_u16(value: &Value) -> Option<u16> {
+    value_to_u32(value).and_then(|value| u16::try_from(value).ok())
+}
+
+fn value_to_i32(value: &Value) -> Option<i32> {
+    match value {
+        Value::UInt8(v) => Some(*v as i32),
+        Value::Int8(v) => Some(*v as i32),
+        Value::UInt16(v) => Some(*v as i32),
+        Value::Int16(v) => Some(*v as i32),
+        Value::UInt32(v) => i32::try_from(*v).ok(),
+        Value::Int32(v) => Some(*v),
+        Value::Float32(v) if v.is_finite() => Some(*v as i32),
+        Value::Float64(v) if v.is_finite() => Some(*v as i32),
+        _ => None,
+    }
+}
+
 fn core_stat_id(stat: CoreStat) -> u32 {
     match stat {
         CoreStat::Strength => 1,
@@ -1643,6 +2291,32 @@ fn core_stat_id(stat: CoreStat) -> u32 {
         CoreStat::Magic => 4,
         CoreStat::Cunning => 5,
         CoreStat::Constitution => 6,
+    }
+}
+
+fn level_stat_id(preferred_game: Option<GameId>) -> u32 {
+    match preferred_game {
+        Some(GameId::Da2) => 36,
+        _ => 15,
+    }
+}
+
+fn experience_stat_id(preferred_game: Option<GameId>) -> u32 {
+    match preferred_game {
+        Some(GameId::Da2) => 35,
+        _ => 19,
+    }
+}
+
+fn point_pool_stat_id(kind: PointPoolKind, preferred_game: Option<GameId>) -> Option<u32> {
+    match (preferred_game, kind) {
+        (Some(GameId::Da2), PointPoolKind::Attribute) => Some(38),
+        (Some(GameId::Da2), PointPoolKind::Talent) => Some(39),
+        (Some(GameId::Da2), PointPoolKind::Skill | PointPoolKind::Specialization) => None,
+        (_, PointPoolKind::Attribute) => Some(34),
+        (_, PointPoolKind::Skill) => Some(35),
+        (_, PointPoolKind::Talent) => Some(36),
+        (_, PointPoolKind::Specialization) => Some(38),
     }
 }
 
@@ -1668,13 +2342,13 @@ impl CharacterAbilityAccess for Character {
 mod tests {
     use super::{
         AbilityListKind, BackpackItemReplacement, CharacterTarget, EditError, InventoryContainer,
-        ItemMetadataPatch, SaveEditor,
+        ItemMetadataPatch, PlotBooleanPatch, PlotIntegerPatch, SaveEditor,
     };
-    use crate::domain::gamedata::{GameDataLookup, GameId, SqliteGameData, DEFAULT_GAME_DATA_PATH};
+    use crate::domain::gamedata::{DEFAULT_GAME_DATA_PATH, GameDataLookup, GameId, SqliteGameData};
     use crate::domain::save::SaveGame;
-    use crate::domain::stats::{CoreStat, CoreStatsPatch};
-    use crate::gff4::fields::{SAVEGAME_MONEY, SAVEGAME_PARTYLIST};
+    use crate::domain::stats::{CoreStat, CoreStatsPatch, PointPoolsPatch};
     use crate::gff4::GffFile;
+    use crate::gff4::fields::{SAVEGAME_MONEY, SAVEGAME_PARTYLIST};
     use crate::test_support::{da2_save_path, dao_save_path};
     use std::fs;
     use std::path::PathBuf;
@@ -1716,7 +2390,10 @@ mod tests {
             )
             .unwrap();
         assert_eq!(editor.save().companions[0].core_stats.magic, 77);
-        assert_eq!(editor.save().companions[1].core_stats.magic, original_second);
+        assert_eq!(
+            editor.save().companions[1].core_stats.magic,
+            original_second
+        );
     }
 
     #[test]
@@ -1809,16 +2486,19 @@ mod tests {
         .unwrap();
 
         assert_eq!(
-            abilities.iter().map(|ability| ability.id).collect::<Vec<_>>(),
+            abilities
+                .iter()
+                .map(|ability| ability.id)
+                .collect::<Vec<_>>(),
             replacement
         );
     }
 
     #[test]
-    fn class_core_dependencies_do_not_block_talent_replacement() {
+    fn specialization_talent_requires_specialization_core() {
         let lookup = SqliteGameData::open(DEFAULT_GAME_DATA_PATH).unwrap();
         let current_ids = std::collections::BTreeSet::from([23_u32]);
-        let abilities = super::load_validated_abilities(
+        let error = super::load_validated_abilities(
             CharacterTarget::MainCharacter,
             AbilityListKind::Talents,
             &[23],
@@ -1826,10 +2506,53 @@ mod tests {
             &lookup,
             Some(crate::domain::gamedata::GameId::Dao),
         )
+        .unwrap_err();
+
+        match error {
+            EditError::MissingCoreAbility {
+                required_id: 4021, ..
+            } => {}
+            other => panic!("unexpected error: {other}"),
+        }
+    }
+
+    #[test]
+    fn archery_talent_accepts_either_rogue_or_warrior_core() {
+        let lookup = SqliteGameData::open(DEFAULT_GAME_DATA_PATH).unwrap();
+        let abilities = super::load_validated_abilities(
+            CharacterTarget::MainCharacter,
+            AbilityListKind::Talents,
+            &[4020, 3071],
+            &std::collections::BTreeSet::new(),
+            &lookup,
+            Some(crate::domain::gamedata::GameId::Dao),
+        )
         .unwrap();
 
-        assert_eq!(abilities.len(), 1);
-        assert_eq!(abilities[0].id, 23);
+        assert_eq!(
+            abilities
+                .iter()
+                .map(|ability| ability.id)
+                .collect::<Vec<_>>(),
+            vec![4020, 3071]
+        );
+    }
+
+    #[test]
+    fn core_talent_can_be_removed_when_dependents_are_removed() {
+        let lookup = SqliteGameData::open(DEFAULT_GAME_DATA_PATH).unwrap();
+        let current_ids = std::collections::BTreeSet::from([4022_u32, 1_u32]);
+        let abilities = super::load_validated_abilities(
+            CharacterTarget::MainCharacter,
+            AbilityListKind::Talents,
+            &[],
+            &current_ids,
+            &lookup,
+            Some(crate::domain::gamedata::GameId::Dao),
+        )
+        .unwrap();
+
+        assert!(abilities.is_empty());
     }
 
     #[test]
@@ -1889,7 +2612,10 @@ mod tests {
         .unwrap();
 
         assert_eq!(
-            abilities.iter().map(|ability| ability.id).collect::<Vec<_>>(),
+            abilities
+                .iter()
+                .map(|ability| ability.id)
+                .collect::<Vec<_>>(),
             vec![4002, 100021]
         );
     }
@@ -1933,12 +2659,7 @@ mod tests {
             .talents
             .iter()
             .map(|ability| ability.id)
-            .filter(|id| {
-                lookup
-                    .ability(*id, Some(GameId::Da2))
-                    .unwrap()
-                    .is_some()
-            })
+            .filter(|id| lookup.ability(*id, Some(GameId::Da2)).unwrap().is_some())
             .collect::<Vec<_>>();
         replacement.reverse();
 
@@ -1991,6 +2712,223 @@ mod tests {
         let original_len = editor.save().backpack.len();
         editor.remove_backpack_item(0).unwrap();
         assert_eq!(editor.save().backpack.len(), original_len - 1);
+    }
+
+    #[test]
+    fn dao_stack_size_allows_stackable_item() {
+        let lookup = SqliteGameData::open(DEFAULT_GAME_DATA_PATH).unwrap();
+        let mut editor =
+            SaveEditor::from_path_with_lookup(dao_save_path(), Some(&lookup), None).unwrap();
+        let index = first_stackable_backpack_item(&editor);
+
+        editor.set_backpack_item_stack_size(index, 2).unwrap();
+
+        assert_eq!(editor.save().backpack[index].item_stacksize, Some(2));
+        assert_eq!(raw_backpack_stack_size(&editor, index), Some(2));
+    }
+
+    #[test]
+    fn dao_stack_size_rejects_non_stackable_item() {
+        let lookup = SqliteGameData::open(DEFAULT_GAME_DATA_PATH).unwrap();
+        let mut editor =
+            SaveEditor::from_path_with_lookup(dao_save_path(), Some(&lookup), None).unwrap();
+        let index = first_non_stackable_backpack_item(&editor);
+
+        let error = editor.set_backpack_item_stack_size(index, 2).unwrap_err();
+
+        match error {
+            EditError::ItemIsNotStackable { index: error_index } => assert_eq!(error_index, index),
+            other => panic!("unexpected error: {other}"),
+        }
+    }
+
+    #[test]
+    fn dao_clones_non_stackable_backpack_item() {
+        let lookup = SqliteGameData::open(DEFAULT_GAME_DATA_PATH).unwrap();
+        let mut editor =
+            SaveEditor::from_path_with_lookup(dao_save_path(), Some(&lookup), None).unwrap();
+        let index = first_non_stackable_backpack_item(&editor);
+        let original_len = editor.save().backpack.len();
+        let original_resref = editor.save().backpack[index].resref.clone();
+        let original_object_id = editor.save().backpack[index].object_id;
+        let next_object_id = super::next_object_id(editor.raw()).unwrap();
+
+        let cloned_index = editor.clone_backpack_item(index).unwrap();
+
+        assert_eq!(cloned_index, original_len);
+        assert_eq!(editor.save().backpack.len(), original_len + 1);
+        assert_eq!(editor.save().backpack[cloned_index].resref, original_resref);
+        assert_eq!(
+            editor.save().backpack[cloned_index].object_id,
+            Some(next_object_id as i32)
+        );
+        assert_ne!(
+            editor.save().backpack[cloned_index].object_id,
+            original_object_id
+        );
+        assert_eq!(worlddb_last_id(&editor), Some(next_object_id));
+    }
+
+    #[test]
+    fn dao_clone_rejects_stackable_item() {
+        let lookup = SqliteGameData::open(DEFAULT_GAME_DATA_PATH).unwrap();
+        let mut editor =
+            SaveEditor::from_path_with_lookup(dao_save_path(), Some(&lookup), None).unwrap();
+        let index = first_stackable_backpack_item(&editor);
+
+        let error = editor.clone_backpack_item(index).unwrap_err();
+
+        match error {
+            EditError::ItemIsStackable { index: error_index } => assert_eq!(error_index, index),
+            other => panic!("unexpected error: {other}"),
+        }
+    }
+
+    #[test]
+    fn da2_clones_non_stackable_backpack_item() {
+        let lookup = SqliteGameData::open(DEFAULT_GAME_DATA_PATH).unwrap();
+        let mut editor =
+            SaveEditor::from_path_with_lookup(da2_save_path(), Some(&lookup), None).unwrap();
+        let index = first_non_stackable_backpack_item(&editor);
+        let original_len = editor.save().backpack.len();
+        let original_resref = editor.save().backpack[index].resref.clone();
+        let original_object_id = editor.save().backpack[index].object_id;
+        let next_object_id = super::next_object_id(editor.raw()).unwrap();
+
+        let cloned_index = editor.clone_backpack_item(index).unwrap();
+
+        assert_eq!(cloned_index, original_len);
+        assert_eq!(editor.save().backpack.len(), original_len + 1);
+        assert_eq!(editor.save().backpack[cloned_index].resref, original_resref);
+        assert_eq!(
+            editor.save().backpack[cloned_index].object_id,
+            Some(next_object_id as i32)
+        );
+        assert_ne!(
+            editor.save().backpack[cloned_index].object_id,
+            original_object_id
+        );
+        assert_eq!(worlddb_last_id(&editor), Some(next_object_id));
+    }
+
+    #[test]
+    fn da2_clone_rejects_stackable_item() {
+        let lookup = SqliteGameData::open(DEFAULT_GAME_DATA_PATH).unwrap();
+        let mut editor =
+            SaveEditor::from_path_with_lookup(da2_save_path(), Some(&lookup), None).unwrap();
+        let index = first_stackable_backpack_item(&editor);
+
+        let error = editor.clone_backpack_item(index).unwrap_err();
+
+        match error {
+            EditError::ItemIsStackable { index: error_index } => assert_eq!(error_index, index),
+            other => panic!("unexpected error: {other}"),
+        }
+    }
+
+    #[test]
+    fn da2_stack_size_allows_stackable_item() {
+        let lookup = SqliteGameData::open(DEFAULT_GAME_DATA_PATH).unwrap();
+        let mut editor =
+            SaveEditor::from_path_with_lookup(da2_save_path(), Some(&lookup), None).unwrap();
+        let index = first_stackable_backpack_item(&editor);
+
+        editor.set_backpack_item_stack_size(index, 42).unwrap();
+
+        assert_eq!(editor.save().backpack[index].item_stacksize, Some(42));
+        assert_eq!(raw_backpack_stack_size(&editor, index), Some(42));
+    }
+
+    #[test]
+    fn da2_stack_size_rejects_non_stackable_item() {
+        let lookup = SqliteGameData::open(DEFAULT_GAME_DATA_PATH).unwrap();
+        let mut editor =
+            SaveEditor::from_path_with_lookup(da2_save_path(), Some(&lookup), None).unwrap();
+        let index = first_non_stackable_backpack_item(&editor);
+
+        let error = editor.set_backpack_item_stack_size(index, 2).unwrap_err();
+
+        match error {
+            EditError::ItemIsNotStackable { index: error_index } => assert_eq!(error_index, index),
+            other => panic!("unexpected error: {other}"),
+        }
+    }
+
+    #[test]
+    fn stack_size_rejects_zero() {
+        let mut editor = SaveEditor::from_path(dao_save_path()).unwrap();
+
+        let error = editor.set_backpack_item_stack_size(0, 0).unwrap_err();
+
+        match error {
+            EditError::InvalidStackSize { stack_size: 0 } => {}
+            other => panic!("unexpected error: {other}"),
+        }
+    }
+
+    #[test]
+    fn stack_size_rejects_above_99() {
+        let mut editor = SaveEditor::from_path(dao_save_path()).unwrap();
+
+        let error = editor.set_backpack_item_stack_size(0, 100).unwrap_err();
+
+        match error {
+            EditError::InvalidStackSize { stack_size: 100 } => {}
+            other => panic!("unexpected error: {other}"),
+        }
+    }
+
+    #[test]
+    fn sets_companion_approval_by_object_id() {
+        let input = dao_save_path();
+        let output = test_output_path("companion-approval-edit.das");
+        let lookup = SqliteGameData::open(DEFAULT_GAME_DATA_PATH).unwrap();
+        let mut editor = SaveEditor::from_path_with_lookup(&input, Some(&lookup), None).unwrap();
+
+        editor
+            .set_character_approval(CharacterTarget::Companion(0), 12)
+            .unwrap();
+        editor.write_to_path(&output).unwrap();
+
+        let reloaded = GffFile::from_path(&output).unwrap();
+        let save = SaveGame::from_gff_with_lookup(&reloaded, Some(&lookup), None).unwrap();
+        let leliana = save
+            .companions
+            .iter()
+            .find(|character| character.template_resref.as_deref() == Some("gen00fl_leliana"))
+            .unwrap();
+        let dog = save
+            .companions
+            .iter()
+            .find(|character| character.template_resref.as_deref() == Some("gen00fl_dog"))
+            .unwrap();
+
+        assert_eq!(leliana.approval, Some(12));
+        assert_eq!(dog.approval, Some(100));
+    }
+
+    #[test]
+    fn inserts_missing_companion_point_pool_stat_row() {
+        let input = dao_save_path();
+        let output = test_output_path("companion-point-pool-edit.das");
+        let mut editor = SaveEditor::from_path(&input).unwrap();
+        remove_stat_row(&mut editor, CharacterTarget::Companion(0), 34);
+        editor.save.companions[0].point_pools.attribute_points = None;
+
+        editor
+            .patch_character_point_pools(
+                CharacterTarget::Companion(0),
+                PointPoolsPatch {
+                    attribute_points: Some(9),
+                    ..Default::default()
+                },
+            )
+            .unwrap();
+        editor.write_to_path(&output).unwrap();
+
+        let reloaded = GffFile::from_path(&output).unwrap();
+        let save = SaveGame::from_gff(&reloaded).unwrap();
+        assert_eq!(save.companions[0].point_pools.attribute_points, Some(9));
     }
 
     #[test]
@@ -2065,7 +3003,13 @@ mod tests {
         let index = first_backpack_item_with_properties(&editor).unwrap_or(0);
         let original_len = editor.save().backpack[index].properties.len();
         editor
-            .add_item_property(InventoryContainer::Backpack, index, 3011, 12.5, Some(&lookup))
+            .add_item_property(
+                InventoryContainer::Backpack,
+                index,
+                3011,
+                12.5,
+                Some(&lookup),
+            )
             .unwrap();
         let properties = &editor.save().backpack[index].properties;
         assert_eq!(properties.len(), original_len + 1);
@@ -2091,7 +3035,10 @@ mod tests {
         editor
             .remove_item_property(InventoryContainer::Backpack, index, 0)
             .unwrap();
-        assert_eq!(editor.save().backpack[index].properties.len(), original_len - 1);
+        assert_eq!(
+            editor.save().backpack[index].properties.len(),
+            original_len - 1
+        );
     }
 
     #[test]
@@ -2137,12 +3084,77 @@ mod tests {
     }
 
     #[test]
+    fn write_reload_main_character_experience_edit() {
+        let input = dao_save_path();
+        let output = test_output_path("main-experience-edit.das");
+        let mut editor = SaveEditor::from_path(&input).unwrap();
+        editor
+            .set_character_experience(CharacterTarget::MainCharacter, 123456)
+            .unwrap();
+        editor.write_to_path(&output).unwrap();
+        let reloaded = GffFile::from_path(&output).unwrap();
+        let save = SaveGame::from_gff(&reloaded).unwrap();
+        assert_eq!(save.main_character.experience, Some(123456));
+    }
+
+    #[test]
+    fn write_reload_da2_main_character_level_and_experience_edit() {
+        let input = da2_save_path();
+        let output = test_output_path("da2-main-progress-edit.das");
+        let mut editor = SaveEditor::from_path(&input).unwrap();
+        editor
+            .set_character_level(CharacterTarget::MainCharacter, 13)
+            .unwrap();
+        editor
+            .set_character_experience(CharacterTarget::MainCharacter, 76543)
+            .unwrap();
+        editor.write_to_path(&output).unwrap();
+        let reloaded = GffFile::from_path(&output).unwrap();
+        let save = SaveGame::from_gff(&reloaded).unwrap();
+        assert_eq!(save.main_character.level, Some(13));
+        assert_eq!(save.main_character.experience, Some(76543));
+    }
+
+    #[test]
+    fn write_reload_da2_plot_flag_edit() {
+        let input = da2_save_path();
+        let output = test_output_path("da2-plot-flag-edit.das");
+        let mut editor = SaveEditor::from_path(&input).unwrap();
+
+        editor
+            .patch_plot_flags(
+                &[
+                    PlotBooleanPatch {
+                        id: 2000,
+                        value: true,
+                    },
+                    PlotBooleanPatch {
+                        id: 2005,
+                        value: false,
+                    },
+                ],
+                &[
+                    PlotIntegerPatch { id: 1000, value: 2 },
+                    PlotIntegerPatch { id: 1001, value: 3 },
+                ],
+            )
+            .unwrap();
+        editor.write_to_path(&output).unwrap();
+
+        let reloaded = GffFile::from_path(&output).unwrap();
+        let save = SaveGame::from_gff(&reloaded).unwrap();
+        assert_eq!(save.plot_flags.booleans.get(&2000), Some(&true));
+        assert_eq!(save.plot_flags.booleans.get(&2005), Some(&false));
+        assert_eq!(save.plot_flags.integers.get(&1000), Some(&2));
+        assert_eq!(save.plot_flags.integers.get(&1001), Some(&3));
+    }
+
+    #[test]
     fn write_reload_ability_edit() {
         let lookup = SqliteGameData::open(DEFAULT_GAME_DATA_PATH).unwrap();
         let input = dao_save_path();
         let output = test_output_path("ability-edit.das");
-        let mut editor =
-            SaveEditor::from_path_with_lookup(&input, Some(&lookup), None).unwrap();
+        let mut editor = SaveEditor::from_path_with_lookup(&input, Some(&lookup), None).unwrap();
         let original = editor
             .save()
             .main_character
@@ -2177,8 +3189,7 @@ mod tests {
         let lookup = SqliteGameData::open(DEFAULT_GAME_DATA_PATH).unwrap();
         let input = dao_save_path();
         let output = test_output_path("backpack-metadata-edit.das");
-        let mut editor =
-            SaveEditor::from_path_with_lookup(&input, Some(&lookup), None).unwrap();
+        let mut editor = SaveEditor::from_path_with_lookup(&input, Some(&lookup), None).unwrap();
         editor
             .patch_item_metadata(
                 InventoryContainer::Backpack,
@@ -2197,18 +3208,112 @@ mod tests {
     }
 
     #[test]
+    fn write_reload_dao_stack_size_edit() {
+        let lookup = SqliteGameData::open(DEFAULT_GAME_DATA_PATH).unwrap();
+        let input = dao_save_path();
+        let output = test_output_path("dao-backpack-stack-edit.das");
+        let mut editor = SaveEditor::from_path_with_lookup(&input, Some(&lookup), None).unwrap();
+        let index = first_stackable_backpack_item(&editor);
+
+        editor.set_backpack_item_stack_size(index, 2).unwrap();
+        editor.write_to_path(&output).unwrap();
+
+        let reloaded = GffFile::from_path(&output).unwrap();
+        let save = SaveGame::from_gff_with_lookup(&reloaded, Some(&lookup), None).unwrap();
+        assert_eq!(save.backpack[index].item_stacksize, Some(2));
+    }
+
+    #[test]
+    fn write_reload_dao_cloned_backpack_item() {
+        let lookup = SqliteGameData::open(DEFAULT_GAME_DATA_PATH).unwrap();
+        let input = dao_save_path();
+        let output = test_output_path("dao-backpack-clone.das");
+        let mut editor = SaveEditor::from_path_with_lookup(&input, Some(&lookup), None).unwrap();
+        let index = first_non_stackable_backpack_item(&editor);
+        let original_len = editor.save().backpack.len();
+        let original_resref = editor.save().backpack[index].resref.clone();
+        let original_object_id = editor.save().backpack[index].object_id;
+        let cloned_index = editor.clone_backpack_item(index).unwrap();
+
+        editor.write_to_path(&output).unwrap();
+
+        let reloaded = GffFile::from_path(&output).unwrap();
+        let save = SaveGame::from_gff_with_lookup(&reloaded, Some(&lookup), None).unwrap();
+        assert_eq!(save.backpack.len(), original_len + 1);
+        assert_eq!(save.backpack[cloned_index].resref, original_resref);
+        assert_ne!(save.backpack[cloned_index].object_id, original_object_id);
+    }
+
+    #[test]
+    fn write_reload_da2_cloned_backpack_item() {
+        let lookup = SqliteGameData::open(DEFAULT_GAME_DATA_PATH).unwrap();
+        let input = da2_save_path();
+        let output = test_output_path("da2-backpack-clone.das");
+        let mut editor = SaveEditor::from_path_with_lookup(&input, Some(&lookup), None).unwrap();
+        let index = first_non_stackable_backpack_item(&editor);
+        let original_len = editor.save().backpack.len();
+        let original_resref = editor.save().backpack[index].resref.clone();
+        let original_object_id = editor.save().backpack[index].object_id;
+        let cloned_index = editor.clone_backpack_item(index).unwrap();
+
+        editor.write_to_path(&output).unwrap();
+
+        let reloaded = GffFile::from_path(&output).unwrap();
+        let save = SaveGame::from_gff_with_lookup(&reloaded, Some(&lookup), None).unwrap();
+        assert_eq!(save.backpack.len(), original_len + 1);
+        assert_eq!(save.backpack[cloned_index].resref, original_resref);
+        assert_ne!(save.backpack[cloned_index].object_id, original_object_id);
+    }
+
+    #[test]
+    fn write_reload_da2_stack_size_edit() {
+        let lookup = SqliteGameData::open(DEFAULT_GAME_DATA_PATH).unwrap();
+        let input = da2_save_path();
+        let output = test_output_path("da2-backpack-stack-edit.das");
+        let mut editor = SaveEditor::from_path_with_lookup(&input, Some(&lookup), None).unwrap();
+        let index = first_stackable_backpack_item(&editor);
+
+        editor.set_backpack_item_stack_size(index, 42).unwrap();
+        editor.write_to_path(&output).unwrap();
+
+        let reloaded = GffFile::from_path(&output).unwrap();
+        let save = SaveGame::from_gff_with_lookup(&reloaded, Some(&lookup), None).unwrap();
+        assert_eq!(save.backpack[index].item_stacksize, Some(42));
+    }
+
+    #[test]
+    fn write_reload_crafting_recipe_edit() {
+        let lookup = SqliteGameData::open(DEFAULT_GAME_DATA_PATH).unwrap();
+        let input = dao_save_path();
+        let output = test_output_path("crafting-recipe-edit.das");
+        let mut editor = SaveEditor::from_path_with_lookup(&input, Some(&lookup), None).unwrap();
+
+        editor.replace_crafting_recipes(&[2, 11, 20019]).unwrap();
+        editor.write_to_path(&output).unwrap();
+
+        let reloaded = GffFile::from_path(&output).unwrap();
+        let save = SaveGame::from_gff_with_lookup(&reloaded, Some(&lookup), None).unwrap();
+        assert_eq!(save.crafting_recipes, vec![2, 11, 20019]);
+    }
+
+    #[test]
     fn write_reload_item_property_edit() {
         let lookup = SqliteGameData::open(DEFAULT_GAME_DATA_PATH).unwrap();
         let input = dao_save_path();
         let output = test_output_path("item-property-edit.das");
-        let mut editor =
-            SaveEditor::from_path_with_lookup(&input, Some(&lookup), None).unwrap();
+        let mut editor = SaveEditor::from_path_with_lookup(&input, Some(&lookup), None).unwrap();
         let index = first_backpack_item_with_properties(&editor).unwrap();
         editor
             .set_item_property_power(InventoryContainer::Backpack, index, 0, 21.0)
             .unwrap();
         editor
-            .add_item_property(InventoryContainer::Backpack, index, 3011, 9.0, Some(&lookup))
+            .add_item_property(
+                InventoryContainer::Backpack,
+                index,
+                3011,
+                9.0,
+                Some(&lookup),
+            )
             .unwrap();
         editor.write_to_path(&output).unwrap();
         let reloaded = GffFile::from_path(&output).unwrap();
@@ -2222,8 +3327,7 @@ mod tests {
         let lookup = SqliteGameData::open(DEFAULT_GAME_DATA_PATH).unwrap();
         let input = dao_save_path();
         let output = test_output_path("item-property-id-edit.das");
-        let mut editor =
-            SaveEditor::from_path_with_lookup(&input, Some(&lookup), None).unwrap();
+        let mut editor = SaveEditor::from_path_with_lookup(&input, Some(&lookup), None).unwrap();
         let index = first_backpack_item_with_properties(&editor).unwrap();
         editor
             .set_item_property_id(InventoryContainer::Backpack, index, 0, 3011, Some(&lookup))
@@ -2232,6 +3336,39 @@ mod tests {
         let reloaded = GffFile::from_path(&output).unwrap();
         let save = SaveGame::from_gff_with_lookup(&reloaded, Some(&lookup), None).unwrap();
         assert_eq!(save.backpack[index].properties[0].id, 3011);
+    }
+
+    #[test]
+    fn da2_added_item_property_uses_float_property_id_storage() {
+        let lookup = SqliteGameData::open(DEFAULT_GAME_DATA_PATH).unwrap();
+        let mut editor =
+            SaveEditor::from_path_with_lookup(da2_save_path(), Some(&lookup), None).unwrap();
+        let index = first_backpack_item_with_properties(&editor).unwrap_or(0);
+        clear_backpack_item_properties(&mut editor, index);
+
+        editor
+            .add_item_property(
+                InventoryContainer::Backpack,
+                index,
+                1000,
+                1.0,
+                Some(&lookup),
+            )
+            .unwrap();
+
+        let raw_item =
+            super::raw_item_mut(&mut editor.raw, InventoryContainer::Backpack, index).unwrap();
+        let property_ids = raw_item
+            .get_list_by_name(super::ITEM_PROPERTIES_NAME)
+            .unwrap();
+        assert_eq!(property_ids.first(), Some(&super::Value::Float32(1000.0)));
+        let property_powers = raw_item
+            .get_list_by_name(super::ITEM_PROPERTY_POWERS_NAME)
+            .unwrap();
+        assert_eq!(
+            property_powers.first(),
+            Some(&super::Value::UInt32(1.0f32.to_bits()))
+        );
     }
 
     fn remove_stat_row(editor: &mut SaveEditor, target: CharacterTarget, stat_id: u32) {
@@ -2265,8 +3402,46 @@ mod tests {
             .position(|item| !item.properties.is_empty())
     }
 
+    fn first_stackable_backpack_item(editor: &SaveEditor) -> usize {
+        editor
+            .save()
+            .backpack
+            .iter()
+            .position(|item| item.stackable)
+            .expect("expected stackable backpack item")
+    }
+
+    fn first_non_stackable_backpack_item(editor: &SaveEditor) -> usize {
+        editor
+            .save()
+            .backpack
+            .iter()
+            .position(|item| !item.stackable)
+            .expect("expected non-stackable backpack item")
+    }
+
+    fn raw_backpack_stack_size(editor: &SaveEditor, index: usize) -> Option<u32> {
+        super::raw_item(editor.raw(), InventoryContainer::Backpack, index)
+            .unwrap()
+            .get(super::ITEM_STACKSIZE)
+            .and_then(super::value_to_u32)
+    }
+
+    fn worlddb_last_id(editor: &SaveEditor) -> Option<u32> {
+        editor
+            .raw()
+            .root()
+            .get(super::SAVEGAME_WORLDDATABASE)
+            .and_then(|value| super::find_field_value(value, super::SAVEGAME_WORLDDB_LASTID))
+            .and_then(super::value_to_u32)
+    }
+
     fn corrupt_first_backpack_property_power_list(editor: &mut SaveEditor) {
-        let party = editor.raw.root_mut().get_struct_mut(SAVEGAME_PARTYLIST).unwrap();
+        let party = editor
+            .raw
+            .root_mut()
+            .get_struct_mut(SAVEGAME_PARTYLIST)
+            .unwrap();
         let items = party.get_list_mut(super::SAVEGAME_BACKPACK).unwrap();
         for value in items {
             let Some(item) = value.as_struct_mut() else {
@@ -2281,5 +3456,19 @@ mod tests {
             }
         }
         panic!("expected backpack item with property powers");
+    }
+
+    fn clear_backpack_item_properties(editor: &mut SaveEditor, index: usize) {
+        editor.save.backpack[index].properties.clear();
+        let raw_item =
+            super::raw_item_mut(&mut editor.raw, InventoryContainer::Backpack, index).unwrap();
+        raw_item
+            .get_list_mut_by_name(super::ITEM_PROPERTIES_NAME)
+            .unwrap()
+            .clear();
+        raw_item
+            .get_list_mut_by_name(super::ITEM_PROPERTY_POWERS_NAME)
+            .unwrap()
+            .clear();
     }
 }

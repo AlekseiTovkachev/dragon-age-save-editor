@@ -1,16 +1,17 @@
 use crate::domain::ability::{AbilityKind, AbilityRef};
 use crate::domain::character::Character;
 use crate::domain::gamedata::{GameDataLookup, GameId, LookupError};
-use crate::domain::item::{Item, ItemProperty, MaterialProfile};
+use crate::domain::item::{Item, ItemCategory, ItemProperty, MaterialProfile};
 use crate::domain::stats::{CoreStats, PointPools};
 use crate::gff4::fields::{
-    ITEM_COST, ITEM_STACKSIZE, OBJECT_ID, SAVEGAME_BACKPACK, SAVEGAME_CREATURE_STATS,
-    SAVEGAME_EQUIPMENT_ITEMS, SAVEGAME_ITEM_MATERIALTYPE, SAVEGAME_MONEY, SAVEGAME_OBJECT_NAME,
-    SAVEGAME_OBJECT_PLOT, SAVEGAME_PARTYLIST, SAVEGAME_PARTYPOOLMEMBERS, SAVEGAME_SKILLLIST,
-    SAVEGAME_SPELLLIST, SAVEGAME_STATLIST, SAVEGAME_TALENTLIST, TEMPLATERESREF,
-    field_id_by_name,
+    ITEM_COST, ITEM_STACKSIZE, OBJECT_ID, SAVEGAME_BACKPACK, SAVEGAME_CAMPAIGN,
+    SAVEGAME_CRAFTING_RECIPE_LIST, SAVEGAME_CREATURE_STATS, SAVEGAME_EQUIPMENT_ITEMS,
+    SAVEGAME_ITEM_MATERIALTYPE, SAVEGAME_MONEY, SAVEGAME_OBJECT_NAME, SAVEGAME_OBJECT_PLOT,
+    SAVEGAME_PARTYLIST, SAVEGAME_PARTYPOOLMEMBERS, SAVEGAME_SKILLLIST, SAVEGAME_SPELLLIST,
+    SAVEGAME_STATLIST, SAVEGAME_TALENTLIST, TEMPLATERESREF, field_id_by_name,
 };
 use crate::gff4::{GffFile, GffStruct, Value};
+use std::collections::BTreeMap;
 use std::error::Error;
 use std::fmt;
 
@@ -22,8 +23,14 @@ const SAVEGAME_PLAYERCHAR_CHAR_NAME: &str = "SAVEGAME_PLAYERCHAR_CHAR";
 const SAVEGAME_STATPROPERTY_INDEX_NAME: &str = "SAVEGAME_STATPROPERTY_INDEX";
 const SAVEGAME_STATPROPERTY_BASE_NAME: &str = "SAVEGAME_STATPROPERTY_BASE";
 const SAVEGAME_PARTY_APPROVAL_LIST_NAME: &str = "SAVEGAME_PARTY_APPROVAL_LIST";
+const SAVEGAME_PARTY_APPROVAL_ID_NAME: &str = "SAVEGAME_PARTY_APPROVAL_ID";
 const SAVEGAME_PARTY_APPROVAL_LEVEL_NAME: &str = "SAVEGAME_PARTY_APPROVAL_LEVEL";
 const SAVEGAME_ABILITYLIST_NAME: &str = "SAVEGAME_ABILITYLIST";
+pub const WORLD_VAULT_LABEL: u32 = 16024;
+pub const WORLD_VAULT_ID_LABEL: u32 = 17601;
+pub const WORLD_VAULT_VALUE_LABEL: u32 = 17602;
+pub const WORLD_VAULT_INTS_LABEL: u32 = 17603;
+pub const WORLD_VAULT_BOOLEANS_LABEL: u32 = 17607;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct SaveGame {
@@ -32,6 +39,14 @@ pub struct SaveGame {
     pub main_character: Character,
     pub companions: Vec<Character>,
     pub backpack: Vec<Item>,
+    pub crafting_recipes: Vec<u32>,
+    pub plot_flags: PlotFlags,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
+pub struct PlotFlags {
+    pub booleans: BTreeMap<u16, bool>,
+    pub integers: BTreeMap<u16, i32>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -123,6 +138,8 @@ impl SaveGame {
             lookup,
             preferred_game,
         )?;
+        let crafting_recipes = extract_u32_list(party, SAVEGAME_CRAFTING_RECIPE_LIST);
+        let plot_flags = extract_plot_flags(root);
 
         Ok(Self {
             preferred_game,
@@ -130,6 +147,8 @@ impl SaveGame {
             main_character,
             companions,
             backpack,
+            crafting_recipes,
+            plot_flags,
         })
     }
 }
@@ -139,7 +158,7 @@ fn extract_character_list(
     label: u32,
     path: &str,
     main_character: bool,
-    approvals: Option<&[Option<i32>]>,
+    approvals: Option<&BTreeMap<i32, i32>>,
     lookup: Option<&dyn GameDataLookup>,
     preferred_game: Option<GameId>,
 ) -> Result<Vec<Character>, ExtractError> {
@@ -151,7 +170,9 @@ fn extract_character_list(
             Value::Struct(structure) => result.push(extract_character(
                 structure,
                 main_character && index == 0,
-                approvals.and_then(|values| values.get(index).copied().flatten()),
+                optional_i32(structure, OBJECT_ID).and_then(|object_id| {
+                    approvals.and_then(|values| values.get(&object_id).copied())
+                }),
                 lookup,
                 preferred_game,
             )?),
@@ -193,14 +214,16 @@ fn extract_character(
     )
     .unwrap_or_default();
 
-    let (core_stats, level, point_pools) = extract_stats(stats_source)?;
-    let (skills, talents, spells) = extract_character_abilities(stats_source, lookup, preferred_game)?;
+    let (core_stats, level, experience, point_pools) = extract_stats(stats_source, preferred_game)?;
+    let (skills, talents, spells) =
+        extract_character_abilities(stats_source, lookup, preferred_game)?;
 
     Ok(Character {
         name,
         template_resref,
         approval,
         level,
+        experience,
         core_stats,
         point_pools,
         equipment,
@@ -242,9 +265,13 @@ fn extract_character_name(
     Ok("<unknown>".to_string())
 }
 
-fn extract_stats(source: &GffStruct) -> Result<(CoreStats, Option<u32>, PointPools), ExtractError> {
+fn extract_stats(
+    source: &GffStruct,
+    preferred_game: Option<GameId>,
+) -> Result<(CoreStats, Option<u32>, Option<u32>, PointPools), ExtractError> {
     let mut core_stats = CoreStats::default();
     let mut level = None;
+    let mut experience = None;
     let mut point_pools = PointPools::default();
 
     let stat_list = require_list(source, SAVEGAME_STATLIST, "character.SAVEGAME_STATLIST")?;
@@ -274,32 +301,40 @@ fn extract_stats(source: &GffStruct) -> Result<(CoreStats, Option<u32>, PointPoo
                 "character.SAVEGAME_STATLIST[].SAVEGAME_STATPROPERTY_BASE",
             )?;
             core_stats.set(core_stat, base);
-        } else if stat_id == 15 {
+        } else if stat_id == level_stat_id(preferred_game) {
             let base = require_u32_by_name(
                 stat,
                 SAVEGAME_STATPROPERTY_BASE_NAME,
                 "character.SAVEGAME_STATLIST[].SAVEGAME_STATPROPERTY_BASE",
             )?;
             level = Some(base);
-        } else if stat_id == 34 {
+        } else if stat_id == experience_stat_id(preferred_game) {
+            let base = require_u32_by_name(
+                stat,
+                SAVEGAME_STATPROPERTY_BASE_NAME,
+                "character.SAVEGAME_STATLIST[].SAVEGAME_STATPROPERTY_BASE",
+            )?;
+            experience = Some(base);
+        } else if Some(stat_id) == point_pool_stat_id(PointPoolKind::Attribute, preferred_game) {
             point_pools.attribute_points = Some(require_u32_by_name(
                 stat,
                 SAVEGAME_STATPROPERTY_BASE_NAME,
                 "character.SAVEGAME_STATLIST[].SAVEGAME_STATPROPERTY_BASE",
             )?);
-        } else if stat_id == 35 {
+        } else if Some(stat_id) == point_pool_stat_id(PointPoolKind::Skill, preferred_game) {
             point_pools.skill_points = Some(require_u32_by_name(
                 stat,
                 SAVEGAME_STATPROPERTY_BASE_NAME,
                 "character.SAVEGAME_STATLIST[].SAVEGAME_STATPROPERTY_BASE",
             )?);
-        } else if stat_id == 36 {
+        } else if Some(stat_id) == point_pool_stat_id(PointPoolKind::Talent, preferred_game) {
             point_pools.talent_points = Some(require_u32_by_name(
                 stat,
                 SAVEGAME_STATPROPERTY_BASE_NAME,
                 "character.SAVEGAME_STATLIST[].SAVEGAME_STATPROPERTY_BASE",
             )?);
-        } else if stat_id == 38 {
+        } else if Some(stat_id) == point_pool_stat_id(PointPoolKind::Specialization, preferred_game)
+        {
             point_pools.specialization_points = Some(require_u32_by_name(
                 stat,
                 SAVEGAME_STATPROPERTY_BASE_NAME,
@@ -308,12 +343,12 @@ fn extract_stats(source: &GffStruct) -> Result<(CoreStats, Option<u32>, PointPoo
         }
     }
 
-    Ok((core_stats, level, point_pools))
+    Ok((core_stats, level, experience, point_pools))
 }
 
-fn extract_companion_approvals(source: &GffStruct) -> Result<Vec<Option<i32>>, ExtractError> {
+fn extract_companion_approvals(source: &GffStruct) -> Result<BTreeMap<i32, i32>, ExtractError> {
     let Some(values) = source.get_by_name(SAVEGAME_PARTY_APPROVAL_LIST_NAME) else {
-        return Ok(Vec::new());
+        return Ok(BTreeMap::new());
     };
     let Value::List(entries) = values else {
         return Err(ExtractError::TypeMismatch {
@@ -323,17 +358,27 @@ fn extract_companion_approvals(source: &GffStruct) -> Result<Vec<Option<i32>>, E
         });
     };
 
-    let mut approvals = Vec::with_capacity(entries.len());
+    let mut approvals = BTreeMap::new();
     for (index, value) in entries.iter().enumerate() {
         match value {
-            Value::Struct(structure) => approvals.push(Some(require_i32_by_name(
-                structure,
-                SAVEGAME_PARTY_APPROVAL_LEVEL_NAME,
-                &format!(
-                    "root.SAVEGAME_PARTYLIST.SAVEGAME_PARTY_APPROVAL_LIST[{index}].SAVEGAME_PARTY_APPROVAL_LEVEL"
-                ),
-            )?)),
-            Value::Null => approvals.push(None),
+            Value::Struct(structure) => {
+                let object_id = require_i32_by_name(
+                    structure,
+                    SAVEGAME_PARTY_APPROVAL_ID_NAME,
+                    &format!(
+                        "root.SAVEGAME_PARTYLIST.SAVEGAME_PARTY_APPROVAL_LIST[{index}].SAVEGAME_PARTY_APPROVAL_ID"
+                    ),
+                )?;
+                let approval = require_i32_by_name(
+                    structure,
+                    SAVEGAME_PARTY_APPROVAL_LEVEL_NAME,
+                    &format!(
+                        "root.SAVEGAME_PARTYLIST.SAVEGAME_PARTY_APPROVAL_LIST[{index}].SAVEGAME_PARTY_APPROVAL_LEVEL"
+                    ),
+                )?;
+                approvals.insert(object_id, approval);
+            }
+            Value::Null => {}
             other => {
                 return Err(ExtractError::TypeMismatch {
                     path: format!("root.SAVEGAME_PARTYLIST.SAVEGAME_PARTY_APPROVAL_LIST[{index}]"),
@@ -380,20 +425,17 @@ fn extract_item(
     lookup: Option<&dyn GameDataLookup>,
     preferred_game: Option<GameId>,
 ) -> Result<Item, ExtractError> {
-    let property_ids = optional_typed_list_by_name(
-        source,
-        ITEM_PROPERTIES_NAME,
-        "item.ITEM_PROPERTIES",
-    )?
-        .map(extract_u32_values)
-        .unwrap_or_default();
+    let property_ids =
+        optional_typed_list_by_name(source, ITEM_PROPERTIES_NAME, "item.ITEM_PROPERTIES")?
+            .map(extract_u32_values)
+            .unwrap_or_default();
     let property_powers = optional_typed_list_by_name(
         source,
         ITEM_PROPERTY_POWERS_NAME,
         "item.ITEM_PROPERTY_POWERS",
     )?
-        .map(extract_f32_values)
-        .unwrap_or_default();
+    .map(|values| extract_property_power_values(values, preferred_game))
+    .unwrap_or_default();
 
     if property_ids.len() != property_powers.len() {
         return Err(ExtractError::InvalidValue {
@@ -409,7 +451,10 @@ fn extract_item(
     let mut properties = Vec::new();
     for (id, power) in property_ids.into_iter().zip(property_powers.into_iter()) {
         let name = if let Some(lookup) = lookup {
-            map_lookup_error(lookup.item_property_name(id), "item.ITEM_PROPERTIES")?
+            map_lookup_error(
+                lookup.item_property_name(id, preferred_game),
+                "item.ITEM_PROPERTIES",
+            )?
         } else {
             None
         };
@@ -418,14 +463,18 @@ fn extract_item(
 
     let resref = optional_string(source, TEMPLATERESREF);
     let object_name = source.get(SAVEGAME_OBJECT_NAME).and_then(value_to_text);
+    let catalog_item = if let (Some(lookup), Some(resref)) = (lookup, resref.as_deref()) {
+        map_lookup_error(
+            lookup.item_metadata(resref, preferred_game),
+            "item.TEMPLATERESREF",
+        )?
+    } else {
+        None
+    };
     let name = if let Some(display_name) = object_name {
         Some(clean_string(display_name))
-    } else if let (Some(lookup), Some(resref)) = (lookup, resref.as_deref()) {
-        let resolved = map_lookup_error(
-            lookup.item_name(resref, preferred_game),
-            "item.TEMPLATERESREF",
-        )?;
-        resolved.or_else(|| Some(clean_string(resref.to_string()).to_ascii_lowercase()))
+    } else if let Some(resolved) = catalog_item.as_ref().and_then(|item| item.name.clone()) {
+        Some(resolved)
     } else if let Some(resref) = resref.as_deref() {
         Some(clean_string(resref.to_string()).to_ascii_lowercase())
     } else {
@@ -459,6 +508,15 @@ fn extract_item(
     Ok(Item {
         resref,
         name,
+        wiki_url: catalog_item.as_ref().and_then(|item| item.wiki_url.clone()),
+        category: catalog_item
+            .as_ref()
+            .map(|item| item.category)
+            .unwrap_or(ItemCategory::Uncategorized),
+        stackable: catalog_item
+            .as_ref()
+            .map(|item| item.stackable)
+            .unwrap_or(false),
         object_id: optional_i32(source, OBJECT_ID),
         equipment_slot: optional_u32_by_name(source, SAVEGAME_EQUIPMENTSET_SLOT_NAME),
         item_cost: optional_u32(source, ITEM_COST),
@@ -638,8 +696,72 @@ fn extract_u32_values(items: &[Value]) -> Vec<u32> {
     items.iter().filter_map(value_to_u32).collect()
 }
 
+fn extract_plot_flags(root: &GffStruct) -> PlotFlags {
+    let Some(world_vault) = root.get_struct(WORLD_VAULT_LABEL) else {
+        return PlotFlags::default();
+    };
+    PlotFlags {
+        booleans: extract_world_vault_bools(world_vault),
+        integers: extract_world_vault_ints(world_vault),
+    }
+}
+
+fn extract_world_vault_bools(world_vault: &GffStruct) -> BTreeMap<u16, bool> {
+    let mut values = BTreeMap::new();
+    let Some(entries) = world_vault.get_list(WORLD_VAULT_BOOLEANS_LABEL) else {
+        return values;
+    };
+    for entry in entries.iter().filter_map(Value::as_struct) {
+        let Some(id) = entry.get(WORLD_VAULT_ID_LABEL).and_then(value_to_u16) else {
+            continue;
+        };
+        let Some(value) = entry.get(WORLD_VAULT_VALUE_LABEL).and_then(value_to_u32) else {
+            continue;
+        };
+        values.insert(id, value != 0);
+    }
+    values
+}
+
+fn extract_world_vault_ints(world_vault: &GffStruct) -> BTreeMap<u16, i32> {
+    let mut values = BTreeMap::new();
+    let Some(entries) = world_vault.get_list(WORLD_VAULT_INTS_LABEL) else {
+        return values;
+    };
+    for entry in entries.iter().filter_map(Value::as_struct) {
+        let Some(id) = entry.get(WORLD_VAULT_ID_LABEL).and_then(value_to_u16) else {
+            continue;
+        };
+        let Some(value) = entry.get(WORLD_VAULT_VALUE_LABEL).and_then(value_to_i32) else {
+            continue;
+        };
+        values.insert(id, value);
+    }
+    values
+}
+
+fn extract_property_power_values(items: &[Value], preferred_game: Option<GameId>) -> Vec<f32> {
+    if preferred_game.is_some_and(GameId::is_da2) {
+        return items
+            .iter()
+            .filter_map(value_to_da2_property_power)
+            .collect();
+    }
+    extract_f32_values(items)
+}
+
 fn extract_f32_values(items: &[Value]) -> Vec<f32> {
     items.iter().filter_map(value_to_f32).collect()
+}
+
+fn value_to_da2_property_power(value: &Value) -> Option<f32> {
+    match value {
+        Value::UInt32(v) => Some(f32::from_bits(*v)),
+        Value::Int32(v) => Some(f32::from_bits(*v as u32)),
+        Value::UInt64(v) => u32::try_from(*v).ok().map(f32::from_bits),
+        Value::Int64(v) if *v >= 0 => u32::try_from(*v).ok().map(f32::from_bits),
+        _ => value_to_f32(value),
+    }
 }
 
 fn value_to_u32(value: &Value) -> Option<u32> {
@@ -654,6 +776,10 @@ fn value_to_u32(value: &Value) -> Option<u32> {
         Value::Float64(v) if v.is_finite() && *v >= 0.0 => Some(*v as u32),
         _ => None,
     }
+}
+
+fn value_to_u16(value: &Value) -> Option<u16> {
+    value_to_u32(value).and_then(|value| u16::try_from(value).ok())
 }
 
 fn value_to_f32(value: &Value) -> Option<f32> {
@@ -702,7 +828,9 @@ fn value_to_display_string(value: &Value) -> Option<String> {
 fn value_to_text(value: &Value) -> Option<String> {
     match value {
         Value::ECString(text) => Some(text.clone()),
-        Value::TlkString { text: Some(text), .. } => Some(text.clone()),
+        Value::TlkString {
+            text: Some(text), ..
+        } => Some(text.clone()),
         _ => None,
     }
 }
@@ -716,9 +844,24 @@ fn map_lookup_error<T>(result: Result<T, LookupError>, path: &str) -> Result<T, 
 
 fn infer_game(file: &GffFile) -> Option<GameId> {
     match &file.header.file_version {
-        b"V1.1" => Some(GameId::Dao),
+        b"V1.1" => Some(infer_dao_campaign(file)),
         b"V2.0" => Some(GameId::Da2),
         _ => None,
+    }
+}
+
+fn infer_dao_campaign(file: &GffFile) -> GameId {
+    let campaign_resource = file
+        .root
+        .get_struct(SAVEGAME_CAMPAIGN)
+        .and_then(|campaign| campaign.get(field_id_by_name("SAVEGAME_CAMPAIGN_RESOURCE")?))
+        .and_then(value_to_display_string)
+        .map(clean_string)
+        .map(|value| value.to_ascii_uppercase());
+
+    match campaign_resource.as_deref() {
+        Some("DAO_PRC_EP_1" | "DAO_PRC_STR" | "DAO_PRC_GIB") => GameId::DaoAwakening,
+        _ => GameId::Dao,
     }
 }
 
@@ -738,12 +881,46 @@ fn core_stat_from_id(stat_id: u32) -> Option<crate::domain::stats::CoreStat> {
     }
 }
 
+#[derive(Debug, Clone, Copy)]
+enum PointPoolKind {
+    Attribute,
+    Skill,
+    Talent,
+    Specialization,
+}
+
+fn level_stat_id(preferred_game: Option<GameId>) -> u32 {
+    match preferred_game {
+        Some(GameId::Da2) => 36,
+        _ => 15,
+    }
+}
+
+fn experience_stat_id(preferred_game: Option<GameId>) -> u32 {
+    match preferred_game {
+        Some(GameId::Da2) => 35,
+        _ => 19,
+    }
+}
+
+fn point_pool_stat_id(kind: PointPoolKind, preferred_game: Option<GameId>) -> Option<u32> {
+    match (preferred_game, kind) {
+        (Some(GameId::Da2), PointPoolKind::Attribute) => Some(38),
+        (Some(GameId::Da2), PointPoolKind::Talent) => Some(39),
+        (Some(GameId::Da2), PointPoolKind::Skill | PointPoolKind::Specialization) => None,
+        (_, PointPoolKind::Attribute) => Some(34),
+        (_, PointPoolKind::Skill) => Some(35),
+        (_, PointPoolKind::Talent) => Some(36),
+        (_, PointPoolKind::Specialization) => Some(38),
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::SaveGame;
-    use crate::domain::gamedata::{GameId, SqliteGameData, DEFAULT_GAME_DATA_PATH};
+    use crate::domain::gamedata::{DEFAULT_GAME_DATA_PATH, GameId, SqliteGameData};
     use crate::gff4::GffFile;
-    use crate::test_support::{da2_save_path, dao_save_path};
+    use crate::test_support::{da2_save_path, dao_save_path, flat_sample_save_path};
 
     #[test]
     fn extracts_dao_read_only_summary() {
@@ -754,6 +931,7 @@ mod tests {
         assert!(!save.companions.is_empty());
         assert!(save.main_character.core_stats.strength > 0);
         assert!(save.main_character.level.is_some());
+        assert!(save.main_character.experience.is_some());
         assert!(save.companions[0].core_stats.magic > 0);
     }
 
@@ -767,6 +945,26 @@ mod tests {
         assert!(!save.companions.is_empty());
         assert!(save.main_character.core_stats.strength > 0);
         assert!(save.main_character.core_stats.dexterity > 0);
+        assert_eq!(save.main_character.level, Some(1));
+        assert_eq!(save.main_character.experience, Some(700));
+    }
+
+    #[test]
+    fn extracts_da2_world_vault_ints_and_booleans_from_expected_lists() {
+        let gff = GffFile::from_path(da2_save_path()).unwrap();
+        let save = SaveGame::from_gff(&gff).unwrap();
+
+        assert_eq!(save.plot_flags.integers.get(&1000), Some(&1));
+        assert!(
+            save.plot_flags
+                .integers
+                .get(&1001)
+                .is_some_and(|value| (1..=3).contains(value))
+        );
+        assert!(save.plot_flags.booleans.contains_key(&2000));
+        assert!(save.plot_flags.booleans.contains_key(&2108));
+        assert!(!save.plot_flags.integers.contains_key(&2000));
+        assert!(!save.plot_flags.booleans.contains_key(&1000));
     }
 
     #[test]
@@ -783,23 +981,17 @@ mod tests {
                 .any(|ability| ability.name.is_some())
         );
         assert_eq!(save.preferred_game, Some(GameId::Dao));
-        assert!(save
-            .companions
-            .iter()
-            .all(|character| !character.name.trim().is_empty()));
         assert!(
-            save.backpack
+            save.companions
                 .iter()
-                .any(|item| item.name.is_some())
+                .all(|character| !character.name.trim().is_empty())
         );
-        assert!(
-            save.backpack
+        assert!(save.backpack.iter().any(|item| item.name.is_some()));
+        assert!(save.backpack.iter().any(|item| {
+            item.properties
                 .iter()
-                .any(|item| item
-                    .properties
-                    .iter()
-                    .any(|property| property.name.is_some()))
-        );
+                .any(|property| property.name.is_some())
+        }));
     }
 
     #[test]
@@ -809,15 +1001,37 @@ mod tests {
         let save = SaveGame::from_gff_with_lookup(&gff, Some(&lookup), None).unwrap();
 
         assert_eq!(save.preferred_game, Some(GameId::Da2));
-        assert!(save
-            .companions
-            .iter()
-            .all(|character| !character.name.trim().is_empty()));
         assert!(
-            save.backpack
+            save.companions
                 .iter()
-                .any(|item| item.name.is_some())
+                .all(|character| !character.name.trim().is_empty())
         );
+        assert!(save.backpack.iter().any(|item| item.name.is_some()));
+    }
+
+    #[test]
+    fn infers_dao_awakening_content_from_campaign_resource() {
+        for name in [
+            "testingawakening.das",
+            "testingwitchhunt.das",
+            "testinggolems.das",
+        ] {
+            let Some(path) = flat_sample_save_path(name) else {
+                continue;
+            };
+            let gff = GffFile::from_path(path).unwrap();
+            let save = SaveGame::from_gff(&gff).unwrap();
+
+            assert_eq!(save.preferred_game, Some(GameId::DaoAwakening), "{name}");
+        }
+    }
+
+    #[test]
+    fn infers_vanilla_dao_for_base_campaign_resource() {
+        let gff = GffFile::from_path(dao_save_path()).unwrap();
+        let save = SaveGame::from_gff(&gff).unwrap();
+
+        assert_eq!(save.preferred_game, Some(GameId::Dao));
     }
 
     #[test]
@@ -837,8 +1051,56 @@ mod tests {
             save.main_character
                 .talents
                 .iter()
-                .any(|ability| ability.id == 200000 || ability.id == 201000 || ability.id == 201001)
+                .any(|ability| ability.id == 200000
+                    || ability.id == 201000
+                    || ability.id == 201001)
         );
+        assert!(
+            save.main_character
+                .talents
+                .iter()
+                .chain(save.main_character.spells.iter())
+                .all(|ability| ability.id != 0)
+        );
+    }
+
+    #[test]
+    fn decodes_da2_integer_backed_item_property_powers_as_float_bits() {
+        let gff = GffFile::from_path(da2_save_path()).unwrap();
+        let lookup = SqliteGameData::open(DEFAULT_GAME_DATA_PATH).unwrap();
+        let save = SaveGame::from_gff_with_lookup(&gff, Some(&lookup), None).unwrap();
+
+        assert!(
+            save.backpack
+                .iter()
+                .flat_map(|item| item.properties.iter())
+                .any(|property| (property.power - 1.0).abs() < f32::EPSILON)
+        );
+        assert!(
+            !save
+                .backpack
+                .iter()
+                .flat_map(|item| item.properties.iter())
+                .any(|property| property.power > 100_000.0)
+        );
+    }
+
+    #[test]
+    fn maps_dao_companion_approval_by_object_id() {
+        let gff = GffFile::from_path(dao_save_path()).unwrap();
+        let lookup = SqliteGameData::open(DEFAULT_GAME_DATA_PATH).unwrap();
+        let save = SaveGame::from_gff_with_lookup(&gff, Some(&lookup), None).unwrap();
+
+        let approvals = save
+            .companions
+            .iter()
+            .map(|character| (character.template_resref.as_deref(), character.approval))
+            .collect::<Vec<_>>();
+
+        assert!(approvals.contains(&(Some("gen00fl_leliana"), Some(95))));
+        assert!(approvals.contains(&(Some("gen00fl_wynne"), Some(98))));
+        assert!(approvals.contains(&(Some("gen00fl_alistair"), Some(74))));
+        assert!(approvals.contains(&(Some("gen00fl_dog"), Some(100))));
     }
 }
 fn extract_character_abilities(
@@ -846,17 +1108,16 @@ fn extract_character_abilities(
     lookup: Option<&dyn GameDataLookup>,
     preferred_game: Option<GameId>,
 ) -> Result<(Vec<AbilityRef>, Vec<AbilityRef>, Vec<AbilityRef>), ExtractError> {
-    if preferred_game == Some(GameId::Da2) && source.get_by_name(SAVEGAME_ABILITYLIST_NAME).is_some() {
+    if preferred_game.is_some_and(GameId::is_da2)
+        && source.get_by_name(SAVEGAME_ABILITYLIST_NAME).is_some()
+    {
         let mut skills = Vec::new();
         let mut talents = Vec::new();
         let mut spells = Vec::new();
 
-        for ability in extract_abilities_by_name(
-            source,
-            SAVEGAME_ABILITYLIST_NAME,
-            lookup,
-            preferred_game,
-        )? {
+        for ability in
+            extract_abilities_by_name(source, SAVEGAME_ABILITYLIST_NAME, lookup, preferred_game)?
+        {
             match ability.kind {
                 AbilityKind::Skill => skills.push(ability),
                 AbilityKind::Spell => spells.push(ability),
@@ -922,6 +1183,9 @@ fn hydrate_abilities(
 ) -> Result<Vec<AbilityRef>, ExtractError> {
     let mut abilities = Vec::with_capacity(ids.len());
     for id in ids {
+        if id == 0 {
+            continue;
+        }
         let ability = if let Some(lookup) = lookup {
             map_lookup_error(lookup.ability(id, preferred_game), path)?.unwrap_or(AbilityRef {
                 id,

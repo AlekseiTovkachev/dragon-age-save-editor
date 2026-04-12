@@ -1,7 +1,7 @@
+use crate::gff4::GffFile;
 use crate::gff4::header::real_version;
 use crate::gff4::schema::{BaseType, ResolvedHeader, StructDef, ValueType};
 use crate::gff4::value::{GffStruct, Value};
-use crate::gff4::GffFile;
 use std::collections::HashMap;
 use std::fs;
 use std::io;
@@ -139,7 +139,11 @@ impl<'a> Writer<'a> {
             for field in &struct_def.fields {
                 bytes.extend_from_slice(&self.pack_u32(field.label));
                 let type_id = field_type_id(field)?;
-                let flags = pack_flags(field.is_list, matches!(field.base, BaseType::Struct(_)), field.is_reference);
+                let flags = pack_flags(
+                    field.is_list,
+                    matches!(field.base, BaseType::Struct(_)),
+                    field.is_reference,
+                );
                 let type_and_flags = ((flags as u32) << 16) | type_id as u32;
                 bytes.extend_from_slice(&self.pack_u32(type_and_flags));
                 bytes.extend_from_slice(&self.pack_u32(field.offset));
@@ -162,15 +166,20 @@ impl<'a> Writer<'a> {
                         format!("missing value for field {}", field.label),
                     )
                 })?;
-            let field_offset = offset
-                .checked_add(field.offset as usize)
-                .ok_or_else(|| io::Error::new(io::ErrorKind::InvalidData, "field offset overflow"))?;
+            let field_offset = offset.checked_add(field.offset as usize).ok_or_else(|| {
+                io::Error::new(io::ErrorKind::InvalidData, "field offset overflow")
+            })?;
             self.write_field(field, value, field_offset)?;
         }
         Ok(())
     }
 
-    fn write_field(&mut self, field: &crate::gff4::schema::FieldDef, value: &Value, offset: usize) -> io::Result<()> {
+    fn write_field(
+        &mut self,
+        field: &crate::gff4::schema::FieldDef,
+        value: &Value,
+        offset: usize,
+    ) -> io::Result<()> {
         if field.is_list {
             return self.write_list(&field.base, field.is_reference, value, offset);
         }
@@ -182,7 +191,9 @@ impl<'a> Writer<'a> {
         match &field.base {
             BaseType::Primitive(ty) => self.write_primitive_value(*ty, value, offset),
             BaseType::Struct(_) => {
-                let child = value.as_struct().ok_or_else(|| type_mismatch("Struct", value, "inline struct field"))?;
+                let child = value
+                    .as_struct()
+                    .ok_or_else(|| type_mismatch("Struct", value, "inline struct field"))?;
                 self.write_struct(child, offset)
             }
             BaseType::Generic => Err(io::Error::new(
@@ -192,7 +203,13 @@ impl<'a> Writer<'a> {
         }
     }
 
-    fn write_list(&mut self, base: &BaseType, indirect: bool, value: &Value, offset: usize) -> io::Result<()> {
+    fn write_list(
+        &mut self,
+        base: &BaseType,
+        indirect: bool,
+        value: &Value,
+        offset: usize,
+    ) -> io::Result<()> {
         let is_empty = matches!(value, Value::List(items) if items.is_empty())
             || matches!(value, Value::Binary(bytes) if bytes.is_empty());
         if is_empty {
@@ -202,7 +219,8 @@ impl<'a> Writer<'a> {
 
         let list_offset = self.align_end(4);
         self.write_u32_at(offset, list_offset as u32);
-        self.data_section.extend_from_slice(&self.pack_u32(list_length(value)? as u32));
+        self.data_section
+            .extend_from_slice(&self.pack_u32(list_length(value)? as u32));
 
         match (base, indirect, value) {
             (BaseType::Generic, true, Value::List(items)) => {
@@ -228,7 +246,9 @@ impl<'a> Writer<'a> {
                 let elem_size = self.struct_def(struct_index)?.size as usize;
                 let elem_offset = self.allocate(items.len() * elem_size, 1);
                 for (index, item) in items.iter().enumerate() {
-                    let child = item.as_struct().ok_or_else(|| type_mismatch("Struct", item, "inline struct list"))?;
+                    let child = item
+                        .as_struct()
+                        .ok_or_else(|| type_mismatch("Struct", item, "inline struct list"))?;
                     self.write_struct(child, elem_offset + index * elem_size)?;
                 }
                 Ok(())
@@ -246,7 +266,11 @@ impl<'a> Writer<'a> {
                 }
                 Ok(())
             }
-            _ => Err(type_mismatch("List/Binary compatible with schema", value, "list field")),
+            _ => Err(type_mismatch(
+                "List/Binary compatible with schema",
+                value,
+                "list field",
+            )),
         }
     }
 
@@ -258,7 +282,9 @@ impl<'a> Writer<'a> {
                     self.write_u32_at(offset, NULLPTR);
                     return Ok(());
                 }
-                let child = value.as_struct().ok_or_else(|| type_mismatch("Struct", value, "reference struct field"))?;
+                let child = value
+                    .as_struct()
+                    .ok_or_else(|| type_mismatch("Struct", value, "reference struct field"))?;
                 let struct_size = self.struct_def(child.struct_index)?.size as usize;
                 let address = self.allocate(struct_size, 4);
                 self.write_struct(child, address)?;
@@ -318,7 +344,12 @@ impl<'a> Writer<'a> {
         }
     }
 
-    fn write_primitive_value(&mut self, ty: ValueType, value: &Value, offset: usize) -> io::Result<()> {
+    fn write_primitive_value(
+        &mut self,
+        ty: ValueType,
+        value: &Value,
+        offset: usize,
+    ) -> io::Result<()> {
         match ty {
             ValueType::UInt8 => self.write_u8_at(offset, expect_u8(value, "UInt8 field")?),
             ValueType::Int8 => self.write_i8_at(offset, expect_i8(value, "Int8 field")?),
@@ -384,7 +415,12 @@ impl<'a> Writer<'a> {
                 Ok(())
             }
             ValueType::TlkString => {
-                let Value::TlkString { label, text, raw_zero } = value else {
+                let Value::TlkString {
+                    label,
+                    text,
+                    raw_zero,
+                } = value
+                else {
                     return Err(type_mismatch("TlkString", value, "TlkString field"));
                 };
                 self.write_u32_at(offset, *label);
@@ -585,46 +621,73 @@ fn value_type_for_generic(value: &Value) -> io::Result<ValueType> {
         Value::Color4f(_) => Ok(ValueType::Color4f),
         Value::Matrix4x4f(_) => Ok(ValueType::Matrix4x4f),
         Value::TlkString { .. } => Ok(ValueType::TlkString),
-        other => Err(type_mismatch("generic primitive/struct", other, "generic value")),
+        other => Err(type_mismatch(
+            "generic primitive/struct",
+            other,
+            "generic value",
+        )),
     }
 }
 
 fn type_mismatch(expected: &'static str, actual: &Value, context: &'static str) -> io::Error {
     io::Error::new(
         io::ErrorKind::InvalidData,
-        format!("type mismatch for {context}: expected {expected}, found {}", actual.type_name()),
+        format!(
+            "type mismatch for {context}: expected {expected}, found {}",
+            actual.type_name()
+        ),
     )
 }
 
 fn expect_u8(value: &Value, context: &'static str) -> io::Result<u8> {
-    value.as_u8().ok_or_else(|| type_mismatch("UInt8", value, context))
+    value
+        .as_u8()
+        .ok_or_else(|| type_mismatch("UInt8", value, context))
 }
 fn expect_i8(value: &Value, context: &'static str) -> io::Result<i8> {
-    value.as_i8().ok_or_else(|| type_mismatch("Int8", value, context))
+    value
+        .as_i8()
+        .ok_or_else(|| type_mismatch("Int8", value, context))
 }
 fn expect_u16(value: &Value, context: &'static str) -> io::Result<u16> {
-    value.as_u16().ok_or_else(|| type_mismatch("UInt16", value, context))
+    value
+        .as_u16()
+        .ok_or_else(|| type_mismatch("UInt16", value, context))
 }
 fn expect_i16(value: &Value, context: &'static str) -> io::Result<i16> {
-    value.as_i16().ok_or_else(|| type_mismatch("Int16", value, context))
+    value
+        .as_i16()
+        .ok_or_else(|| type_mismatch("Int16", value, context))
 }
 fn expect_u32(value: &Value, context: &'static str) -> io::Result<u32> {
-    value.as_u32().ok_or_else(|| type_mismatch("UInt32", value, context))
+    value
+        .as_u32()
+        .ok_or_else(|| type_mismatch("UInt32", value, context))
 }
 fn expect_i32(value: &Value, context: &'static str) -> io::Result<i32> {
-    value.as_i32().ok_or_else(|| type_mismatch("Int32", value, context))
+    value
+        .as_i32()
+        .ok_or_else(|| type_mismatch("Int32", value, context))
 }
 fn expect_u64(value: &Value, context: &'static str) -> io::Result<u64> {
-    value.as_u64().ok_or_else(|| type_mismatch("UInt64", value, context))
+    value
+        .as_u64()
+        .ok_or_else(|| type_mismatch("UInt64", value, context))
 }
 fn expect_i64(value: &Value, context: &'static str) -> io::Result<i64> {
-    value.as_i64().ok_or_else(|| type_mismatch("Int64", value, context))
+    value
+        .as_i64()
+        .ok_or_else(|| type_mismatch("Int64", value, context))
 }
 fn expect_f32(value: &Value, context: &'static str) -> io::Result<f32> {
-    value.as_f32().ok_or_else(|| type_mismatch("Float32", value, context))
+    value
+        .as_f32()
+        .ok_or_else(|| type_mismatch("Float32", value, context))
 }
 fn expect_f64(value: &Value, context: &'static str) -> io::Result<f64> {
-    value.as_f64().ok_or_else(|| type_mismatch("Float64", value, context))
+    value
+        .as_f64()
+        .ok_or_else(|| type_mismatch("Float64", value, context))
 }
 
 impl ValueType {

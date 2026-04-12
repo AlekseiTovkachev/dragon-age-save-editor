@@ -1,0 +1,238 @@
+0 - invalid
+1000 - (passive):Attribute - strength
+1001 - (passive):Attribute - dexterity
+1002 - (passive):Attribute - magic
+1003 - (passive):Attribute - cunning
+1004 - (passive):Attribute - willpower
+1005 - (passive):Attribute - constitution
+1006 - (passive):Attribute - all
+1100 - (passive):Property - health
+1101 - (passive):Property - mana
+1102 - (passive):Property - attack
+1103 - (passive):Property - defense
+1104 - (passive):Property - stamina
+1105 - (passive):Property - critical chance
+1106 - (passive):Property - damage factor - critical
+1107 - (passive):Property - armor(metal)
+1108 - (passive):Property - armor(leather)
+1109 - (passive):Property - armor(cloth)
+1110 - (passive):Property - health regen
+1111 - (passive):Property - mana regen
+1113 - (passive):Property - damage factor - physical
+1114 - (passive):Property - damage factor - fire
+1115 - (passive):Property - damage factor - cold
+1116 - (passive):Property - damage factor - electrical
+1117 - (passive):Property - damage factor - nature
+1118 - (passive):Property - damage factor - spirit
+1119 - (passive):Property - healing done
+1120 - (passive):Property - healing taken
+1121 - (passive):Property - stamina regen
+1122 - (passive):Property - bloodmage cost
+1123 - (passive):Property - attack speed
+1200 - (Passive): Resistance - Elemental - Fire	
+1201 - (Passive): Resistance - Elemental - Cold	
+1202 - (Passive): Resistance - Elemental - Electricity	
+1203 - (Passive): Resistance - Elemental - Nature	
+1204 - (Passive): Resistance - Elemental - Spirit	
+1205 - (Passive): Resistance - Damage	
+1210 - (Passive): Resistance - Magic	
+1211 - (Passive): Resistance - Force	
+2000 - (On-Hit): Damage - Physical	
+2001 - (On-Hit): Damage - Physical  (AOE)	
+2002 - (On-Hit): Damage - Fire	
+2003 - (On-Hit): Damage - Fire (AOE)	
+2004 - (On-Hit): Damage - Cold	
+2005 - (On-Hit): Damage - Cold (AOE)	
+2006 - (On-Hit): Damage - Electricity	
+2007 - (On-Hit): Damage - Electricity (AOE)	
+2008 - (On-Hit): Damage - Nature	
+2009 - (On-Hit): Damage - Nature (AOE)	
+2010 - (On-Hit): Damage - Spirit	
+2011 - (On-Hit): Damage - Spirit (AOE)	
+2100 - (On-Hit): Chance to Knockback	
+2101 - (On-Hit): Chance to Stun	
+2102 - (On-Hit): Chance to Reduce Speed	
+2201 - (On-Hit): Chance to Charm	
+2202 - (On-Hit): Chance to inflict Walking Bomb	
+2204 - (On-Hit): Life Leach	
+2205 - (On-Hit): Energy Leach	
+2206 - (On-Hit): Dispel	
+2300 - (On-Hit-[Internal]): Poison - Debilitating Poison	
+2301 - (On-Hit-[Internal]): Poison - Crow Venom	
+2302 - (On-Hit-[Internal]): Poison - Deathroot Toxin	
+2303 - (On-Hit-[Internal]): Poison - Arcane Poison	
+2304 - (On-Hit-[Internal]): Poison - Fel-Poison	
+2400 - (On-Hit): Bonus Damage to Humans	
+2401 - (On-Hit): Bonus Damage to Qunari	
+2402 - (On-Hit): Bonus Damage to Demons/Undead	
+2450 - [(On-Hit)-[Internal]): Bonus Damage to Darkspawn	
+3000 - (Restriction): Style - Two-Handed Weapon Style	
+3001 - (Restriction): Style - Dual Wield Style	
+3002 - (Restriction): Style - Staff	
+3003 - (Restriction): Style - Weapon and Shield Style	
+3004 - (Restriction): Style - Archery Style	
+3100 - (Restriction): Race - Human	
+3101 - (Restriction): Race - Dwarf	
+3102 - (Restriction): Race - Elf	
+3103 - (Restriction): Race - Qunari	
+3200 - (Restriction): Attribute - Strength [Primary]	
+3201 - (Restriction): Attribute - Dexterity [Primary]	
+3202 - (Restriction): Attribute - Magic [Primary]	
+3203 - (Restriction): Attribute - Cunning [Primary]	
+3204 - (Restriction): Attribute - Willpower [Primary]	
+3205 - (Restriction): Attribute - Constitution [Primary]	
+3210 - (Restriction): Attribute - Strength [Secondary]	
+3211 - (Restriction): Attribute - Dexterity [Secondary]	
+3212 - (Restriction): Attribute - Magic [Secondary]	
+3213 - (Restriction): Attribute - Cunning [Secondary]	
+3214 - (Restriction): Attribute - Willpower [Secondary]	
+3215 - (Restriction): Attribute - Constitution [Secondary]	
+3300 - (Restriction): Player	
+3400 - (Restriction): Follower - Anders	
+3401 - (Restriction): Follower - Aveline	
+3402 - (Restriction): Follower - Bethany	
+3403 - (Restriction): Follower - Carver	
+3404 - (Restriction): Follower - Fenris	
+3405 - (Restriction): Follower - Isabella	
+3406 - (Restriction): Follower - Merril	
+3407 - (Restriction): Follower - Varric	
+3408 - (Restriction): Follower - Sebastian	
+3500 - (Restriction): Class - Warrior	
+3501 - (Restriction): Class - Rogue	
+3502 - (Restriction): Class - Mage	
+3510 - (Restriction): Class - Warrior or Rogue	
+3600 - (Restriction): Spec - Spirithealer	
+3601 - (Restriction): Spec - Bloodmage	
+3602 - (Restriction): Spec - Forcemage	
+3604 - (Restriction): Spec - Shadow	
+3605 - (Restriction): Spec - Duelist	
+3606 - (Restriction): Spec - Assassin	
+3608 - (Restriction): Spec - Templar	
+3609 - (Restriction): Spec - Reaver	
+3610 - (Restriction): Spec - Berserker	
+3700 - (Restriction): Level	
+3701 - (Restriction): Level [-2]		
+3702 - (Restriction): Level [-4]	
+3703 - (Restriction): Level [-6]	
+3704 - (Restriction): Level [-8]	
+3705 - (Restriction): Level [-10]	
+3800 - (Restriction): Status - Full Health	
+3801 - (Restriction): Status - Not Full Health	
+3802 - (Restriction): Status - Full Mana/Stamina	
+3803 - (Restriction): Status - Not Full Mana/Stamina	
+3804 - (Restriction): Status - Injured	
+3805 - (Restriction): Status - Not Injured	
+3806 - (Restriction): Status - Combat	
+3807 - (Restriction): Status - Not Combat	
+3850 - (Restriction): Status - Not Full Health OR Not Full Mana/Stamina	
+3851 - (Restriction): Status - Not Full Health OR Injured	
+5000 - (Base Item): Weapon - Warrior - One-Handed	
+5100 - (Base Item): Weapon - Warrior - Two-Handed	
+5200 - (Base Item): Weapon - Rogue - Dual Wield	
+5300 - (Base Item): Weapon - Rogue - Bow	
+5400 - (Base Item): Weapon - Mage - Staff	
+5500 - (Base Item): Armor - Heavy	
+5501 - (Base Item): Armor - Medium	
+5502 - (Base Item): Armor - Light	
+5600 - (Base Item): Accessory - Amulet	
+5610 - (Base Item): Accessory - Ring	
+5620 - (Base Item): Accessory - Belt	
+6001 - (Heraldry): Amell Family	
+6002 - (Heraldry): Antivan Crows	
+6004 - (Heraldry): Chantry	
+6005 - (Heraldry): Dalish Elves	
+6006 - (Heraldry): Dwarven Carta	
+6008 - (Heraldry): Ferelden	
+6009 - (Heraldry): Grey Wardens	
+6010 - (Heraldry): Harimann Family	
+6011 - (Heraldry): Kirkwall	
+6013 - (Heraldry): Merchants Guild	
+6014 - (Heraldry): Orlais	
+6015 - (Heraldry): Qunari	
+6016 - (Heraldry): Red Icon Mercenaries	
+6017 - (Heraldry): Resolutionists	
+6018 - (Heraldry): Starkhaven	
+6019 - (Heraldry): Templars	
+6020 - (Heraldry): Tevinter Slavers	
+6021 - (Heraldry): The Coterie	
+6022 - (Heraldry): The Winters	
+7000 - (Treasure): Rank 01 (Worthless Junk)	
+7001 - (Treasure): Rank 02 (Broken Weapons)	
+7002 - (Treasure): Rank 03 (Cheap Gems)	
+7003 - (Treasure): Rank 04 (Statuettes)	
+7004 - (Treasure): Rank 05 (Health Potions)	
+7005 - (Treasure): Rank 06 (Standard Gems)	
+7006 - (Treasure): Rank 07 (Bag of Coins)	
+7007 - (Treasure): Rank 08 (Expensive Gems)	
+7008 - (Treasure): Rank 09 (Unique Items)	
+7009 - (Treasure): Rank 10 (Priceless Gems)	
+7999 - (Treasure): Worthless (forced 1cp)	
+8000 - (Rune): Rune Slot	
+9000 - (Special): Armor - Immunity - Critical Hits	
+9001 - (Special): Armor - Immunity - Flanking	
+9002 - (Special): Armor - Immunity - Stun	
+9003 - (Special): Armor - Immunity - Knockback	
+9100 - (Special): Weapon - Increase chance of Deathblow	
+9101 - (Special): Weapon - Increased Gore	
+9102 - (Special): Armor - Increase player XP	
+9103 - (Special): Weapon - Increase Theat	
+9104 - (Special): Armor - Decrease Theat	
+9105 - (Special): Weapon - Attacks Ignore Displacement	
+9106 - (Special): Armor - Trap Evasion	
+9107 - (Special): Armor - Improved Disarm	
+9108 - (Special): Armor - Improved Lockpicking	
+9109 - (Special): Armor - Spiked Shield	
+9110 - (Special): Armor - Escape	
+9111 - (Special): Armor - Lucky	
+9112 - (Special): Celestial
+9113 - (Special): Weapon - Attacks Ignore Armor	
+9114 - (Special): Accessory - Increased Gold drop	
+9115 - (Special): Evolving	
+9200 - (Special-[Internal]): Rune of Devastation	
+9201 - (Special-[Internal]): Rune of Valiance	
+9202 - (Special-[Internal]): Primeval Lyrium Rune	
+10000 - (Damage Type): Physical	
+10001 - (Damage Type): Fire	
+10002 - (Damage Type): Cold	
+10004 - (Damage Type): Electricity	
+10005 - (Damage Type): Nature	
+10006 - (Damage Type): Spirit	
+11100 - (On-Hit-[Internal]): Warrior - Offensive Stun	
+11101 - (On-Hit-[Internal]): Warrior - Offensive Damage	
+11102 - (On-Hit-[Internal]): Mage - Elemental Weapons - Physical	
+11103 - (On-Hit-[Internal]): Mage - Elemental Weapons - Fire	
+11104 - (On-Hit-[Internal]): Mage - Elemental Weapons - Cold	
+11105 - (On-Hit-[Internal]): Mage - Elemental Weapons - Electricity	
+11106 - (On-Hit-[Internal]): Mage - Elemental Weapons - Nature	
+11107 - (On-Hit-[Internal]): Mage - Elemental Weapons - Spirit	
+12000 - (Passive-[Internal]): Upgrade - Anders 01 - Spirit Essence - Magic Resistance	
+12001 - (Passive-[Internal]): Upgrade - Anders 02 - Armor Struts - Armor	
+12002 - (Passive-[Internal]): Upgrade - Anders 03 - Underground Sigil --- Rune	
+12003 - (Passive-[Internal]): Upgrade - Anders 04 - Lyrium Weave - Attack	
+12010 - (Passive-[Internal]): Upgrade - Aveline 01 - Underpadding - Attack	
+12011 - (Passive-[Internal]): Upgrade - Aveline 02 - Flex-Chain --- Rune	
+12012 - (Passive-[Internal]): Upgrade - Aveline 03 - Impact Plating - Armor	
+12013 - (Passive-[Internal]): Upgrade - Aveline 04 - Deflecting Joints - Defense	
+12020 - (Passive-[Internal]): Upgrade - Bethany 01 - Protective Sigil --- Magic Resist	
+12030 - (Passive-[Internal]): Upgrade - Carver 01 - Girded Plating --- Armor	
+12040 - (Passive-[Internal]): Upgrade - Fenris 01 - Reinforced Straps --- Attack	
+12041 - (Passive-[Internal]): Upgrade - Fenris 02 - Enchanted Resin --- Rune	
+12042 - (Passive-[Internal]): Upgrade - Fenris 03 - Lyrium Scales  --- Rune	
+12043 - (Passive-[Internal]): Upgrade - Fenris 04 - Tevinter Spirit Runes --- Rune	
+12050 - (Passive-[Internal]): Upgrade - Isabela 01 - Lambswool Insoles - Critical Strike Chance	
+12051 - (Passive-[Internal]): Upgrade - Isabela 02 - Rigid Boning --- Defense	
+12052 - (Passive-[Internal]): Upgrade - Isabela 03 - Boiled Leather Plates --- Rune	
+12053 - (Passive-[Internal]): Upgrade - Isabela 04 - Supportive Corselet --- Rune	
+12060 - (Passive-[Internal]): Upgrade - Merril 01 - Carved Ironwood Buttons- Health	
+12061 - (Passive-[Internal]): Upgrade - Merril 02 - Samite Lining --- Rune	
+12062 - (Passive-[Internal]): Upgrade - Merril 03 - Silver-threaded Dalish Embroidery - Health Regen	
+12063 - (Passive-[Internal]): Upgrade - Merril 04 - Halla Horn Buckles --- Rune	
+12070 - (Passive-[Internal]): Upgrade - Varric 01 - Coat Lining --- Attack	
+12071 - (Passive-[Internal]): Upgrade - Varric 02 - Inscribed Leather Harness --- Rune	
+12072 - (Passive-[Internal]): Upgrade - Varric 03 - Silverite-reinforced Buckles --- Rune	
+12073 - (Passive-[Internal]): Upgrade - Varric 04 - Drakeskin Leg Straps --- Rune	
+12080 - (Passive-[Internal]): Upgrade - Sebastian 01 - Reinforced Bracers -- Increased Attack	
+12081 - (Passive-[Internal]): Upgrade - Sebastian 02 - Mail Undertunic --- Crit Strike %	
+12082 - (Passive-[Internal]): Upgrade - Sebastian 03 - Enhanced Articulation --- Rune	
+12083 - (Passive-[Internal]): Upgrade - Sebastian 04 - Protection of the Faith --- Rune	
+100000 - (Item Set): Default	

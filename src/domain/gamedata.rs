@@ -1,6 +1,8 @@
 use crate::domain::ability::{AbilityKind, AbilityRef};
-use crate::domain::item::{MaterialFamily, MaterialInfo, MaterialProfile, MaterialTarget};
-use rusqlite::{params, Connection, OptionalExtension};
+use crate::domain::item::{
+    ItemCatalogEntry, ItemCategory, MaterialFamily, MaterialInfo, MaterialProfile, MaterialTarget,
+};
+use rusqlite::{Connection, OptionalExtension, params};
 use std::error::Error;
 use std::fmt;
 use std::path::Path;
@@ -10,6 +12,7 @@ pub const DEFAULT_GAME_DATA_PATH: &str = "data/gamedata.db";
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum GameId {
     Dao,
+    DaoAwakening,
     Da2,
 }
 
@@ -17,8 +20,29 @@ impl GameId {
     fn as_db_value(self) -> &'static str {
         match self {
             GameId::Dao => "dao",
+            GameId::DaoAwakening => "dao",
             GameId::Da2 => "da2",
         }
+    }
+
+    fn item_lookup_games(self) -> &'static [&'static str] {
+        match self {
+            GameId::Dao => &["dao"],
+            GameId::DaoAwakening => &["dao", "daoa"],
+            GameId::Da2 => &["da2"],
+        }
+    }
+
+    pub fn is_da2(self) -> bool {
+        self == GameId::Da2
+    }
+
+    pub fn is_dao_family(self) -> bool {
+        matches!(self, GameId::Dao | GameId::DaoAwakening)
+    }
+
+    fn allows_awakening_content(self) -> bool {
+        self == GameId::DaoAwakening
     }
 }
 
@@ -28,6 +52,12 @@ pub trait GameDataLookup {
         resref: &str,
         preferred_game: Option<GameId>,
     ) -> Result<Option<String>, LookupError>;
+
+    fn item_metadata(
+        &self,
+        resref: &str,
+        preferred_game: Option<GameId>,
+    ) -> Result<Option<ItemCatalogEntry>, LookupError>;
 
     fn ability(
         &self,
@@ -41,9 +71,16 @@ pub trait GameDataLookup {
         preferred_game: Option<GameId>,
     ) -> Result<Vec<AbilityRef>, LookupError>;
 
-    fn item_properties(&self) -> Result<Vec<(u32, Option<String>)>, LookupError>;
+    fn item_properties(
+        &self,
+        preferred_game: Option<GameId>,
+    ) -> Result<Vec<(u32, Option<String>)>, LookupError>;
 
-    fn item_property_name(&self, property_id: u32) -> Result<Option<String>, LookupError>;
+    fn item_property_name(
+        &self,
+        property_id: u32,
+        preferred_game: Option<GameId>,
+    ) -> Result<Option<String>, LookupError>;
 
     fn material_info(
         &self,
@@ -99,7 +136,13 @@ impl SqliteGameData {
 
     fn map_ability_row(
         ability_id: u32,
-        row: (String, Option<String>, Option<String>, Option<String>, Option<String>),
+        row: (
+            String,
+            Option<String>,
+            Option<String>,
+            Option<String>,
+            Option<String>,
+        ),
     ) -> AbilityRef {
         let (id_text, name, core_id, tree, ability_type) = row;
         let parsed_id = id_text.parse().unwrap_or(ability_id);
@@ -131,10 +174,22 @@ impl SqliteGameData {
         &self,
         ability_id: u32,
         preferred_game: Option<GameId>,
-    ) -> Result<Option<(String, Option<String>, Option<String>, Option<String>, Option<String>)>, LookupError> {
+    ) -> Result<
+        Option<(
+            String,
+            Option<String>,
+            Option<String>,
+            Option<String>,
+            Option<String>,
+        )>,
+        LookupError,
+    > {
         let id = ability_id.to_string();
 
         if let Some(game) = preferred_game {
+            if game == GameId::Dao && ability_id >= 400_000 {
+                return Ok(None);
+            }
             let row = self
                 .connection
                 .query_row(
@@ -192,6 +247,21 @@ impl SqliteGameData {
             MaterialTarget::Shield => "shield",
         }
     }
+
+    fn map_item_catalog_entry(row: &rusqlite::Row<'_>) -> rusqlite::Result<ItemCatalogEntry> {
+        let category = row
+            .get::<_, Option<String>>(2)?
+            .as_deref()
+            .map(ItemCategory::from_db_value)
+            .unwrap_or(ItemCategory::Uncategorized);
+
+        Ok(ItemCatalogEntry {
+            name: row.get::<_, Option<String>>(0)?,
+            wiki_url: row.get::<_, Option<String>>(1)?,
+            category,
+            stackable: row.get::<_, bool>(3)?,
+        })
+    }
 }
 
 impl GameDataLookup for SqliteGameData {
@@ -200,33 +270,44 @@ impl GameDataLookup for SqliteGameData {
         resref: &str,
         preferred_game: Option<GameId>,
     ) -> Result<Option<String>, LookupError> {
+        Ok(self
+            .item_metadata(resref, preferred_game)?
+            .and_then(|item| item.name))
+    }
+
+    fn item_metadata(
+        &self,
+        resref: &str,
+        preferred_game: Option<GameId>,
+    ) -> Result<Option<ItemCatalogEntry>, LookupError> {
         let cleaned = resref.trim_end_matches('\0').to_ascii_lowercase();
 
         if let Some(game) = preferred_game {
-            let result = self
-                .connection
-                .query_row(
-                    "SELECT name FROM items WHERE resref = ?1 AND game = ?2",
-                    params![cleaned, game.as_db_value()],
-                    |row| row.get::<_, Option<String>>(0),
-                )
-                .optional()?
-                .flatten();
+            for game in game.item_lookup_games() {
+                let result = self
+                    .connection
+                    .query_row(
+                        "SELECT name, wiki_url, category, stackable FROM items WHERE resref = ?1 AND game = ?2",
+                        params![cleaned, game],
+                        |row| Self::map_item_catalog_entry(row),
+                    )
+                    .optional()?;
 
-            if result.is_some() {
-                return Ok(result);
+                if result.is_some() {
+                    return Ok(result);
+                }
             }
+            return Ok(None);
         }
 
         let result = self
             .connection
             .query_row(
-                "SELECT name FROM items WHERE resref = ?1 ORDER BY CASE game WHEN 'dao' THEN 0 WHEN 'da2' THEN 1 ELSE 2 END LIMIT 1",
+                "SELECT name, wiki_url, category, stackable FROM items WHERE resref = ?1 ORDER BY CASE game WHEN 'dao' THEN 0 WHEN 'daoa' THEN 1 WHEN 'da2' THEN 2 ELSE 3 END LIMIT 1",
                 params![cleaned],
-                |row| row.get::<_, Option<String>>(0),
+                |row| Self::map_item_catalog_entry(row),
             )
-            .optional()?
-            .flatten();
+            .optional()?;
 
         Ok(result)
     }
@@ -272,10 +353,10 @@ impl GameDataLookup for SqliteGameData {
         let mut abilities = Vec::new();
         for row in rows {
             let row = row?;
-            let ability = Self::map_ability_row(
-                row.0.parse().unwrap_or_default(),
-                row,
-            );
+            let ability = Self::map_ability_row(row.0.parse().unwrap_or_default(), row);
+            if game == GameId::Dao && ability.id >= 400_000 {
+                continue;
+            }
             if ability.kind == kind {
                 abilities.push(ability);
             }
@@ -283,11 +364,17 @@ impl GameDataLookup for SqliteGameData {
         Ok(abilities)
     }
 
-    fn item_properties(&self) -> Result<Vec<(u32, Option<String>)>, LookupError> {
+    fn item_properties(
+        &self,
+        preferred_game: Option<GameId>,
+    ) -> Result<Vec<(u32, Option<String>)>, LookupError> {
+        let Some(game) = preferred_game else {
+            return Ok(Vec::new());
+        };
         let mut statement = self
             .connection
-            .prepare("SELECT id, label FROM item_properties ORDER BY label, id")?;
-        let rows = statement.query_map([], |row| {
+            .prepare("SELECT id, label FROM item_properties WHERE game = ?1 ORDER BY label, id")?;
+        let rows = statement.query_map(params![game.as_db_value()], |row| {
             Ok((row.get::<_, u32>(0)?, row.get::<_, Option<String>>(1)?))
         })?;
 
@@ -298,11 +385,31 @@ impl GameDataLookup for SqliteGameData {
         Ok(properties)
     }
 
-    fn item_property_name(&self, property_id: u32) -> Result<Option<String>, LookupError> {
+    fn item_property_name(
+        &self,
+        property_id: u32,
+        preferred_game: Option<GameId>,
+    ) -> Result<Option<String>, LookupError> {
+        if let Some(game) = preferred_game {
+            let result = self
+                .connection
+                .query_row(
+                    "SELECT label FROM item_properties WHERE id = ?1 AND game = ?2",
+                    params![property_id, game.as_db_value()],
+                    |row| row.get::<_, Option<String>>(0),
+                )
+                .optional()?
+                .flatten();
+
+            if result.is_some() {
+                return Ok(result);
+            }
+        }
+
         let result = self
             .connection
             .query_row(
-                "SELECT label FROM item_properties WHERE id = ?1",
+                "SELECT label FROM item_properties WHERE id = ?1 ORDER BY CASE game WHEN 'dao' THEN 0 WHEN 'da2' THEN 1 ELSE 2 END LIMIT 1",
                 params![property_id],
                 |row| row.get::<_, Option<String>>(0),
             )
@@ -317,11 +424,15 @@ impl GameDataLookup for SqliteGameData {
         material_code: u32,
         preferred_game: Option<GameId>,
     ) -> Result<Option<MaterialInfo>, LookupError> {
-        if preferred_game != Some(GameId::Dao) {
+        let Some(game) = preferred_game else {
+            return Ok(None);
+        };
+        if !game.is_dao_family() {
             return Ok(None);
         }
 
-        self.connection
+        let material = self
+            .connection
             .query_row(
                 "SELECT code, tier, name, family, target
                  FROM material_codes
@@ -352,7 +463,9 @@ impl GameDataLookup for SqliteGameData {
                 },
             )
             .optional()
-            .map_err(LookupError::from)
+            .map_err(LookupError::from)?;
+
+        Ok(material.filter(|info| game.allows_awakening_content() || info.tier <= 7))
     }
 
     fn item_material_profile(
@@ -364,37 +477,44 @@ impl GameDataLookup for SqliteGameData {
             return Ok(None);
         };
         let cleaned = resref.trim_end_matches('\0').to_ascii_lowercase();
-        self.connection
-            .query_row(
-                "SELECT material_family, material_target FROM items WHERE resref = ?1 AND game = ?2",
-                params![cleaned, game.as_db_value()],
-                |row| {
-                    let family = row.get::<_, Option<String>>(0)?;
-                    let target = row.get::<_, Option<String>>(1)?;
-                    Ok(match (family.as_deref(), target.as_deref()) {
-                        (Some(family), Some(target)) => Some(MaterialProfile {
-                            family: Self::family_from_db(family).ok_or_else(|| {
-                                rusqlite::Error::FromSqlConversionFailure(
-                                    0,
-                                    rusqlite::types::Type::Text,
-                                    Box::<dyn std::error::Error + Send + Sync>::from("invalid family"),
-                                )
-                            })?,
-                            target: Self::target_from_db(target).ok_or_else(|| {
-                                rusqlite::Error::FromSqlConversionFailure(
-                                    1,
-                                    rusqlite::types::Type::Text,
-                                    Box::<dyn std::error::Error + Send + Sync>::from("invalid target"),
-                                )
-                            })?,
-                        }),
-                        _ => None,
-                    })
-                },
-            )
-            .optional()
-            .map(|result| result.flatten())
-            .map_err(LookupError::from)
+        for game in game.item_lookup_games() {
+            let result = self
+                .connection
+                .query_row(
+                    "SELECT material_family, material_target FROM items WHERE resref = ?1 AND game = ?2",
+                    params![cleaned, game],
+                    |row| {
+                        let family = row.get::<_, Option<String>>(0)?;
+                        let target = row.get::<_, Option<String>>(1)?;
+                        Ok(match (family.as_deref(), target.as_deref()) {
+                            (Some(family), Some(target)) => Some(MaterialProfile {
+                                family: Self::family_from_db(family).ok_or_else(|| {
+                                    rusqlite::Error::FromSqlConversionFailure(
+                                        0,
+                                        rusqlite::types::Type::Text,
+                                        Box::<dyn std::error::Error + Send + Sync>::from("invalid family"),
+                                    )
+                                })?,
+                                target: Self::target_from_db(target).ok_or_else(|| {
+                                    rusqlite::Error::FromSqlConversionFailure(
+                                        1,
+                                        rusqlite::types::Type::Text,
+                                        Box::<dyn std::error::Error + Send + Sync>::from("invalid target"),
+                                    )
+                                })?,
+                            }),
+                            _ => None,
+                        })
+                    },
+                )
+                .optional()?;
+
+            if let Some(result) = result.flatten() {
+                return Ok(Some(result));
+            }
+        }
+
+        Ok(None)
     }
 
     fn material_options(
@@ -403,16 +523,25 @@ impl GameDataLookup for SqliteGameData {
         target: MaterialTarget,
         preferred_game: Option<GameId>,
     ) -> Result<Vec<MaterialInfo>, LookupError> {
-        if preferred_game != Some(GameId::Dao) {
+        let Some(game) = preferred_game else {
+            return Ok(Vec::new());
+        };
+        if !game.is_dao_family() {
             return Ok(Vec::new());
         }
 
-        let mut statement = self.connection.prepare(
+        let tier_clause = if game.allows_awakening_content() {
+            ""
+        } else {
+            " AND tier <= 7"
+        };
+        let sql = format!(
             "SELECT code, tier, name, family, target
              FROM material_codes
-             WHERE game = 'dao' AND family = ?1 AND target = ?2
-             ORDER BY tier, code",
-        )?;
+             WHERE game = 'dao' AND family = ?1 AND target = ?2{tier_clause}
+             ORDER BY tier, code"
+        );
+        let mut statement = self.connection.prepare(&sql)?;
         let rows = statement.query_map(
             params![Self::family_to_db(family), Self::target_to_db(target)],
             |row| {
@@ -450,8 +579,8 @@ impl GameDataLookup for SqliteGameData {
 
 #[cfg(test)]
 mod tests {
-    use super::{AbilityKind, GameDataLookup, GameId, SqliteGameData, DEFAULT_GAME_DATA_PATH};
-    use crate::domain::item::{MaterialFamily, MaterialTarget};
+    use super::{AbilityKind, DEFAULT_GAME_DATA_PATH, GameDataLookup, GameId, SqliteGameData};
+    use crate::domain::item::{ItemCategory, MaterialFamily, MaterialTarget};
     use std::path::PathBuf;
     use std::time::{SystemTime, UNIX_EPOCH};
 
@@ -493,7 +622,16 @@ mod tests {
                     game TEXT NOT NULL,
                     material_family TEXT,
                     material_target TEXT,
+                    wiki_url TEXT,
+                    category TEXT NOT NULL DEFAULT 'uncategorized',
+                    stackable INTEGER NOT NULL DEFAULT 0,
                     PRIMARY KEY (resref, game)
+                );
+                CREATE TABLE item_properties (
+                    id INTEGER NOT NULL,
+                    game TEXT NOT NULL,
+                    label TEXT,
+                    PRIMARY KEY (id, game)
                 );
                 INSERT INTO abilities (id, name, core_id, tree, type, game) VALUES
                     ('5000', 'DAO Test Talent', '5001', 'DAO Tree', ' Talent ', 'dao'),
@@ -504,6 +642,12 @@ mod tests {
                     (45, 6, 'Silverite', 'metal', 'weapon', 'dao');
                 INSERT INTO items (resref, name, game, material_family, material_target) VALUES
                     ('gen_im_wep_mel_lsw_lsw', 'Longsword', 'dao', 'metal', 'weapon');
+                INSERT INTO items (resref, name, game, wiki_url, category, stackable) VALUES
+                    ('gen_im_qck_health_101', 'Lesser Health Poultice', 'dao', 'https://dragonage.fandom.com/wiki/Lesser_Health_Poultice', 'consumables.health_poultices', 1),
+                    ('gxa_im_qck_stamina_201', 'Stamina Draught', 'daoa', 'https://dragonage.fandom.com/wiki/Stamina_Draught_(Awakening)', 'consumables.potions', 1);
+                INSERT INTO item_properties (id, game, label) VALUES
+                    (1000, 'dao', 'DAO Strength'),
+                    (1000, 'da2', 'DA2 Strength');
                 ",
             )
             .unwrap();
@@ -550,7 +694,10 @@ mod tests {
     #[test]
     fn material_lookup_returns_dao_material_metadata() {
         let lookup = create_test_lookup();
-        let material = lookup.material_info(45, Some(GameId::Dao)).unwrap().unwrap();
+        let material = lookup
+            .material_info(45, Some(GameId::Dao))
+            .unwrap()
+            .unwrap();
         assert_eq!(material.tier, 6);
         assert_eq!(material.name, "Silverite");
     }
@@ -570,10 +717,208 @@ mod tests {
     fn material_options_are_scoped_by_family_and_target() {
         let lookup = create_test_lookup();
         let options = lookup
-            .material_options(MaterialFamily::Metal, MaterialTarget::Weapon, Some(GameId::Dao))
+            .material_options(
+                MaterialFamily::Metal,
+                MaterialTarget::Weapon,
+                Some(GameId::Dao),
+            )
             .unwrap();
         assert_eq!(options.len(), 1);
         assert_eq!(options[0].code, 45);
+    }
+
+    #[test]
+    fn item_property_lookup_is_scoped_to_requested_game() {
+        let lookup = create_test_lookup();
+
+        assert_eq!(
+            lookup
+                .item_property_name(1000, Some(GameId::Dao))
+                .unwrap()
+                .as_deref(),
+            Some("DAO Strength")
+        );
+        assert_eq!(
+            lookup
+                .item_property_name(1000, Some(GameId::Da2))
+                .unwrap()
+                .as_deref(),
+            Some("DA2 Strength")
+        );
+        assert_eq!(
+            lookup.item_properties(Some(GameId::Da2)).unwrap(),
+            vec![(1000, Some("DA2 Strength".to_string()))]
+        );
+    }
+
+    #[test]
+    fn item_metadata_includes_wiki_url_and_stackability() {
+        let lookup = create_test_lookup();
+        let item = lookup
+            .item_metadata("gen_im_qck_health_101", Some(GameId::Dao))
+            .unwrap()
+            .unwrap();
+
+        assert_eq!(item.name.as_deref(), Some("Lesser Health Poultice"));
+        assert_eq!(
+            item.wiki_url.as_deref(),
+            Some("https://dragonage.fandom.com/wiki/Lesser_Health_Poultice")
+        );
+        assert_eq!(item.category, ItemCategory::ConsumablesHealthPoultices);
+        assert!(item.stackable);
+    }
+
+    #[test]
+    fn unknown_item_category_falls_back_to_uncategorized() {
+        assert_eq!(
+            ItemCategory::from_db_value("future.category"),
+            ItemCategory::Uncategorized
+        );
+        assert_eq!(
+            ItemCategory::WeaponsArrowsBolts.as_db_value(),
+            "weapons.arrows_bolts"
+        );
+        assert_eq!(
+            ItemCategory::WeaponsArrowsBolts.label(),
+            "Weapons > Arrows & Bolts"
+        );
+    }
+
+    #[test]
+    fn dao_item_lookup_falls_back_to_awakening_rows() {
+        let lookup = create_test_lookup();
+        let item = lookup
+            .item_metadata("gxa_im_qck_stamina_201", Some(GameId::DaoAwakening))
+            .unwrap()
+            .unwrap();
+
+        assert_eq!(item.name.as_deref(), Some("Stamina Draught"));
+        assert_eq!(item.category, ItemCategory::ConsumablesPotions);
+        assert!(item.stackable);
+    }
+
+    #[test]
+    fn vanilla_dao_item_lookup_does_not_fallback_to_awakening_rows() {
+        let lookup = create_test_lookup();
+
+        assert!(
+            lookup
+                .item_metadata("gxa_im_qck_stamina_201", Some(GameId::Dao))
+                .unwrap()
+                .is_none()
+        );
+    }
+
+    #[test]
+    fn real_da2_item_properties_are_loaded_from_da2_codes() {
+        let lookup = SqliteGameData::open(DEFAULT_GAME_DATA_PATH).unwrap();
+
+        assert_eq!(
+            lookup
+                .item_property_name(1000, Some(GameId::Da2))
+                .unwrap()
+                .as_deref(),
+            Some("(passive):Attribute - strength")
+        );
+        assert_eq!(
+            lookup
+                .item_property_name(1000, Some(GameId::Dao))
+                .unwrap()
+                .as_deref(),
+            Some("Increase Strength")
+        );
+        assert!(
+            lookup
+                .item_properties(Some(GameId::Da2))
+                .unwrap()
+                .iter()
+                .any(|(id, name)| *id == 0 && name.as_deref() == Some("invalid"))
+        );
+    }
+
+    #[test]
+    fn real_da2_promotional_and_dlc_item_names_are_loaded() {
+        let lookup = SqliteGameData::open(DEFAULT_GAME_DATA_PATH).unwrap();
+
+        assert_eq!(
+            lookup
+                .item_name("prm000im_fut01", Some(GameId::Da2))
+                .unwrap()
+                .as_deref(),
+            Some("Pendant of the Morning Frost")
+        );
+        assert_eq!(
+            lookup
+                .item_name("tbe100im_anderfel_2h", Some(GameId::Da2))
+                .unwrap()
+                .as_deref(),
+            Some("The Anderfel Cleaver")
+        );
+        assert_eq!(
+            lookup
+                .item_name("drk_im_acc_amu_01", Some(GameId::Da2))
+                .unwrap()
+                .as_deref(),
+            Some("Chain of the Penitent")
+        );
+    }
+
+    #[test]
+    fn real_dao_item_names_wiki_links_and_stackability_are_loaded() {
+        let lookup = SqliteGameData::open(DEFAULT_GAME_DATA_PATH).unwrap();
+        let poultice = lookup
+            .item_metadata("gen_im_qck_health_401", Some(GameId::Dao))
+            .unwrap()
+            .unwrap();
+        let promotional = lookup
+            .item_metadata("prm000im_band_of_fire", Some(GameId::Dao))
+            .unwrap()
+            .unwrap();
+
+        assert_eq!(poultice.name.as_deref(), Some("Potent Health Poultice"));
+        assert_eq!(
+            poultice.wiki_url.as_deref(),
+            Some("https://dragonage.fandom.com/wiki/Potent_Health_Poultice")
+        );
+        assert!(poultice.stackable);
+
+        assert_eq!(promotional.name.as_deref(), Some("Band of Fire"));
+        assert_eq!(
+            promotional.wiki_url.as_deref(),
+            Some("https://dragonage.fandom.com/wiki/Band_of_Fire")
+        );
+        assert!(!promotional.stackable);
+    }
+
+    #[test]
+    fn real_dao_item_names_are_not_mojibake() {
+        let lookup = SqliteGameData::open(DEFAULT_GAME_DATA_PATH).unwrap();
+        let item = lookup
+            .item_metadata("gen_im_acc_amu_lel", Some(GameId::Dao))
+            .unwrap()
+            .unwrap();
+
+        assert_eq!(item.name.as_deref(), Some("Seeker's Circle"));
+    }
+
+    #[test]
+    fn real_da2_item_names_are_not_mojibake() {
+        let lookup = SqliteGameData::open(DEFAULT_GAME_DATA_PATH).unwrap();
+
+        assert_eq!(
+            lookup
+                .item_name("gen_im_wep_rog_dua_act0_03", Some(GameId::Da2))
+                .unwrap()
+                .as_deref(),
+            Some("Enforcer's Blade")
+        );
+        assert_eq!(
+            lookup
+                .item_name("gen_im_wep_mag_sta_act0_03", Some(GameId::Da2))
+                .unwrap()
+                .as_deref(),
+            Some("\"Imported\" Circle Staff")
+        );
     }
 
     #[test]
@@ -585,6 +930,48 @@ mod tests {
     }
 
     #[test]
+    fn dao_mage_specialization_unlocks_are_classified_as_spells() {
+        let lookup = SqliteGameData::open(DEFAULT_GAME_DATA_PATH).unwrap();
+
+        for ability_id in [4012_u32, 4017, 4018, 4025] {
+            let ability = lookup
+                .ability(ability_id, Some(GameId::Dao))
+                .unwrap()
+                .unwrap();
+            assert_eq!(ability.tree.as_deref(), Some("Mage Specialization"));
+            assert_eq!(ability.kind, AbilityKind::Spell);
+        }
+
+        for ability_id in [401002_u32, 401003] {
+            let ability = lookup
+                .ability(ability_id, Some(GameId::DaoAwakening))
+                .unwrap()
+                .unwrap();
+            assert_eq!(ability.tree.as_deref(), Some("Mage Specialization"));
+            assert_eq!(ability.kind, AbilityKind::Spell);
+        }
+    }
+
+    #[test]
+    fn non_mage_specialization_unlocks_are_classified_as_talents() {
+        let lookup = SqliteGameData::open(DEFAULT_GAME_DATA_PATH).unwrap();
+
+        for (ability_id, game) in [
+            (4013_u32, GameId::Dao),
+            (4014, GameId::Dao),
+            (4021, GameId::Dao),
+            (4030, GameId::Dao),
+            (107000, GameId::Da2),
+            (110000, GameId::Da2),
+            (210000, GameId::Da2),
+        ] {
+            let ability = lookup.ability(ability_id, Some(game)).unwrap().unwrap();
+            assert_eq!(ability.ability_type.as_deref(), Some("Talent"));
+            assert_eq!(ability.kind, AbilityKind::Talent);
+        }
+    }
+
+    #[test]
     fn dao_core_skill_rows_have_behavioral_names() {
         let lookup = SqliteGameData::open(DEFAULT_GAME_DATA_PATH).unwrap();
 
@@ -592,7 +979,30 @@ mod tests {
         let humanoid_unlock = lookup.ability(4002, Some(GameId::Dao)).unwrap().unwrap();
 
         assert_eq!(player_unlock.name.as_deref(), Some("Player Skill Unlock"));
-        assert_eq!(humanoid_unlock.name.as_deref(), Some("Humanoid Skill Unlock"));
+        assert_eq!(
+            humanoid_unlock.name.as_deref(),
+            Some("Humanoid Skill Unlock")
+        );
+    }
+
+    #[test]
+    fn dao_plot_skill_core_rows_have_correct_trees() {
+        let lookup = SqliteGameData::open(DEFAULT_GAME_DATA_PATH).unwrap();
+
+        for (ability_id, tree) in [
+            (90224_u32, "Plot Skill (Strength)"),
+            (90225, "Plot Skill (Dexterity)"),
+            (90226, "Plot Skill (Constitution)"),
+            (90227, "Plot Skill (Cunning)"),
+            (90228, "Plot Skill (Willpower)"),
+            (90229, "Plot Skill (Magic)"),
+        ] {
+            let ability = lookup
+                .ability(ability_id, Some(GameId::Dao))
+                .unwrap()
+                .unwrap();
+            assert_eq!(ability.tree.as_deref(), Some(tree));
+        }
     }
 
     #[test]
@@ -600,7 +1010,10 @@ mod tests {
         let lookup = SqliteGameData::open(DEFAULT_GAME_DATA_PATH).unwrap();
 
         for ability_id in [100011_u32, 100012, 100013, 100014] {
-            let ability = lookup.ability(ability_id, Some(GameId::Dao)).unwrap().unwrap();
+            let ability = lookup
+                .ability(ability_id, Some(GameId::Dao))
+                .unwrap()
+                .unwrap();
             assert_eq!(ability.core_ids, vec![4001]);
         }
     }
@@ -610,7 +1023,10 @@ mod tests {
         let lookup = SqliteGameData::open(DEFAULT_GAME_DATA_PATH).unwrap();
 
         for ability_id in [100021_u32, 100061, 100100, 100110] {
-            let ability = lookup.ability(ability_id, Some(GameId::Dao)).unwrap().unwrap();
+            let ability = lookup
+                .ability(ability_id, Some(GameId::Dao))
+                .unwrap()
+                .unwrap();
             assert_eq!(ability.core_ids, vec![4002]);
         }
     }
@@ -620,8 +1036,73 @@ mod tests {
         let lookup = SqliteGameData::open(DEFAULT_GAME_DATA_PATH).unwrap();
 
         for ability_id in [410000_u32, 410100, 410200] {
-            let ability = lookup.ability(ability_id, Some(GameId::Dao)).unwrap().unwrap();
+            let ability = lookup
+                .ability(ability_id, Some(GameId::DaoAwakening))
+                .unwrap()
+                .unwrap();
             assert_eq!(ability.core_ids, vec![4002]);
         }
+    }
+
+    #[test]
+    fn vanilla_dao_ability_lookup_excludes_awakening_ability_ids() {
+        let lookup = SqliteGameData::open(DEFAULT_GAME_DATA_PATH).unwrap();
+
+        assert!(lookup.ability(410000, Some(GameId::Dao)).unwrap().is_none());
+        assert!(
+            !lookup
+                .abilities_by_kind(AbilityKind::Skill, Some(GameId::Dao))
+                .unwrap()
+                .iter()
+                .any(|ability| ability.id >= 400_000)
+        );
+    }
+
+    #[test]
+    fn vanilla_dao_material_options_exclude_awakening_tiers() {
+        let lookup = SqliteGameData::open(DEFAULT_GAME_DATA_PATH).unwrap();
+
+        let vanilla = lookup
+            .material_options(
+                MaterialFamily::Metal,
+                MaterialTarget::Weapon,
+                Some(GameId::Dao),
+            )
+            .unwrap();
+        let awakening = lookup
+            .material_options(
+                MaterialFamily::Metal,
+                MaterialTarget::Weapon,
+                Some(GameId::DaoAwakening),
+            )
+            .unwrap();
+
+        assert!(vanilla.iter().all(|material| material.tier <= 7));
+        assert!(awakening.iter().any(|material| material.tier >= 8));
+    }
+
+    #[test]
+    fn real_dao_bows_use_ranged_wood_material_codes() {
+        let lookup = SqliteGameData::open(DEFAULT_GAME_DATA_PATH).unwrap();
+        let profile = lookup
+            .item_material_profile("gen_im_wep_rng_cbw_cbw", Some(GameId::Dao))
+            .unwrap()
+            .unwrap();
+        let options = lookup
+            .material_options(profile.family, profile.target, Some(GameId::Dao))
+            .unwrap();
+
+        assert_eq!(profile.family, MaterialFamily::Wood);
+        assert_eq!(profile.target, MaterialTarget::Shield);
+        assert!(
+            options
+                .iter()
+                .any(|material| material.tier == 1 && material.name == "Elm")
+        );
+        assert!(
+            options
+                .iter()
+                .any(|material| material.tier == 2 && material.name == "Ash")
+        );
     }
 }

@@ -43,6 +43,7 @@ fn execute_save_command(
 fn main() {
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_opener::init())
         .manage(AppState {
             document: Mutex::new(None),
         })
