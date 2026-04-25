@@ -136,7 +136,6 @@ fn replaces_da2_talent_list_with_valid_da2_ids() {
         CharacterTarget::MainCharacter,
         AbilityListKind::Talents,
         &replacement,
-        &std::collections::BTreeSet::new(),
         &lookup,
         Some(crate::domain::gamedata::GameId::Da2),
     )
@@ -154,12 +153,10 @@ fn replaces_da2_talent_list_with_valid_da2_ids() {
 #[test]
 fn specialization_talent_requires_specialization_core() {
     let lookup = SqliteGameData::open(DEFAULT_GAME_DATA_PATH).unwrap();
-    let current_ids = std::collections::BTreeSet::from([23_u32]);
     let error = super::load_validated_abilities(
         CharacterTarget::MainCharacter,
         AbilityListKind::Talents,
         &[23],
-        &current_ids,
         &lookup,
         Some(crate::domain::gamedata::GameId::Dao),
     )
@@ -180,7 +177,6 @@ fn archery_talent_accepts_either_rogue_or_warrior_core() {
         CharacterTarget::MainCharacter,
         AbilityListKind::Talents,
         &[4020, 3071],
-        &std::collections::BTreeSet::new(),
         &lookup,
         Some(crate::domain::gamedata::GameId::Dao),
     )
@@ -198,12 +194,10 @@ fn archery_talent_accepts_either_rogue_or_warrior_core() {
 #[test]
 fn core_talent_can_be_removed_when_dependents_are_removed() {
     let lookup = SqliteGameData::open(DEFAULT_GAME_DATA_PATH).unwrap();
-    let current_ids = std::collections::BTreeSet::from([4022_u32, 1_u32]);
     let abilities = super::load_validated_abilities(
         CharacterTarget::MainCharacter,
         AbilityListKind::Talents,
         &[],
-        &current_ids,
         &lookup,
         Some(crate::domain::gamedata::GameId::Dao),
     )
@@ -219,7 +213,6 @@ fn coercion_requires_player_skill_unlock() {
         CharacterTarget::MainCharacter,
         AbilityListKind::Skills,
         &[100011],
-        &std::collections::BTreeSet::new(),
         &lookup,
         Some(crate::domain::gamedata::GameId::Dao),
     )
@@ -240,7 +233,6 @@ fn humanoid_skill_requires_humanoid_skill_unlock() {
         CharacterTarget::MainCharacter,
         AbilityListKind::Skills,
         &[100021],
-        &std::collections::BTreeSet::new(),
         &lookup,
         Some(crate::domain::gamedata::GameId::Dao),
     )
@@ -257,12 +249,10 @@ fn humanoid_skill_requires_humanoid_skill_unlock() {
 #[test]
 fn humanoid_skill_list_succeeds_without_player_skill_unlock() {
     let lookup = SqliteGameData::open(DEFAULT_GAME_DATA_PATH).unwrap();
-    let current_ids = std::collections::BTreeSet::from([4002_u32, 100021_u32]);
     let abilities = super::load_validated_abilities(
         CharacterTarget::MainCharacter,
         AbilityListKind::Skills,
         &[4002, 100021],
-        &current_ids,
         &lookup,
         Some(crate::domain::gamedata::GameId::Dao),
     )
@@ -586,6 +576,30 @@ fn inserts_missing_companion_point_pool_stat_row() {
     let reloaded = GffFile::from_path(&output).unwrap();
     let save = SaveGame::from_gff(&reloaded).unwrap();
     assert_eq!(save.companions[0].point_pools.attribute_points, Some(9));
+}
+
+#[test]
+fn inserting_stat_row_without_template_returns_explicit_error() {
+    let mut editor = SaveEditor::from_path(dao_save_path()).unwrap();
+    clear_stat_list(&mut editor, CharacterTarget::Companion(0));
+    editor.save.companions[0].point_pools.attribute_points = None;
+
+    let error = editor
+        .patch_character_point_pools(
+            CharacterTarget::Companion(0),
+            PointPoolsPatch {
+                attribute_points: Some(9),
+                ..Default::default()
+            },
+        )
+        .unwrap_err();
+
+    match error {
+        EditError::NoStatRowTemplate {
+            target: CharacterTarget::Companion(0),
+        } => {}
+        other => panic!("unexpected error: {other}"),
+    }
 }
 
 #[test]
@@ -1043,6 +1057,17 @@ fn remove_stat_row(editor: &mut SaveEditor, target: CharacterTarget, stat_id: u3
             .and_then(super::value_to_u32)
             != Some(stat_id)
     });
+}
+
+fn clear_stat_list(editor: &mut SaveEditor, target: CharacterTarget) {
+    let character = super::raw_character_mut(&mut editor.raw, target).unwrap();
+    let stats = character
+        .get_struct_mut_by_name(super::SAVEGAME_CREATURE_STATS_NAME)
+        .unwrap();
+    let stat_list = stats
+        .get_list_mut_by_name(super::SAVEGAME_STATLIST_NAME)
+        .unwrap();
+    stat_list.clear();
 }
 
 fn test_output_path(name: &str) -> PathBuf {

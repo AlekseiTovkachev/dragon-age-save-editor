@@ -9,6 +9,14 @@ use std::path::Path;
 
 pub const DEFAULT_GAME_DATA_PATH: &str = "data/gamedata.db";
 
+type AbilityRow = (
+    String,
+    Option<String>,
+    Option<String>,
+    Option<String>,
+    Option<String>,
+);
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum GameId {
     Dao,
@@ -134,16 +142,7 @@ impl SqliteGameData {
         Ok(Self { connection })
     }
 
-    fn map_ability_row(
-        ability_id: u32,
-        row: (
-            String,
-            Option<String>,
-            Option<String>,
-            Option<String>,
-            Option<String>,
-        ),
-    ) -> AbilityRef {
+    fn map_ability_row(ability_id: u32, row: AbilityRow) -> AbilityRef {
         let (id_text, name, core_id, tree, ability_type) = row;
         let parsed_id = id_text.parse().unwrap_or(ability_id);
         let core_ids = core_id
@@ -174,16 +173,7 @@ impl SqliteGameData {
         &self,
         ability_id: u32,
         preferred_game: Option<GameId>,
-    ) -> Result<
-        Option<(
-            String,
-            Option<String>,
-            Option<String>,
-            Option<String>,
-            Option<String>,
-        )>,
-        LookupError,
-    > {
+    ) -> Result<Option<AbilityRow>, LookupError> {
         let id = ability_id.to_string();
 
         if let Some(game) = preferred_game {
@@ -289,7 +279,7 @@ impl GameDataLookup for SqliteGameData {
                     .query_row(
                         "SELECT name, wiki_url, category, stackable FROM items WHERE resref = ?1 AND game = ?2",
                         params![cleaned, game],
-                        |row| Self::map_item_catalog_entry(row),
+                        Self::map_item_catalog_entry,
                     )
                     .optional()?;
 
@@ -305,7 +295,7 @@ impl GameDataLookup for SqliteGameData {
             .query_row(
                 "SELECT name, wiki_url, category, stackable FROM items WHERE resref = ?1 ORDER BY CASE game WHEN 'dao' THEN 0 WHEN 'daoa' THEN 1 WHEN 'da2' THEN 2 ELSE 3 END LIMIT 1",
                 params![cleaned],
-                |row| Self::map_item_catalog_entry(row),
+                Self::map_item_catalog_entry,
             )
             .optional()?;
 

@@ -22,7 +22,6 @@ fn extracts_da2_read_only_summary() {
     let save = SaveGame::from_gff(&gff).unwrap();
 
     assert!(!save.main_character.name.is_empty());
-    assert!(save.money <= u32::MAX);
     assert!(!save.companions.is_empty());
     assert!(save.main_character.core_stats.strength > 0);
     assert!(save.main_character.core_stats.dexterity > 0);

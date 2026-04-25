@@ -82,7 +82,7 @@ pub fn read_raw_header<R: Read + Seek>(r: &mut R) -> io::Result<Header> {
     if &magic != b"GFF " {
         return Err(io::Error::new(
             io::ErrorKind::InvalidData,
-            format!("invalid magic: {:?}", magic),
+            format!("invalid magic: {magic:?}"),
         ));
     }
 
@@ -91,7 +91,7 @@ pub fn read_raw_header<R: Read + Seek>(r: &mut R) -> io::Result<Header> {
     if &version != b"V4.0" && &version != b"V4.1" {
         return Err(io::Error::new(
             io::ErrorKind::InvalidData,
-            format!("unsupported version: {:?}", version),
+            format!("unsupported version: {version:?}"),
         ));
     }
 

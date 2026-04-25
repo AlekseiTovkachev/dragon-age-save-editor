@@ -69,7 +69,7 @@ def insert_seed_file(conn: sqlite3.Connection, table: str, filename: str) -> Non
             [coerce_value(table, column, row[column]) for column in columns]
             for row in reader
         ]
-    conn.executemany(sql, rows)
+    _ = conn.executemany(sql, rows)
 
 
 def main() -> None:
@@ -77,7 +77,7 @@ def main() -> None:
         DB_PATH.unlink()
     conn = sqlite3.connect(DB_PATH)
     try:
-        conn.executescript(SCHEMA_PATH.read_text(encoding="utf-8"))
+        _ = conn.executescript(SCHEMA_PATH.read_text(encoding="utf-8"))
         for table, filename in SEED_TABLES:
             insert_seed_file(conn, table, filename)
         conn.commit()

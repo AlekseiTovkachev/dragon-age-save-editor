@@ -868,6 +868,7 @@ dependencies = [
  "image_dds",
  "rusqlite",
  "serde",
+ "thiserror 1.0.69",
 ]
 
 [[package]]

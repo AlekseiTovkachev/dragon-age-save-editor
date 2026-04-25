@@ -30,7 +30,7 @@ impl SaveDocument {
             code: CommandErrorCode::Io,
             message: err.to_string(),
         })?;
-        Ok(Self::from_gff(source_path, raw)?)
+        Self::from_gff(source_path, raw)
     }
 
     pub fn from_gff(source_path: impl Into<PathBuf>, raw: GffFile) -> Result<Self, CommandError> {

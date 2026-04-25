@@ -1,8 +1,12 @@
 use crate::domain::ability::{AbilityKind, AbilityRef};
 use crate::domain::character::Character;
+use crate::domain::game::{AbilityListStyle, GameBehavior, PropertyPowerEncoding};
 use crate::domain::gamedata::{GameDataLookup, GameId, LookupError};
 use crate::domain::item::{Item, ItemCategory, ItemProperty, MaterialProfile};
-use crate::domain::stats::{CoreStats, PointPools};
+use crate::domain::stats::{
+    CoreStats, PointPoolKind, PointPools, core_stat_from_id, experience_stat_id, level_stat_id,
+    point_pool_stat_id,
+};
 use crate::gff4::fields::{
     ITEM_COST, ITEM_STACKSIZE, OBJECT_ID, SAVEGAME_BACKPACK, SAVEGAME_CAMPAIGN,
     SAVEGAME_CRAFTING_RECIPE_LIST, SAVEGAME_CREATURE_STATS, SAVEGAME_EQUIPMENT_ITEMS,
@@ -215,8 +219,7 @@ fn extract_character(
     .unwrap_or_default();
 
     let (core_stats, level, experience, point_pools) = extract_stats(stats_source, preferred_game)?;
-    let (skills, talents, spells) =
-        extract_character_abilities(stats_source, lookup, preferred_game)?;
+    let abilities = extract_character_abilities(stats_source, lookup, preferred_game)?;
 
     Ok(Character {
         name,
@@ -227,9 +230,9 @@ fn extract_character(
         core_stats,
         point_pools,
         equipment,
-        skills,
-        talents,
-        spells,
+        skills: abilities.skills,
+        talents: abilities.talents,
+        spells: abilities.spells,
     })
 }
 
@@ -471,15 +474,14 @@ fn extract_item(
     } else {
         None
     };
-    let name = if let Some(display_name) = object_name {
-        Some(clean_string(display_name))
-    } else if let Some(resolved) = catalog_item.as_ref().and_then(|item| item.name.clone()) {
-        Some(resolved)
-    } else if let Some(resref) = resref.as_deref() {
-        Some(clean_string(resref.to_string()).to_ascii_lowercase())
-    } else {
-        None
-    };
+    let name = object_name
+        .map(clean_string)
+        .or_else(|| catalog_item.as_ref().and_then(|item| item.name.clone()))
+        .or_else(|| {
+            resref
+                .as_deref()
+                .map(|resref| clean_string(resref.to_string()).to_ascii_lowercase())
+        });
 
     let material = optional_u32(source, SAVEGAME_ITEM_MATERIALTYPE);
     let material_profile = if let (Some(lookup), Some(resref)) = (lookup, resref.as_deref()) {
@@ -620,11 +622,13 @@ fn require_u32(source: &GffStruct, label: u32, path: &str) -> Result<u32, Extrac
         .ok_or_else(|| ExtractError::MissingField {
             path: path.to_string(),
         })?;
-    value_to_u32(value).ok_or_else(|| ExtractError::TypeMismatch {
-        path: path.to_string(),
-        expected: "UInt32-compatible number",
-        actual: value.type_name(),
-    })
+    value
+        .to_u32_compatible()
+        .ok_or_else(|| ExtractError::TypeMismatch {
+            path: path.to_string(),
+            expected: "UInt32-compatible number",
+            actual: value.type_name(),
+        })
 }
 
 fn require_u32_by_name(source: &GffStruct, name: &str, path: &str) -> Result<u32, ExtractError> {
@@ -633,11 +637,13 @@ fn require_u32_by_name(source: &GffStruct, name: &str, path: &str) -> Result<u32
         .ok_or_else(|| ExtractError::MissingField {
             path: path.to_string(),
         })?;
-    value_to_u32(value).ok_or_else(|| ExtractError::TypeMismatch {
-        path: path.to_string(),
-        expected: "UInt32-compatible number",
-        actual: value.type_name(),
-    })
+    value
+        .to_u32_compatible()
+        .ok_or_else(|| ExtractError::TypeMismatch {
+            path: path.to_string(),
+            expected: "UInt32-compatible number",
+            actual: value.type_name(),
+        })
 }
 
 fn require_i32_by_name(source: &GffStruct, name: &str, path: &str) -> Result<i32, ExtractError> {
@@ -646,19 +652,21 @@ fn require_i32_by_name(source: &GffStruct, name: &str, path: &str) -> Result<i32
         .ok_or_else(|| ExtractError::MissingField {
             path: path.to_string(),
         })?;
-    value_to_i32(value).ok_or_else(|| ExtractError::TypeMismatch {
-        path: path.to_string(),
-        expected: "Int32-compatible number",
-        actual: value.type_name(),
-    })
+    value
+        .to_i32_compatible()
+        .ok_or_else(|| ExtractError::TypeMismatch {
+            path: path.to_string(),
+            expected: "Int32-compatible number",
+            actual: value.type_name(),
+        })
 }
 
 fn optional_u32(source: &GffStruct, label: u32) -> Option<u32> {
-    source.get(label).and_then(value_to_u32)
+    source.get(label).and_then(Value::to_u32_compatible)
 }
 
 fn optional_u32_by_name(source: &GffStruct, name: &str) -> Option<u32> {
-    source.get_by_name(name).and_then(value_to_u32)
+    source.get_by_name(name).and_then(Value::to_u32_compatible)
 }
 
 fn optional_i32(source: &GffStruct, label: u32) -> Option<i32> {
@@ -693,7 +701,7 @@ fn extract_u32_list(source: &GffStruct, label: u32) -> Vec<u32> {
 }
 
 fn extract_u32_values(items: &[Value]) -> Vec<u32> {
-    items.iter().filter_map(value_to_u32).collect()
+    items.iter().filter_map(Value::to_u32_compatible).collect()
 }
 
 fn extract_plot_flags(root: &GffStruct) -> PlotFlags {
@@ -712,10 +720,16 @@ fn extract_world_vault_bools(world_vault: &GffStruct) -> BTreeMap<u16, bool> {
         return values;
     };
     for entry in entries.iter().filter_map(Value::as_struct) {
-        let Some(id) = entry.get(WORLD_VAULT_ID_LABEL).and_then(value_to_u16) else {
+        let Some(id) = entry
+            .get(WORLD_VAULT_ID_LABEL)
+            .and_then(Value::to_u16_compatible)
+        else {
             continue;
         };
-        let Some(value) = entry.get(WORLD_VAULT_VALUE_LABEL).and_then(value_to_u32) else {
+        let Some(value) = entry
+            .get(WORLD_VAULT_VALUE_LABEL)
+            .and_then(Value::to_u32_compatible)
+        else {
             continue;
         };
         values.insert(id, value != 0);
@@ -729,10 +743,16 @@ fn extract_world_vault_ints(world_vault: &GffStruct) -> BTreeMap<u16, i32> {
         return values;
     };
     for entry in entries.iter().filter_map(Value::as_struct) {
-        let Some(id) = entry.get(WORLD_VAULT_ID_LABEL).and_then(value_to_u16) else {
+        let Some(id) = entry
+            .get(WORLD_VAULT_ID_LABEL)
+            .and_then(Value::to_u16_compatible)
+        else {
             continue;
         };
-        let Some(value) = entry.get(WORLD_VAULT_VALUE_LABEL).and_then(value_to_i32) else {
+        let Some(value) = entry
+            .get(WORLD_VAULT_VALUE_LABEL)
+            .and_then(Value::to_i32_compatible)
+        else {
             continue;
         };
         values.insert(id, value);
@@ -741,73 +761,17 @@ fn extract_world_vault_ints(world_vault: &GffStruct) -> BTreeMap<u16, i32> {
 }
 
 fn extract_property_power_values(items: &[Value], preferred_game: Option<GameId>) -> Vec<f32> {
-    if preferred_game.is_some_and(GameId::is_da2) {
-        return items
+    match preferred_game.property_power_encoding() {
+        PropertyPowerEncoding::Float => extract_f32_values(items),
+        PropertyPowerEncoding::Da2Bitcast => items
             .iter()
-            .filter_map(value_to_da2_property_power)
-            .collect();
+            .filter_map(Value::to_da2_property_power)
+            .collect(),
     }
-    extract_f32_values(items)
 }
 
 fn extract_f32_values(items: &[Value]) -> Vec<f32> {
-    items.iter().filter_map(value_to_f32).collect()
-}
-
-fn value_to_da2_property_power(value: &Value) -> Option<f32> {
-    match value {
-        Value::UInt32(v) => Some(f32::from_bits(*v)),
-        Value::Int32(v) => Some(f32::from_bits(*v as u32)),
-        Value::UInt64(v) => u32::try_from(*v).ok().map(f32::from_bits),
-        Value::Int64(v) if *v >= 0 => u32::try_from(*v).ok().map(f32::from_bits),
-        _ => value_to_f32(value),
-    }
-}
-
-fn value_to_u32(value: &Value) -> Option<u32> {
-    match value {
-        Value::UInt8(v) => Some(*v as u32),
-        Value::UInt16(v) => Some(*v as u32),
-        Value::UInt32(v) => Some(*v),
-        Value::Int8(v) if *v >= 0 => Some(*v as u32),
-        Value::Int16(v) if *v >= 0 => Some(*v as u32),
-        Value::Int32(v) if *v >= 0 => Some(*v as u32),
-        Value::Float32(v) if v.is_finite() && *v >= 0.0 => Some(*v as u32),
-        Value::Float64(v) if v.is_finite() && *v >= 0.0 => Some(*v as u32),
-        _ => None,
-    }
-}
-
-fn value_to_u16(value: &Value) -> Option<u16> {
-    value_to_u32(value).and_then(|value| u16::try_from(value).ok())
-}
-
-fn value_to_f32(value: &Value) -> Option<f32> {
-    match value {
-        Value::Float32(v) => Some(*v),
-        Value::Float64(v) => Some(*v as f32),
-        Value::UInt8(v) => Some(*v as f32),
-        Value::UInt16(v) => Some(*v as f32),
-        Value::UInt32(v) => Some(*v as f32),
-        Value::Int8(v) => Some(*v as f32),
-        Value::Int16(v) => Some(*v as f32),
-        Value::Int32(v) => Some(*v as f32),
-        _ => None,
-    }
-}
-
-fn value_to_i32(value: &Value) -> Option<i32> {
-    match value {
-        Value::UInt8(v) => Some(*v as i32),
-        Value::UInt16(v) => Some(*v as i32),
-        Value::UInt32(v) => i32::try_from(*v).ok(),
-        Value::Int8(v) => Some(*v as i32),
-        Value::Int16(v) => Some(*v as i32),
-        Value::Int32(v) => Some(*v),
-        Value::Float32(v) if v.is_finite() => Some(*v as i32),
-        Value::Float64(v) if v.is_finite() => Some(*v as i32),
-        _ => None,
-    }
+    items.iter().filter_map(Value::to_f32_compatible).collect()
 }
 
 fn value_to_display_string(value: &Value) -> Option<String> {
@@ -869,101 +833,61 @@ fn clean_string(value: String) -> String {
     value.trim_end_matches('\0').to_string()
 }
 
-fn core_stat_from_id(stat_id: u32) -> Option<crate::domain::stats::CoreStat> {
-    match stat_id {
-        1 => Some(crate::domain::stats::CoreStat::Strength),
-        2 => Some(crate::domain::stats::CoreStat::Dexterity),
-        3 => Some(crate::domain::stats::CoreStat::Willpower),
-        4 => Some(crate::domain::stats::CoreStat::Magic),
-        5 => Some(crate::domain::stats::CoreStat::Cunning),
-        6 => Some(crate::domain::stats::CoreStat::Constitution),
-        _ => None,
-    }
-}
-
-#[derive(Debug, Clone, Copy)]
-enum PointPoolKind {
-    Attribute,
-    Skill,
-    Talent,
-    Specialization,
-}
-
-fn level_stat_id(preferred_game: Option<GameId>) -> u32 {
-    match preferred_game {
-        Some(GameId::Da2) => 36,
-        _ => 15,
-    }
-}
-
-fn experience_stat_id(preferred_game: Option<GameId>) -> u32 {
-    match preferred_game {
-        Some(GameId::Da2) => 35,
-        _ => 19,
-    }
-}
-
-fn point_pool_stat_id(kind: PointPoolKind, preferred_game: Option<GameId>) -> Option<u32> {
-    match (preferred_game, kind) {
-        (Some(GameId::Da2), PointPoolKind::Attribute) => Some(38),
-        (Some(GameId::Da2), PointPoolKind::Talent) => Some(39),
-        (Some(GameId::Da2), PointPoolKind::Skill | PointPoolKind::Specialization) => None,
-        (_, PointPoolKind::Attribute) => Some(34),
-        (_, PointPoolKind::Skill) => Some(35),
-        (_, PointPoolKind::Talent) => Some(36),
-        (_, PointPoolKind::Specialization) => Some(38),
-    }
-}
-
 #[cfg(test)]
 mod tests;
+
+#[derive(Debug, Default)]
+struct CharacterAbilities {
+    skills: Vec<AbilityRef>,
+    talents: Vec<AbilityRef>,
+    spells: Vec<AbilityRef>,
+}
+
 fn extract_character_abilities(
     source: &GffStruct,
     lookup: Option<&dyn GameDataLookup>,
     preferred_game: Option<GameId>,
-) -> Result<(Vec<AbilityRef>, Vec<AbilityRef>, Vec<AbilityRef>), ExtractError> {
-    if preferred_game.is_some_and(GameId::is_da2)
+) -> Result<CharacterAbilities, ExtractError> {
+    if preferred_game.ability_list_style() == AbilityListStyle::Combined
         && source.get_by_name(SAVEGAME_ABILITYLIST_NAME).is_some()
     {
-        let mut skills = Vec::new();
-        let mut talents = Vec::new();
-        let mut spells = Vec::new();
+        let mut abilities = CharacterAbilities::default();
 
         for ability in
             extract_abilities_by_name(source, SAVEGAME_ABILITYLIST_NAME, lookup, preferred_game)?
         {
             match ability.kind {
-                AbilityKind::Skill => skills.push(ability),
-                AbilityKind::Spell => spells.push(ability),
-                AbilityKind::Talent | AbilityKind::Unknown => talents.push(ability),
+                AbilityKind::Skill => abilities.skills.push(ability),
+                AbilityKind::Spell => abilities.spells.push(ability),
+                AbilityKind::Talent | AbilityKind::Unknown => abilities.talents.push(ability),
             }
         }
 
-        Ok((skills, talents, spells))
+        Ok(abilities)
     } else {
-        Ok((
-            extract_abilities(
+        Ok(CharacterAbilities {
+            skills: extract_abilities(
                 source,
                 SAVEGAME_SKILLLIST,
                 "character.SAVEGAME_CREATURE_STATS.SAVEGAME_SKILLLIST",
                 lookup,
                 preferred_game,
             )?,
-            extract_abilities(
+            talents: extract_abilities(
                 source,
                 SAVEGAME_TALENTLIST,
                 "character.SAVEGAME_CREATURE_STATS.SAVEGAME_TALENTLIST",
                 lookup,
                 preferred_game,
             )?,
-            extract_abilities(
+            spells: extract_abilities(
                 source,
                 SAVEGAME_SPELLLIST,
                 "character.SAVEGAME_CREATURE_STATS.SAVEGAME_SPELLLIST",
                 lookup,
                 preferred_game,
             )?,
-        ))
+        })
     }
 }
 

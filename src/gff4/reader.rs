@@ -412,7 +412,7 @@ impl Reader {
             if struct_index >= self.header.structs.len() {
                 return Err(io::Error::new(
                     io::ErrorKind::InvalidData,
-                    format!("generic references invalid struct index {}", struct_index),
+                    format!("generic references invalid struct index {struct_index}"),
                 ));
             }
 
@@ -463,7 +463,7 @@ impl Reader {
             if struct_index >= self.header.structs.len() {
                 return Err(io::Error::new(
                     io::ErrorKind::InvalidData,
-                    format!("generic references invalid struct index {}", struct_index),
+                    format!("generic references invalid struct index {struct_index}"),
                 ));
             }
 
