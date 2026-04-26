@@ -61,6 +61,27 @@ export function Field({ label, children, className = "", ...props }: FieldProps)
   );
 }
 
+export function FieldGrid({ children, className = "" }: { children: ReactNode; className?: string }) {
+  return <div className={["field-grid", className].filter(Boolean).join(" ")}>{children}</div>;
+}
+
+type SectionCardProps = {
+  title?: ReactNode;
+  children: ReactNode;
+  className?: string;
+  headingLevel?: 3 | 4;
+};
+
+export function SectionCard({ title, children, className = "", headingLevel = 3 }: SectionCardProps) {
+  const Heading = headingLevel === 4 ? "h4" : "h3";
+  return (
+    <section className={["section-card", className].filter(Boolean).join(" ")}>
+      {title ? <Heading>{title}</Heading> : null}
+      {children}
+    </section>
+  );
+}
+
 type TextInputProps = InputHTMLAttributes<HTMLInputElement>;
 
 export function TextInput(props: TextInputProps) {
@@ -73,6 +94,19 @@ export function SelectInput({ children, ...props }: SelectInputProps) {
   return <select {...props}>{children}</select>;
 }
 
-export function ButtonRow({ children }: { children: ReactNode }) {
-  return <div className="button-row">{children}</div>;
+export function ButtonRow({ children, className = "" }: { children: ReactNode; className?: string }) {
+  return <div className={["button-row", className].filter(Boolean).join(" ")}>{children}</div>;
+}
+
+type ChoiceRowProps = LabelHTMLAttributes<HTMLLabelElement> & {
+  kind: "checkbox" | "radio";
+};
+
+export function ChoiceRow({ kind, children, className = "", ...props }: ChoiceRowProps) {
+  const rowClass = kind === "checkbox" ? "check-row" : "radio-row";
+  return (
+    <label className={[rowClass, className].filter(Boolean).join(" ")} {...props}>
+      {children}
+    </label>
+  );
 }

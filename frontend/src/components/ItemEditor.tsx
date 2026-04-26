@@ -1,7 +1,7 @@
 import { editableItemProperties, itemLabel } from "../lib/itemUtils";
 import type { ItemPropertyDraft } from "../lib/itemUtils";
 import type { Item, SelectableItemProperty } from "../types";
-import { ButtonRow, EmptyState, Field, PanelBody, ScrollRegion, SelectInput, TextInput } from "./ui";
+import { ButtonRow, EmptyState, Field, FieldGrid, PanelBody, ScrollRegion, SelectInput, TextInput } from "./ui";
 
 type ItemMetadataDraft = {
   material: string;
@@ -74,7 +74,7 @@ export function ItemEditor({
           <div className="item-editor-grid">
             <section className="item-overview-column">
               <h3>Overview</h3>
-              <div className="field-grid">
+              <FieldGrid>
                 <Field label="Resref"><TextInput value={item.resref ?? ""} disabled /></Field>
                 <Field label="Category"><TextInput value={item.category.label} disabled /></Field>
                 {canEditStackSize ? (
@@ -124,7 +124,7 @@ export function ItemEditor({
                     disabled={!canEdit || busy}
                   />
                 </Field>
-              </div>
+              </FieldGrid>
               {allowRemove ? (
                 <ButtonRow>
                   {canCloneBackpackItem ? (

@@ -1,4 +1,4 @@
-import { EmptyState, Panel, PanelBody } from "../../components/ui";
+import { ChoiceRow, EmptyState, Panel, PanelBody, SectionCard } from "../../components/ui";
 import type { PlotBooleanFlag, PlotIntegerFlag, SaveSummary } from "../../types";
 
 type PlotFlagsPanelProps = {
@@ -40,13 +40,17 @@ export function PlotFlagsPanel({ state, actions, summary, canEdit, busy }: PlotF
             <div className="plot-choice-list">
               <h3>Choices</h3>
               {state.groupedPlotIntegers.map((group) => (
-                <div key={`plot-int-group-${group.category}`} className="plot-group">
-                  <h4>{group.category}</h4>
+                <SectionCard
+                  key={`plot-int-group-${group.category}`}
+                  title={group.category}
+                  className="plot-group"
+                  headingLevel={4}
+                >
                   {group.flags.map((flag) => (
                     <fieldset key={`plot-int-${flag.id}`} className="plot-radio-group">
                       <legend>{flag.description}</legend>
                       {flag.options.map((option) => (
-                        <label key={`plot-int-${flag.id}-${option.value}`} className="radio-row">
+                        <ChoiceRow key={`plot-int-${flag.id}-${option.value}`} kind="radio">
                           <input
                             type="radio"
                             name={`plot-int-${flag.id}`}
@@ -55,21 +59,25 @@ export function PlotFlagsPanel({ state, actions, summary, canEdit, busy }: PlotF
                             disabled={!canEdit || busy}
                           />
                           <span>{option.label}</span>
-                        </label>
+                        </ChoiceRow>
                       ))}
                       <span className="plot-flag-code">{flag.name} ({flag.id})</span>
                     </fieldset>
                   ))}
-                </div>
+                </SectionCard>
               ))}
             </div>
             <div className="plot-boolean-list">
               <h3>Booleans</h3>
               {state.groupedPlotBooleans.map((group) => (
-                <div key={`plot-bool-group-${group.category}`} className="plot-group">
-                  <h4>{group.category}</h4>
+                <SectionCard
+                  key={`plot-bool-group-${group.category}`}
+                  title={group.category}
+                  className="plot-group"
+                  headingLevel={4}
+                >
                   {group.flags.map((flag) => (
-                    <label key={`plot-bool-${flag.id}`} className="check-row">
+                    <ChoiceRow key={`plot-bool-${flag.id}`} kind="checkbox">
                       <input
                         type="checkbox"
                         checked={Boolean(state.plotBooleanDrafts[flag.id])}
@@ -80,9 +88,9 @@ export function PlotFlagsPanel({ state, actions, summary, canEdit, busy }: PlotF
                         {flag.description}
                         <small className="plot-flag-code">{flag.name} ({flag.id})</small>
                       </span>
-                    </label>
+                    </ChoiceRow>
                   ))}
-                </div>
+                </SectionCard>
               ))}
             </div>
           </div>

@@ -1,7 +1,18 @@
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { ItemEditor } from "../../components/ItemEditor";
 import { ItemList } from "../../components/ItemList";
-import { EmptyState, Field, ListRow, Panel, PanelBody, ScrollRegion, SelectInput, TextInput } from "../../components/ui";
+import {
+  EmptyState,
+  Field,
+  FieldGrid,
+  ListRow,
+  Panel,
+  PanelBody,
+  ScrollRegion,
+  SectionCard,
+  SelectInput,
+  TextInput,
+} from "../../components/ui";
 import { abilityLabel, groupedAbilities } from "../../lib/abilityUtils";
 import { titleCase } from "../../lib/format";
 import { targetKey } from "../../lib/itemUtils";
@@ -149,9 +160,8 @@ function CharacterOverview({
 }: Pick<CharacterPanelProps, "state" | "actions" | "canEdit" | "busy">) {
   return (
     <>
-      <div className="character-field-section">
-        <h3>Progress</h3>
-        <div className="field-grid">
+      <SectionCard title="Progress" className="character-field-section">
+        <FieldGrid>
           <Field label="Level">
             <TextInput
               value={state.levelDraft}
@@ -177,11 +187,10 @@ function CharacterOverview({
               />
             </Field>
           ) : null}
-        </div>
-      </div>
-      <div className="character-field-section">
-        <h3>Attributes</h3>
-        <div className="field-grid">
+        </FieldGrid>
+      </SectionCard>
+      <SectionCard title="Attributes" className="character-field-section">
+        <FieldGrid>
           {Object.entries(state.statsDraft).map(([key, value]) => (
             <Field key={key} label={titleCase(key)}>
               <TextInput
@@ -191,11 +200,10 @@ function CharacterOverview({
               />
             </Field>
           ))}
-        </div>
-      </div>
-      <div className="character-field-section">
-        <h3>Point Pools</h3>
-        <div className="field-grid">
+        </FieldGrid>
+      </SectionCard>
+      <SectionCard title="Point Pools" className="character-field-section">
+        <FieldGrid>
           {[ 
             ["attribute_points", "Attribute Points"],
             ["skill_points", "Skill Points"],
@@ -217,8 +225,8 @@ function CharacterOverview({
               />
             </Field>
           ))}
-        </div>
-      </div>
+        </FieldGrid>
+      </SectionCard>
     </>
   );
 }

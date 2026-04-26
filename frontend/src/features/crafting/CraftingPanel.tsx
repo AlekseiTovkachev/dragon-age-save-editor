@@ -1,4 +1,4 @@
-import { EmptyState, Panel, PanelBody, ScrollRegion } from "../../components/ui";
+import { ChoiceRow, EmptyState, Panel, PanelBody, ScrollRegion, SectionCard } from "../../components/ui";
 import type { RecipeChecklistGroup } from "../../lib/recipeUtils";
 
 type CraftingPanelProps = {
@@ -27,10 +27,9 @@ export function CraftingPanel({ state, actions, canEdit, busy }: CraftingPanelPr
         <ScrollRegion className="recipe-checklist">
           {state.sortedRecipeIds.length > 0 ? (
             state.groupedRecipeIds.map((group) => (
-              <div key={`recipe-group-${group.category}`} className="recipe-group">
-                <h3>{group.category}</h3>
+              <SectionCard key={`recipe-group-${group.category}`} title={group.category} className="recipe-group">
                 {group.ids.map((recipeId) => (
-                  <label key={`recipe-${recipeId}`} className="check-row">
+                  <ChoiceRow key={`recipe-${recipeId}`} kind="checkbox">
                     <input
                       type="checkbox"
                       checked={state.craftingRecipeDrafts.includes(recipeId)}
@@ -41,9 +40,9 @@ export function CraftingPanel({ state, actions, canEdit, busy }: CraftingPanelPr
                       {actions.recipeLabel(recipeId)}
                       {actions.recipeIsKnown(recipeId) ? "" : " (unknown, preserved)"}
                     </span>
-                  </label>
+                  </ChoiceRow>
                 ))}
-              </div>
+              </SectionCard>
             ))
           ) : (
             <EmptyState>No recipe catalog entries are available for this save.</EmptyState>
