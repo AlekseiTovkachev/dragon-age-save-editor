@@ -33,8 +33,10 @@ export function MainTabs({
       <nav className="main-tabbar">
         {sections.map((entry) => (
           <button
+            type="button"
             key={entry}
             className={activeSection === entry ? "nav-link active" : "nav-link"}
+            onMouseDown={(event) => event.preventDefault()}
             onClick={() => onSelect(entry)}
           >
             {(() => {

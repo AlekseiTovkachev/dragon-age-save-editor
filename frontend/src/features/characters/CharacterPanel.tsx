@@ -95,8 +95,10 @@ export function CharacterPanel({
           <div className="character-tabbar">
             {CHARACTER_TABS.map((tab) => (
               <button
+                type="button"
                 key={tab}
                 className={characterTab === tab ? "nav-link active" : "nav-link"}
+                onMouseDown={(event) => event.preventDefault()}
                 onClick={() => setCharacterTab(tab)}
               >
                 {CHARACTER_TAB_TITLES[tab]}
