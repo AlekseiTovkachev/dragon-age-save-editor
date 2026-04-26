@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { expectResult } from "./api";
-import type { SaveCommand, SaveCommandResult } from "./types";
+import type { CommandError, SaveCommand, SaveCommandResult } from "./types";
 
 const commandFixtures = {
   validate: { command: "validate" },
@@ -30,7 +30,12 @@ const commandFixtures = {
   },
   replace_crafting_recipe_list: { command: "replace_crafting_recipe_list", recipe_ids: [1, 2] },
   patch_plot_flags: { command: "patch_plot_flags", booleans: [{ id: 1, value: true }], integers: [{ id: 2, value: 3 }] },
-  patch_item_metadata: { command: "patch_item_metadata", container: "backpack", index: 0, patch: { item_level: 2 } },
+  patch_item_metadata: {
+    command: "patch_item_metadata",
+    container: { equipment: { target: { companion: { index: 0 } } } },
+    index: 0,
+    patch: { item_level: 2, material: null },
+  },
   remove_backpack_item: { command: "remove_backpack_item", index: 0 },
   clone_backpack_item: { command: "clone_backpack_item", index: 0 },
   set_backpack_item_stack_size: { command: "set_backpack_item_stack_size", index: 0, stack_size: 9 },
@@ -41,10 +46,29 @@ const commandFixtures = {
   set_item_property_id: { command: "set_item_property_id", container: "backpack", index: 0, property_index: 1, property_id: 8 },
   apply_batch: {
     command: "apply_batch",
-    commands: [{ command: "set_backpack_item_stack_size", index: 0, stack_size: 9 }],
+    commands: [
+      { command: "set_money", money: 123 },
+      {
+        command: "patch_core_stats",
+        target: { companion: { index: 0 } },
+        patch: { strength: 20, magic: 18 },
+      },
+      { command: "set_backpack_item_stack_size", index: 0, stack_size: 9 },
+    ],
   },
   save_as: { command: "save_as", output_path: "C:/mock/save-copy.das" },
 } satisfies { [K in SaveCommand["command"]]: Extract<SaveCommand, { command: K }> };
+
+const errorFixtures = {
+  invalid_stack_size: {
+    code: "invalid_stack_size",
+    message: "invalid stack size 500; stack size must be between 1 and 99",
+  },
+  no_stat_row_template: {
+    code: "no_stat_row_template",
+    message: "cannot insert stat row for MainCharacter: no stat row template exists",
+  },
+} satisfies Record<string, CommandError>;
 
 const resultFixtures = {
   validation: { result: "validation", report: { is_valid: true, findings: [] } },
@@ -132,8 +156,30 @@ describe("Tauri command contract", () => {
   it("serializes apply_batch with the Rust snake_case wire shape", () => {
     expect(JSON.parse(JSON.stringify(commandFixtures.apply_batch))).toEqual({
       command: "apply_batch",
-      commands: [{ command: "set_backpack_item_stack_size", index: 0, stack_size: 9 }],
+      commands: [
+        { command: "set_money", money: 123 },
+        {
+          command: "patch_core_stats",
+          target: { companion: { index: 0 } },
+          patch: { strength: 20, magic: 18 },
+        },
+        { command: "set_backpack_item_stack_size", index: 0, stack_size: 9 },
+      ],
     });
+  });
+
+  it("serializes nested equipment containers with the Rust enum wire shape", () => {
+    expect(JSON.parse(JSON.stringify(commandFixtures.patch_item_metadata))).toEqual({
+      command: "patch_item_metadata",
+      container: { equipment: { target: { companion: { index: 0 } } } },
+      index: 0,
+      patch: { item_level: 2, material: null },
+    });
+  });
+
+  it("keeps frontend error codes aligned with Rust command errors", () => {
+    expect(errorFixtures.invalid_stack_size.code).toBe("invalid_stack_size");
+    expect(errorFixtures.no_stat_row_template.code).toBe("no_stat_row_template");
   });
 
   it("narrows command results by result tag", () => {

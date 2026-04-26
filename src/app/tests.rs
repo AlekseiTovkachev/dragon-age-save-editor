@@ -1,6 +1,8 @@
 use super::{
-    AbilityListKindDto, BackpackItemReplacementDto, CharacterTargetDto, ItemMetadataPatchDto,
-    SaveCommand, SaveCommandResult, SaveDocument,
+    AbilityDto, AbilityListKindDto, BackpackItemReplacementDto, CharacterDto, CharacterTargetDto,
+    CommandError, CommandErrorCode, CoreStatsDto, GameIdDto, IndexedItemDto, InventoryContainerDto,
+    ItemCategoryDto, ItemDto, ItemMetadataPatchDto, ItemPropertyDto, PointPoolsDto, SaveCommand,
+    SaveCommandResult, SaveDocument, SaveSummaryDto,
 };
 use crate::gff4::GffFile;
 use crate::gff4::fields::{SAVEGAME_BACKPACK, SAVEGAME_PARTYLIST};
@@ -27,10 +29,21 @@ fn serializes_and_deserializes_command_dtos() {
 #[test]
 fn apply_batch_command_wire_shape_matches_frontend_contract() {
     let command = SaveCommand::ApplyBatch {
-        commands: vec![SaveCommand::SetBackpackItemStackSize {
-            index: 0,
-            stack_size: 9,
-        }],
+        commands: vec![
+            SaveCommand::SetMoney { money: 123 },
+            SaveCommand::PatchCoreStats {
+                target: CharacterTargetDto::Companion { index: 0 },
+                patch: super::CoreStatsPatchDto {
+                    strength: Some(20),
+                    magic: Some(18),
+                    ..Default::default()
+                },
+            },
+            SaveCommand::SetBackpackItemStackSize {
+                index: 0,
+                stack_size: 9,
+            },
+        ],
     };
 
     assert_eq!(
@@ -39,12 +52,105 @@ fn apply_batch_command_wire_shape_matches_frontend_contract() {
             "command": "apply_batch",
             "commands": [
                 {
+                    "command": "set_money",
+                    "money": 123
+                },
+                {
+                    "command": "patch_core_stats",
+                    "target": { "companion": { "index": 0 } },
+                    "patch": {
+                        "strength": 20,
+                        "dexterity": null,
+                        "willpower": null,
+                        "magic": 18,
+                        "cunning": null,
+                        "constitution": null
+                    }
+                },
+                {
                     "command": "set_backpack_item_stack_size",
                     "index": 0,
                     "stack_size": 9
                 }
             ]
         })
+    );
+}
+
+#[test]
+fn representative_edit_command_wire_shapes_match_frontend_contract() {
+    let commands = vec![
+        SaveCommand::PatchItemMetadata {
+            container: InventoryContainerDto::Equipment {
+                target: CharacterTargetDto::Companion { index: 0 },
+            },
+            index: 1,
+            patch: ItemMetadataPatchDto {
+                item_cost: Some(50),
+                material: None,
+                item_level: Some(2),
+            },
+        },
+        SaveCommand::AddItemProperty {
+            container: InventoryContainerDto::Backpack,
+            index: 0,
+            property_id: 3011,
+            power: 3.5,
+        },
+        SaveCommand::PatchPlotFlags {
+            booleans: vec![super::PlotBooleanValueDto {
+                id: 7405,
+                value: true,
+            }],
+            integers: vec![super::PlotIntegerValueDto { id: 7401, value: 2 }],
+        },
+        SaveCommand::ReplaceBackpackItem {
+            index: 0,
+            replacement: BackpackItemReplacementDto {
+                resref: "gen_im_wep_mel_lsw_lsw".to_string(),
+                item_cost: Some(25),
+                material: Some(45),
+                item_level: None,
+            },
+        },
+    ];
+
+    assert_eq!(
+        serde_json::to_value(&commands).unwrap(),
+        serde_json::json!([
+            {
+                "command": "patch_item_metadata",
+                "container": { "equipment": { "target": { "companion": { "index": 0 } } } },
+                "index": 1,
+                "patch": {
+                    "item_cost": 50,
+                    "material": null,
+                    "item_level": 2
+                }
+            },
+            {
+                "command": "add_item_property",
+                "container": "backpack",
+                "index": 0,
+                "property_id": 3011,
+                "power": 3.5
+            },
+            {
+                "command": "patch_plot_flags",
+                "booleans": [{ "id": 7405, "value": true }],
+                "integers": [{ "id": 7401, "value": 2 }]
+            },
+            {
+                "command": "replace_backpack_item",
+                "index": 0,
+                "replacement": {
+                    "resref": "gen_im_wep_mel_lsw_lsw",
+                    "item_cost": 25,
+                    "material": 45,
+                    "item_level": null
+                }
+            }
+        ])
     );
 }
 
@@ -63,6 +169,138 @@ fn summary_result_wire_shape_matches_frontend_contract() {
     assert!(json["summary"]["main_character_name"].is_string());
     assert!(json["summary"]["companion_count"].is_number());
     assert!(json["summary"]["backpack_count"].is_number());
+}
+
+#[test]
+fn representative_result_wire_shapes_match_frontend_contract() {
+    let summary = SaveSummaryDto {
+        source_path: "C:/mock/save.das".to_string(),
+        dirty: true,
+        preferred_game: Some(GameIdDto::Dao),
+        money: 123,
+        main_character_name: "Aedan".to_string(),
+        companion_count: 1,
+        backpack_count: 2,
+    };
+    let character_result = SaveCommandResult::Character {
+        target: CharacterTargetDto::MainCharacter,
+        character: CharacterDto {
+            name: "Aedan".to_string(),
+            template_resref: Some("player".to_string()),
+            approval: None,
+            level: Some(7),
+            experience: Some(1000),
+            core_stats: CoreStatsDto {
+                strength: 10,
+                dexterity: 11,
+                willpower: 12,
+                magic: 13,
+                cunning: 14,
+                constitution: 15,
+            },
+            point_pools: PointPoolsDto {
+                attribute_points: Some(1),
+                skill_points: Some(2),
+                talent_points: Some(3),
+                specialization_points: None,
+            },
+            equipment: Vec::new(),
+            skills: Vec::new(),
+            talents: vec![AbilityDto {
+                id: 100100,
+                name: Some("Powerful".to_string()),
+                tree: Some("Warrior".to_string()),
+                ability_type: Some("talent".to_string()),
+                core_ids: vec![100000],
+            }],
+            spells: Vec::new(),
+        },
+    };
+    let item_result = SaveCommandResult::Items {
+        items: vec![IndexedItemDto {
+            index: 0,
+            item: ItemDto {
+                resref: Some("gen_im_wep_mel_lsw_lsw".to_string()),
+                name: Some("Longsword".to_string()),
+                wiki_url: None,
+                category: ItemCategoryDto {
+                    value: "weapon".to_string(),
+                    label: "Weapon".to_string(),
+                },
+                stackable: false,
+                object_id: Some(123),
+                equipment_slot: None,
+                item_cost: Some(50),
+                item_stacksize: None,
+                item_level: Some(2),
+                material: Some(45),
+                material_profile: None,
+                material_info: None,
+                material_options: Vec::new(),
+                properties: vec![ItemPropertyDto {
+                    id: 3011,
+                    name: Some("Damage".to_string()),
+                    power: 3.5,
+                }],
+            },
+        }],
+    };
+    let saved_result = SaveCommandResult::Saved {
+        output_path: "C:/mock/save-copy.das".to_string(),
+        summary,
+    };
+
+    assert_eq!(
+        serde_json::to_value(&character_result).unwrap()["result"],
+        "character"
+    );
+    assert_eq!(
+        serde_json::to_value(&item_result).unwrap(),
+        serde_json::json!({
+            "result": "items",
+            "items": [{
+                "index": 0,
+                "item": {
+                    "resref": "gen_im_wep_mel_lsw_lsw",
+                    "name": "Longsword",
+                    "wiki_url": null,
+                    "category": { "value": "weapon", "label": "Weapon" },
+                    "stackable": false,
+                    "object_id": 123,
+                    "equipment_slot": null,
+                    "item_cost": 50,
+                    "item_stacksize": null,
+                    "item_level": 2,
+                    "material": 45,
+                    "material_profile": null,
+                    "material_info": null,
+                    "material_options": [],
+                    "properties": [{ "id": 3011, "name": "Damage", "power": 3.5 }]
+                }
+            }]
+        })
+    );
+    assert_eq!(
+        serde_json::to_value(&saved_result).unwrap()["summary"]["preferred_game"],
+        "dao"
+    );
+}
+
+#[test]
+fn command_error_wire_shape_matches_frontend_contract() {
+    let error = CommandError {
+        code: CommandErrorCode::NoStatRowTemplate,
+        message: "cannot insert stat row for MainCharacter: no stat row template exists"
+            .to_string(),
+    };
+
+    assert_eq!(
+        serde_json::to_value(&error).unwrap(),
+        serde_json::json!({
+            "code": "no_stat_row_template",
+            "message": "cannot insert stat row for MainCharacter: no stat row template exists"
+        })
+    );
 }
 
 #[test]

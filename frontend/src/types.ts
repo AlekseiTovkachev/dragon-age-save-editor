@@ -3,6 +3,7 @@ export type CommandErrorCode =
   | "missing_field"
   | "type_mismatch"
   | "missing_stat_row"
+  | "no_stat_row_template"
   | "unsupported_numeric_value"
   | "numeric_range"
   | "lookup_failed"
