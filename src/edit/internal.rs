@@ -869,9 +869,9 @@ fn append_float_value(
         .iter()
         .find_map(FloatValueKind::from_value)
         .unwrap_or(FloatValueKind::Float32);
-    values.push(kind.build_value(new_value));
-    let last = values.last_mut().expect("just pushed");
-    set_float_value(last, new_value, path)?;
+    let mut value = kind.build_value(new_value);
+    set_float_value(&mut value, new_value, path)?;
+    values.push(value);
     Ok(())
 }
 
