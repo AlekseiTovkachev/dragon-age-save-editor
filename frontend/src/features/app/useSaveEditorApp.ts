@@ -103,8 +103,10 @@ export function useSaveEditorApp() {
       await refreshAvailableItemProperties();
       await refreshCraftingRecipes();
       await refreshAvailableCraftingRecipes();
-      await refreshPlotFlags();
-      await refreshAvailablePlotFlags();
+      if (preferredGame === "da2") {
+        await refreshPlotFlags();
+        await refreshAvailablePlotFlags();
+      }
     },
     [
       refreshAvailableAbilities,

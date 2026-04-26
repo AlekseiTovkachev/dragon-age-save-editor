@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { executeCommand, expectResult } from "../../api";
 import { useDraftCheckpoint } from "../../hooks/useDraftCheckpoint";
 import {
@@ -15,12 +15,14 @@ type UseCraftingEditorOptions = {
   refreshSummary: () => Promise<unknown>;
 };
 
+const cloneRecipeDrafts = (draft: number[]) => [...draft];
+
 export function useCraftingEditor({ run, refreshSummary }: UseCraftingEditorOptions) {
   const [craftingRecipes, setCraftingRecipes] = useState<number[]>([]);
   const [craftingRecipeDrafts, setCraftingRecipeDrafts] = useState<number[]>([]);
   const [availableCraftingRecipes, setAvailableCraftingRecipes] = useState<CraftingRecipe[]>([]);
   const craftingRecipeDraftsRef = useRef(craftingRecipeDrafts);
-  const draftCheckpoint = useDraftCheckpoint<number[]>({ clone: (draft) => [...draft] });
+  const draftCheckpoint = useDraftCheckpoint<number[]>({ clone: cloneRecipeDrafts });
 
   useEffect(() => {
     craftingRecipeDraftsRef.current = craftingRecipeDrafts;
@@ -95,13 +97,30 @@ export function useCraftingEditor({ run, refreshSummary }: UseCraftingEditorOpti
     draftCheckpoint.clear();
   }, [draftCheckpoint]);
 
+  const sortedRecipeIds = useMemo(
+    () => sortedRecipeChecklistIds(availableCraftingRecipes, craftingRecipes, craftingRecipeDrafts),
+    [availableCraftingRecipes, craftingRecipeDrafts, craftingRecipes],
+  );
+  const groupedRecipeIds = useMemo(
+    () => groupedRecipeChecklistIds(availableCraftingRecipes, craftingRecipes, craftingRecipeDrafts),
+    [availableCraftingRecipes, craftingRecipeDrafts, craftingRecipes],
+  );
+  const getRecipeLabel = useCallback(
+    (recipeId: number) => recipeLabel(availableCraftingRecipes, recipeId),
+    [availableCraftingRecipes],
+  );
+  const getRecipeIsKnown = useCallback(
+    (recipeId: number) => recipeIsKnown(availableCraftingRecipes, recipeId),
+    [availableCraftingRecipes],
+  );
+
   return {
     craftingRecipeDrafts,
     availableCraftingRecipes,
-    sortedRecipeIds: sortedRecipeChecklistIds(availableCraftingRecipes, craftingRecipes, craftingRecipeDrafts),
-    groupedRecipeIds: groupedRecipeChecklistIds(availableCraftingRecipes, craftingRecipes, craftingRecipeDrafts),
-    recipeLabel: (recipeId: number) => recipeLabel(availableCraftingRecipes, recipeId),
-    recipeIsKnown: (recipeId: number) => recipeIsKnown(availableCraftingRecipes, recipeId),
+    sortedRecipeIds,
+    groupedRecipeIds,
+    recipeLabel: getRecipeLabel,
+    recipeIsKnown: getRecipeIsKnown,
     refreshCraftingRecipes,
     refreshAvailableCraftingRecipes,
     handleToggle,

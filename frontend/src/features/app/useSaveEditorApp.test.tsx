@@ -156,6 +156,41 @@ describe("useSaveEditorApp", () => {
     expect(mocks.executeCommand).toHaveBeenCalledWith({ command: "list_characters" });
   });
 
+  it("does not repeatedly rehydrate when the loaded state rerenders", async () => {
+    mocks.open.mockResolvedValue("C:/save.das");
+    mocks.openDocument.mockResolvedValue(summary());
+    const { result } = renderHook(() => useSaveEditorApp());
+
+    await act(async () => {
+      await result.current.handleOpen();
+    });
+    await waitFor(() => expect(result.current.characterPanel.state.levelDraft).toBe("1"));
+    mocks.executeCommand.mockClear();
+
+    act(() => {
+      result.current.characterPanel.actions.setLevelDraft("2");
+    });
+    act(() => {
+      result.current.characterPanel.actions.setLevelDraft("3");
+    });
+
+    expect(mocks.executeCommand).not.toHaveBeenCalledWith({ command: "get_summary" });
+    expect(mocks.executeCommand).not.toHaveBeenCalledWith({ command: "list_characters" });
+  });
+
+  it("skips DA2-only plot flag hydration for DAO saves", async () => {
+    mocks.open.mockResolvedValue("C:/save.das");
+    mocks.openDocument.mockResolvedValue(summary({ preferred_game: "dao" }));
+    const { result } = renderHook(() => useSaveEditorApp());
+
+    await act(async () => {
+      await result.current.handleOpen();
+    });
+
+    expect(mocks.executeCommand).not.toHaveBeenCalledWith({ command: "list_plot_flags" });
+    expect(mocks.executeCommand).not.toHaveBeenCalledWith({ command: "list_available_plot_flags" });
+  });
+
   it("resets drafts to the initial hydration baseline", async () => {
     mocks.open.mockResolvedValue("C:/save.das");
     mocks.openDocument.mockResolvedValue(summary());

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { executeCommand, expectResult } from "../../api";
 import { useDraftCheckpoint } from "../../hooks/useDraftCheckpoint";
 import {
@@ -20,6 +20,11 @@ type PlotFlagDraftCheckpoint = {
   plotIntegerDrafts: Record<number, number>;
 };
 
+const clonePlotFlagCheckpoint = (draft: PlotFlagDraftCheckpoint): PlotFlagDraftCheckpoint => ({
+  plotBooleanDrafts: { ...draft.plotBooleanDrafts },
+  plotIntegerDrafts: { ...draft.plotIntegerDrafts },
+});
+
 export function usePlotFlagsEditor({ run, refreshSummary }: UsePlotFlagsEditorOptions) {
   const [plotBooleanValues, setPlotBooleanValues] = useState<Record<number, boolean>>({});
   const [plotBooleanDrafts, setPlotBooleanDrafts] = useState<Record<number, boolean>>({});
@@ -27,12 +32,7 @@ export function usePlotFlagsEditor({ run, refreshSummary }: UsePlotFlagsEditorOp
   const [plotIntegerDrafts, setPlotIntegerDrafts] = useState<Record<number, number>>({});
   const [availablePlotBooleans, setAvailablePlotBooleans] = useState<PlotBooleanFlag[]>([]);
   const [availablePlotIntegers, setAvailablePlotIntegers] = useState<PlotIntegerFlag[]>([]);
-  const draftCheckpoint = useDraftCheckpoint<PlotFlagDraftCheckpoint>({
-    clone: (draft) => ({
-      plotBooleanDrafts: { ...draft.plotBooleanDrafts },
-      plotIntegerDrafts: { ...draft.plotIntegerDrafts },
-    }),
-  });
+  const draftCheckpoint = useDraftCheckpoint<PlotFlagDraftCheckpoint>({ clone: clonePlotFlagCheckpoint });
   const plotBooleanDraftsRef = useRef(plotBooleanDrafts);
   const plotIntegerDraftsRef = useRef(plotIntegerDrafts);
 
@@ -144,11 +144,20 @@ export function usePlotFlagsEditor({ run, refreshSummary }: UsePlotFlagsEditorOp
     draftCheckpoint.clear();
   }, [draftCheckpoint]);
 
+  const groupedBooleanFlags = useMemo(
+    () => groupedPlotBooleans(availablePlotBooleans),
+    [availablePlotBooleans],
+  );
+  const groupedIntegerFlags = useMemo(
+    () => groupedPlotIntegers(availablePlotIntegers),
+    [availablePlotIntegers],
+  );
+
   return {
     plotBooleanDrafts,
     plotIntegerDrafts,
-    groupedPlotBooleans: groupedPlotBooleans(availablePlotBooleans),
-    groupedPlotIntegers: groupedPlotIntegers(availablePlotIntegers),
+    groupedPlotBooleans: groupedBooleanFlags,
+    groupedPlotIntegers: groupedIntegerFlags,
     refreshPlotFlags,
     refreshAvailablePlotFlags,
     handleBooleanToggle,

@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { editableItemProperties, itemLabel } from "../lib/itemUtils";
 import type { ItemPropertyDraft } from "../lib/itemUtils";
 import type { Item, SelectableItemProperty } from "../types";
@@ -69,10 +70,17 @@ export function ItemEditor({
   onClone,
   onWikiOpen,
 }: ItemEditorProps) {
-  const editableAvailableItemProperties = editableItemProperties(availableItemProperties);
-  const visibleItemPropertiesDraft = itemPropertiesDraft
-    .map((property, propertyIndex) => ({ property, propertyIndex }))
-    .filter(({ property }) => editableItemProperties([property]).length > 0);
+  const editableAvailableItemProperties = useMemo(
+    () => editableItemProperties(availableItemProperties),
+    [availableItemProperties],
+  );
+  const visibleItemPropertiesDraft = useMemo(
+    () =>
+      itemPropertiesDraft
+        .map((property, propertyIndex) => ({ property, propertyIndex }))
+        .filter(({ property }) => editableItemProperties([property]).length > 0),
+    [itemPropertiesDraft],
+  );
 
   return (
     <>
