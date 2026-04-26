@@ -35,4 +35,26 @@ describe("MainTabs", () => {
     fireEvent.change(moneyInput, { target: { value: "456" } });
     expect(onMoneyChange).toHaveBeenCalledWith("456");
   });
+
+  it("rejects non-numeric and negative money input", () => {
+    const onMoneyChange = vi.fn();
+
+    render(
+      <MainTabs
+        sections={["characters", "inventory"]}
+        activeSection="inventory"
+        onSelect={vi.fn()}
+        moneyDraft="123"
+        onMoneyChange={onMoneyChange}
+        canEditMoney
+      />,
+    );
+
+    const moneyInput = screen.getByLabelText("Money");
+
+    fireEvent.change(moneyInput, { target: { value: "12a" } });
+    fireEvent.change(moneyInput, { target: { value: "-12" } });
+
+    expect(onMoneyChange).not.toHaveBeenCalled();
+  });
 });

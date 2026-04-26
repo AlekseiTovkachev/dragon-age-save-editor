@@ -1,4 +1,11 @@
-import type { ButtonHTMLAttributes, InputHTMLAttributes, LabelHTMLAttributes, ReactNode, SelectHTMLAttributes } from "react";
+import type {
+  ButtonHTMLAttributes,
+  ChangeEvent,
+  InputHTMLAttributes,
+  LabelHTMLAttributes,
+  ReactNode,
+  SelectHTMLAttributes,
+} from "react";
 
 type PanelProps = {
   title?: ReactNode;
@@ -86,6 +93,50 @@ type TextInputProps = InputHTMLAttributes<HTMLInputElement>;
 
 export function TextInput(props: TextInputProps) {
   return <input {...props} />;
+}
+
+type NumericInputProps = Omit<TextInputProps, "inputMode" | "onChange"> & {
+  allowDecimal?: boolean;
+  max?: number;
+  min?: number;
+  onChange: (event: ChangeEvent<HTMLInputElement>) => void;
+};
+
+type NumericInputConstraints = Pick<NumericInputProps, "allowDecimal" | "max" | "min">;
+
+function isAllowedNumericValue(value: string, { allowDecimal = false, min, max }: NumericInputConstraints) {
+  if (value === "") {
+    return true;
+  }
+  const pattern = allowDecimal ? /^\d+(?:\.\d*)?$/ : /^\d+$/;
+  if (!pattern.test(value)) {
+    return false;
+  }
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) {
+    return false;
+  }
+  if (min !== undefined && parsed < min) {
+    return false;
+  }
+  if (max !== undefined && parsed > max) {
+    return false;
+  }
+  return true;
+}
+
+export function NumericInput({ allowDecimal = false, min, max, onChange, ...props }: NumericInputProps) {
+  return (
+    <TextInput
+      {...props}
+      inputMode={allowDecimal ? "decimal" : "numeric"}
+      onChange={(event) => {
+        if (isAllowedNumericValue(event.target.value, { allowDecimal, min, max })) {
+          onChange(event);
+        }
+      }}
+    />
+  );
 }
 
 type SelectInputProps = SelectHTMLAttributes<HTMLSelectElement>;

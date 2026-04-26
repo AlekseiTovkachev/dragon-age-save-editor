@@ -333,5 +333,6 @@ describe("useSaveEditorApp", () => {
       command: "apply_batch",
       commands: [{ command: "set_backpack_item_stack_size", index: 0, stack_size: 42 }],
     });
+    expect(result.current.inventoryPanel.state.moneyDraft).toBe("999");
   });
 });

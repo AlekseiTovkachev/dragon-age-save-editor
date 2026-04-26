@@ -6,12 +6,12 @@ import {
   Field,
   FieldGrid,
   ListRow,
+  NumericInput,
   Panel,
   PanelBody,
   ScrollRegion,
   SectionCard,
   SelectInput,
-  TextInput,
 } from "../../components/ui";
 import { abilityLabel, groupedAbilities } from "../../lib/abilityUtils";
 import { titleCase } from "../../lib/format";
@@ -165,15 +165,17 @@ function CharacterOverview({
       <SectionCard title="Progress" className="character-field-section">
         <FieldGrid>
           <Field label="Level">
-            <TextInput
+            <NumericInput
               value={state.levelDraft}
+              min={0}
               onChange={(event) => actions.setLevelDraft(event.target.value)}
               disabled={!canEdit || busy}
             />
           </Field>
           <Field label="Experience">
-            <TextInput
+            <NumericInput
               value={state.experienceDraft}
+              min={0}
               onChange={(event) => actions.setExperienceDraft(event.target.value)}
               disabled={!canEdit || busy}
               placeholder={state.character?.experience === null ? "Add to save" : undefined}
@@ -181,8 +183,9 @@ function CharacterOverview({
           </Field>
           {state.characterKey !== "main" ? (
             <Field label="Approval">
-              <TextInput
+              <NumericInput
                 value={state.approvalDraft}
+                min={0}
                 onChange={(event) => actions.setApprovalDraft(event.target.value)}
                 disabled={!canEdit || busy || state.character?.approval === null}
                 placeholder={state.character?.approval === null ? "Unavailable for this character" : undefined}
@@ -195,8 +198,9 @@ function CharacterOverview({
         <FieldGrid>
           {Object.entries(state.statsDraft).map(([key, value]) => (
             <Field key={key} label={titleCase(key)}>
-              <TextInput
+              <NumericInput
                 value={value}
+                min={0}
                 onChange={(event) => actions.setStatsDraft((current) => ({ ...current, [key]: event.target.value }))}
                 disabled={!canEdit || busy}
               />
@@ -213,8 +217,9 @@ function CharacterOverview({
             ["specialization_points", "Specialization Points"],
           ].map(([key, label]) => (
             <Field key={key} label={label}>
-              <TextInput
+              <NumericInput
                 value={state.pointPoolsDraft[key] ?? ""}
+                min={0}
                 onChange={(event) =>
                   actions.setPointPoolsDraft((current) => ({ ...current, [key]: event.target.value }))
                 }

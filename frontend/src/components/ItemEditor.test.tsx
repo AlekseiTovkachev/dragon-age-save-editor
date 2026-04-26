@@ -61,6 +61,22 @@ describe("ItemEditor", () => {
     expect(props.onPropertyDraftChange).toHaveBeenCalledWith({ power: "2" });
   });
 
+  it("rejects invalid numeric metadata and property input", () => {
+    const props = renderEditor();
+
+    const stackInput = screen.getByDisplayValue("3");
+    fireEvent.change(stackInput, { target: { value: "abc" } });
+    fireEvent.change(stackInput, { target: { value: "-1" } });
+    fireEvent.change(stackInput, { target: { value: "100" } });
+
+    const powerInput = screen.getByPlaceholderText("Power");
+    fireEvent.change(powerInput, { target: { value: "x" } });
+    fireEvent.change(powerInput, { target: { value: "-2" } });
+
+    expect(props.onMetadataChange).not.toHaveBeenCalled();
+    expect(props.onPropertyDraftChange).not.toHaveBeenCalled();
+  });
+
   it("does not render an apply button", () => {
     renderEditor({ itemIndex: null });
 

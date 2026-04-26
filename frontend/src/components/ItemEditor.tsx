@@ -9,6 +9,7 @@ import {
   FieldGrid,
   GridTable,
   GridTableRow,
+  NumericInput,
   PanelBody,
   SelectInput,
   TextInput,
@@ -97,8 +98,10 @@ export function ItemEditor({
                 <Field label="Category"><TextInput value={item.category.label} disabled /></Field>
                 {canEditStackSize ? (
                   <Field label="Stack Size">
-                    <TextInput
+                    <NumericInput
                       value={metadataDraft.stack_size}
+                      min={1}
+                      max={99}
                       onChange={(event) => onMetadataChange({ stack_size: event.target.value })}
                       disabled={!canEdit || busy}
                     />
@@ -136,8 +139,9 @@ export function ItemEditor({
                   </Field>
                 ) : null}
                 <Field label="Item Level">
-                  <TextInput
+                  <NumericInput
                     value={metadataDraft.item_level}
+                    min={0}
                     onChange={(event) => onMetadataChange({ item_level: event.target.value })}
                     disabled={!canEdit || busy}
                   />
@@ -177,8 +181,10 @@ export function ItemEditor({
                         </option>
                       ))}
                     </SelectInput>
-                    <TextInput
+                    <NumericInput
                       value={property.power}
+                      min={0}
+                      allowDecimal
                       onChange={(event) => onPropertyUpdate("power", propertyIndex, event.target.value)}
                       disabled={!canEdit || busy}
                     />
@@ -200,9 +206,11 @@ export function ItemEditor({
                         </option>
                       ))}
                     </SelectInput>
-                    <TextInput
+                    <NumericInput
                       placeholder="Power"
                       value={propertyDraft.power}
+                      min={0}
+                      allowDecimal
                       onChange={(event) => onPropertyDraftChange({ power: event.target.value })}
                       disabled={!canEdit || busy}
                     />

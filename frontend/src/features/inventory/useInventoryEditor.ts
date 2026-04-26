@@ -90,6 +90,7 @@ export function useInventoryEditor({
   const itemPropertiesDraftRef = useRef(itemPropertiesDraft);
   const propertyDraftRef = useRef(propertyDraft);
   const selectedItemRef = useRef<Item | null>(null);
+  const loadedSummaryKey = useRef<string | null>(null);
 
   const selectedItem = useMemo(
     () => items.find((entry) => entry.index === itemIndex)?.item ?? null,
@@ -155,6 +156,11 @@ export function useInventoryEditor({
 
   useEffect(() => {
     if (summary) {
+      const summaryKey = `${summary.source_path}:${summary.preferred_game}`;
+      if (loadedSummaryKey.current === summaryKey) {
+        return;
+      }
+      loadedSummaryKey.current = summaryKey;
       const nextMoneyDraft = summary.money.toString();
       setMoneyDraft(nextMoneyDraft);
       draftCheckpoint.checkpoint({
@@ -398,6 +404,7 @@ export function useInventoryEditor({
     setPropertyDraft({ property_id: "", power: "" });
     itemDrafts.current = {};
     currentItemDraftKey.current = null;
+    loadedSummaryKey.current = null;
     draftCheckpoint.clear();
   }, [draftCheckpoint]);
 

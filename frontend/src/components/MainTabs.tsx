@@ -1,4 +1,5 @@
 import { Flag, Package, ScrollText, UsersRound } from "lucide-react";
+import { NumericInput } from "./ui";
 import { SECTION_TITLES } from "../lib/navigation";
 import type { Section } from "../lib/navigation";
 
@@ -50,8 +51,9 @@ export function MainTabs({
       {moneyDraft !== undefined && onMoneyChange ? (
         <label className="tab-money-control">
           <span>Money</span>
-          <input
+          <NumericInput
             value={moneyDraft}
+            min={0}
             onChange={(event) => onMoneyChange(event.target.value)}
             disabled={!canEditMoney || busy}
           />
