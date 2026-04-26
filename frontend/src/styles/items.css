@@ -13,77 +13,159 @@
   flex: 1 1 auto;
 }
 
+.item-list .list-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  min-height: 2.65rem;
+  padding-block: 0.45rem;
+}
+
+.item-list .list-row strong {
+  overflow: hidden;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.item-amount {
+  padding: 0.15rem 0.45rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface-muted);
+}
+
 .property-list {
   flex: 1 1 auto;
 }
 
-.property-table {
+.item-editor-grid {
   display: grid;
+  grid-template-columns: minmax(220px, 0.58fr) minmax(0, 1.42fr);
+  align-items: start;
+  gap: 1rem;
+  height: 100%;
+  min-height: 0;
+}
+
+.item-editor-body {
+  overflow: hidden;
+}
+
+.item-overview-column,
+.properties-section {
+  min-width: 0;
+}
+
+.item-overview-column {
+  display: grid;
+  align-content: start;
+  gap: 0.75rem;
+  padding: 0.85rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-field);
+}
+
+.item-overview-column .field-grid {
+  grid-template-columns: 1fr;
+  gap: 0.55rem;
+}
+
+.property-table {
+  --property-power-width: 90px;
+  --property-action-width: 86px;
+  --property-scrollbar-width: 14px;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
   gap: 0;
-  border: 1px solid #493a2b;
-  background: rgba(21, 17, 15, 0.55);
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-field);
 }
 
 .property-table .property-list {
   gap: 0;
+  min-height: 0;
   padding-right: 0;
-  border-top: 1px solid #493a2b;
+  border-top: 1px solid var(--line);
+  overflow-y: scroll;
+}
+
+.properties-section {
+  min-height: 0;
+  height: 100%;
 }
 
 .badge {
   padding: 0.2rem 0.5rem;
-  border: 1px solid #675337;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface-field);
+  color: var(--muted);
   text-transform: uppercase;
   font-size: 0.75rem;
 }
 
 .badge.error,
 .status-error {
-  color: #f3aea8;
+  color: var(--accent);
 }
 
 .badge.warning {
-  color: #efdb96;
+  color: #8a651e;
 }
 
 .status-ok {
-  color: #cfe0c4;
+  color: #377a4f;
 }
 
 .property-row {
   display: grid;
-  grid-template-columns: minmax(220px, 1fr) 120px 88px;
+  grid-template-columns: minmax(0, 1fr) var(--property-power-width) var(--property-action-width);
   gap: 0;
   align-items: center;
 }
 
 .property-row > * {
   border-radius: 0;
+  border-width: 0;
+  background: transparent;
+}
+
+.property-row > button {
+  min-height: 100%;
+  border-left: 1px solid var(--line);
+  color: var(--accent);
 }
 
 .property-row > * + * {
-  border-left-width: 0;
+  border-left: 1px solid var(--line);
 }
 
 .property-row + .property-row,
 .property-list .property-row + .property-row,
 .add-property {
-  border-top: 1px solid #493a2b;
+  border-top: 1px solid var(--line);
 }
 
 .property-header {
-  color: #cdbfae;
-  background: rgba(36, 29, 25, 0.8);
-  font-size: 0.82rem;
+  padding-right: var(--property-scrollbar-width);
+  color: var(--muted);
+  background: var(--surface-muted);
+  font-size: 0.78rem;
+  font-weight: 900;
   text-transform: uppercase;
 }
 
 .property-header span {
-  padding: 0.35rem 0.65rem;
+  padding: 0.45rem 0.7rem;
 }
 
 .add-property {
-  grid-template-columns: minmax(220px, 1fr) 120px 88px;
+  padding-right: var(--property-scrollbar-width);
+  grid-template-columns: minmax(0, 1fr) var(--property-power-width) var(--property-action-width);
 }
 
 .error-banner,
@@ -91,11 +173,14 @@
   position: fixed;
   right: 1rem;
   bottom: 1rem;
+  z-index: 50;
   max-width: 500px;
   padding: 0.85rem 1rem;
-  border: 1px solid #6f472d;
-  background: rgba(58, 30, 25, 0.96);
-  color: #f6d7cf;
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  background: #220b10;
+  color: #f4d7d8;
+  box-shadow: var(--shadow);
   display: flex;
   gap: 0.75rem;
   align-items: center;
@@ -104,12 +189,19 @@
 
 .warning-banner {
   bottom: 4.75rem;
-  background: rgba(68, 51, 26, 0.97);
-  color: #f1dfb0;
+  border-color: var(--line-bright);
+  background: var(--gold-soft);
+  color: #eadfc8;
 }
 
 .dismiss-button {
   flex: 0 0 auto;
+  min-height: 2rem;
   padding: 0.35rem 0.65rem;
 }
 
+@media (max-width: 1120px) {
+  .item-editor-grid {
+    grid-template-columns: 1fr;
+  }
+}

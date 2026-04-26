@@ -1,6 +1,6 @@
 .plot-flags-layout {
   display: grid;
-  grid-template-columns: minmax(260px, 340px) 1fr;
+  grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
   gap: 1rem;
   align-items: start;
 }
@@ -9,43 +9,53 @@
 .plot-boolean-list,
 .plot-group {
   display: grid;
-  gap: 0.5rem;
+  gap: 0.6rem;
+}
+
+.plot-group {
+  padding: 1rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-strong);
 }
 
 .plot-group h4 {
-  margin: 0.5rem 0 0;
-  color: #f1d7a9;
+  margin: 0;
+  color: var(--accent);
 }
 
 .plot-radio-group {
   display: grid;
-  gap: 0.4rem;
+  gap: 0.45rem;
   margin: 0;
-  padding: 0.75rem;
-  border: 1px solid #493a2b;
-  background: rgba(21, 17, 15, 0.55);
+  padding: 0.8rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-field);
 }
 
 .plot-radio-group legend {
   padding: 0 0.35rem;
-  color: #f1d7a9;
+  color: var(--text);
+  font-weight: 800;
 }
 
 .radio-row {
   display: grid;
   grid-template-columns: auto 1fr;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.55rem;
 }
 
 .radio-row input {
   width: auto;
+  accent-color: var(--accent);
 }
 
 .plot-flag-code {
   display: block;
   margin-top: 0.15rem;
-  color: #9f927f;
+  color: var(--faint);
   font-size: 0.82rem;
 }
 
@@ -54,4 +64,3 @@
     grid-template-columns: 1fr;
   }
 }
-

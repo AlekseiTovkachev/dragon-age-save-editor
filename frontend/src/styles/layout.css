@@ -2,36 +2,95 @@
   min-height: 100vh;
   height: 100vh;
   display: grid;
-  grid-template-rows: auto 1fr auto;
   overflow: hidden;
 }
 
-.topbar,
-.statusbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 1rem;
-  padding: 1rem 1.5rem;
-  background: rgba(24, 20, 18, 0.94);
+.workspace {
+  display: grid;
+  grid-template-rows: auto auto 1fr;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .topbar {
-  border-bottom: 1px solid #403223;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  background: rgba(18, 13, 10, 0.96);
+  border-bottom: 1px solid var(--line);
+}
+
+.topbar {
+  justify-content: space-between;
+}
+
+.topbar-title {
+  min-width: 260px;
+  max-width: 50%;
+}
+
+.topbar h1,
+.panel h2,
+.panel h3 {
+  margin: 0;
+}
+
+.topbar h1 {
+  font-size: 1.35rem;
+  letter-spacing: 0;
+}
+
+.topbar p,
+.topbar-title small,
+.topbar-document small {
+  margin: 0.2rem 0 0;
+  color: var(--muted);
+}
+
+.topbar-title p,
+.topbar-title small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.topbar-document {
+  display: grid;
+  justify-items: end;
+  min-width: 160px;
+  margin-left: auto;
+}
+
+.topbar-document span {
+  font-weight: 800;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 0.75rem;
 }
 
 .topbar-preview {
   position: relative;
   display: grid;
   place-items: center;
-  width: 56px;
-  height: 56px;
+  width: 50px;
+  height: 50px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-muted);
   outline: none;
 }
 
 .topbar-preview-image {
-  max-width: 48px;
-  max-height: 48px;
+  max-width: 42px;
+  max-height: 42px;
   width: auto;
   height: auto;
   object-fit: contain;
@@ -45,9 +104,10 @@
   right: 0;
   z-index: 20;
   padding: 0.75rem;
-  background: #1d1815;
-  border: 1px solid #55412d;
-  box-shadow: 0 1rem 2.5rem rgba(0, 0, 0, 0.5);
+  background: var(--surface-strong);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
 }
 
 .topbar-preview:hover .topbar-preview-popover,
@@ -66,67 +126,48 @@
 }
 
 .topbar-preview-empty {
-  color: #b9ac99;
-  border: 1px solid #4c4030;
-  padding: 0.45rem 0.6rem;
+  color: var(--muted);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0.55rem 0.7rem;
   white-space: nowrap;
-}
-
-.topbar h1,
-.panel h2,
-.panel h3 {
-  margin: 0;
-}
-
-.topbar p {
-  margin: 0.3rem 0 0;
-  color: #b9ac99;
-}
-
-.workspace {
-  display: grid;
-  grid-template-rows: auto 1fr;
-  min-height: 0;
-  overflow: hidden;
+  background: var(--surface-muted);
 }
 
 .content {
-  padding: 1rem;
+  padding: 0.75rem;
   min-height: 0;
   overflow: auto;
 }
 
 .panel {
-  padding: 1rem;
+  padding: 0.85rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-strong);
+  box-shadow: var(--shadow);
 }
 
 .empty-state {
   display: grid;
   place-items: center;
   min-height: 340px;
+  text-align: center;
 }
 
 .split-section {
-  grid-template-columns: 280px 1fr;
+  grid-template-columns: 250px minmax(0, 1fr);
   min-height: 0;
   height: 100%;
 }
 
 .inventory-layout {
-  grid-template-columns: 320px 1fr;
-}
-
-.inventory-money-panel {
-  display: grid;
-  gap: 0.75rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid #463626;
+  grid-template-columns: 270px minmax(0, 1fr);
 }
 
 .muted,
-.statusbar,
 .finding-path {
-  color: #b9ac99;
+  color: var(--muted);
 }
 
 .list-panel,
@@ -136,7 +177,7 @@
 
 .scroll-panel {
   display: grid;
-  grid-template-rows: auto 1fr;
+  grid-template-rows: auto minmax(0, 1fr);
 }
 
 .panel-scroll-body {
@@ -147,6 +188,7 @@
 
 .editor-help {
   margin: 0;
+  color: var(--muted);
   font-size: 0.92rem;
 }
 
@@ -156,3 +198,25 @@
   padding-right: 0.3rem;
 }
 
+@media (max-width: 1050px) {
+  .topbar-title {
+    max-width: none;
+  }
+}
+
+@media (max-width: 820px) {
+  .topbar {
+    flex-wrap: wrap;
+  }
+
+  .topbar-document {
+    justify-items: start;
+    margin-left: 0;
+  }
+
+  .split-section,
+  .inventory-layout,
+  .character-equipment-layout {
+    grid-template-columns: 1fr;
+  }
+}

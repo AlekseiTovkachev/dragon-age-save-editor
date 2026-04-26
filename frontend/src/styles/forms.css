@@ -1,25 +1,61 @@
 .field-link {
   display: block;
   width: 100%;
-  border: 1px solid #4c4030;
-  background: #221d19;
-  color: #f1d7a9;
-  padding: 0.55rem 0.65rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-field);
+  color: var(--accent);
+  padding: 0.6rem 0.7rem;
   text-decoration: none;
+  font-weight: 700;
 }
 
 .field-link:hover,
 .field-link:focus {
-  color: #f8edd7;
-  border-color: #6a5436;
+  color: var(--accent-strong);
+  border-color: var(--accent);
+  background: var(--accent-soft);
 }
 
 .field-grid {
   grid-template-columns: repeat(2, minmax(180px, 1fr));
 }
 
+label {
+  display: grid;
+  gap: 0.25rem;
+  color: var(--text);
+}
+
 label span,
 .panel h3,
 .panel h2 {
   text-transform: none;
+}
+
+label span {
+  color: var(--muted);
+  font-size: 0.86rem;
+  font-weight: 800;
+}
+
+.inline-form {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.button-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.panel-heading {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
 }
