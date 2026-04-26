@@ -111,6 +111,9 @@ pub enum SaveCommand {
         property_index: usize,
         property_id: u32,
     },
+    ApplyBatch {
+        commands: Vec<SaveCommand>,
+    },
     SaveAs {
         output_path: String,
     },
@@ -173,6 +176,7 @@ pub enum SaveCommandResult {
 impl SaveDocument {
     pub fn execute(&mut self, command: SaveCommand) -> Result<SaveCommandResult, CommandError> {
         match command {
+            SaveCommand::ApplyBatch { commands } => self.execute_batch(commands),
             SaveCommand::Validate => Ok(SaveCommandResult::Validation {
                 report: ValidationReportDto::from(validate_gff(&self.raw)),
             }),
@@ -396,23 +400,25 @@ impl SaveDocument {
                 ability_ids,
             } => {
                 let target = CharacterTarget::from(target);
-                if self.lookup.is_none() {
-                    return Err(CommandError {
-                        code: CommandErrorCode::LookupFailed,
-                        message: "ability editing requires data/gamedata.db".to_string(),
-                    });
-                }
+                let missing_lookup = || CommandError {
+                    code: CommandErrorCode::LookupFailed,
+                    message: "ability editing requires data/gamedata.db".to_string(),
+                };
                 let lookup = self.lookup.take();
+                let Some(lookup_ref) = lookup
+                    .as_ref()
+                    .map(|db| db as &dyn crate::domain::gamedata::GameDataLookup)
+                else {
+                    self.lookup = lookup;
+                    return Err(missing_lookup());
+                };
                 let result = self
                     .editor_mut()?
                     .replace_character_abilities(
                         target,
                         AbilityListKind::from(list),
                         &ability_ids,
-                        lookup
-                            .as_ref()
-                            .map(|db| db as &dyn crate::domain::gamedata::GameDataLookup)
-                            .unwrap(),
+                        lookup_ref,
                     )
                     .map_err(CommandError::from);
                 self.lookup = lookup;
@@ -640,6 +646,57 @@ impl SaveDocument {
                 })
             }
         }
+    }
+
+    fn execute_batch(
+        &mut self,
+        commands: Vec<SaveCommand>,
+    ) -> Result<SaveCommandResult, CommandError> {
+        if let Some(command) = commands
+            .iter()
+            .find(|command| !command.is_batch_edit_command())
+        {
+            return Err(CommandError {
+                code: CommandErrorCode::InvalidSaveState,
+                message: format!("command {command:?} cannot be used in apply_batch"),
+            });
+        }
+
+        let editor_backup = self.editor.clone();
+        let dirty_backup = self.dirty;
+        for command in commands {
+            if let Err(err) = self.execute(command) {
+                self.editor = editor_backup;
+                self.dirty = dirty_backup;
+                return Err(err);
+            }
+        }
+        Ok(SaveCommandResult::Summary {
+            summary: self.summary(),
+        })
+    }
+}
+
+impl SaveCommand {
+    fn is_batch_edit_command(&self) -> bool {
+        matches!(
+            self,
+            SaveCommand::SetMoney { .. }
+                | SaveCommand::PatchCoreStats { .. }
+                | SaveCommand::PatchPointPools { .. }
+                | SaveCommand::SetLevel { .. }
+                | SaveCommand::SetExperience { .. }
+                | SaveCommand::SetApproval { .. }
+                | SaveCommand::ReplaceAbilityList { .. }
+                | SaveCommand::ReplaceCraftingRecipeList { .. }
+                | SaveCommand::PatchPlotFlags { .. }
+                | SaveCommand::PatchItemMetadata { .. }
+                | SaveCommand::SetBackpackItemStackSize { .. }
+                | SaveCommand::AddItemProperty { .. }
+                | SaveCommand::RemoveItemProperty { .. }
+                | SaveCommand::SetItemPropertyPower { .. }
+                | SaveCommand::SetItemPropertyId { .. }
+        )
     }
 }
 

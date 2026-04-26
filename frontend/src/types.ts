@@ -282,6 +282,7 @@ export type SaveCommand =
       property_index: number;
       property_id: number;
     }
+  | { command: "apply_batch"; commands: SaveCommand[] }
   | { command: "save_as"; output_path: string };
 
 export type SaveCommandResult =

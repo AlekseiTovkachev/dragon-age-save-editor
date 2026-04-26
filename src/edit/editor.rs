@@ -30,7 +30,7 @@ const SAVEGAME_PARTY_APPROVAL_LEVEL_NAME: &str = "SAVEGAME_PARTY_APPROVAL_LEVEL"
 const SAVEGAME_ABILITYLIST_NAME: &str = "SAVEGAME_ABILITYLIST";
 const MAX_ITEM_STACK_SIZE: u32 = 99;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct SaveEditor {
     raw: GffFile,
     save: SaveGame,

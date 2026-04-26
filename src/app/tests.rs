@@ -10,16 +10,101 @@ use std::path::PathBuf;
 
 #[test]
 fn serializes_and_deserializes_command_dtos() {
-    let command = SaveCommand::ReplaceAbilityList {
-        target: CharacterTargetDto::Companion { index: 0 },
-        list: AbilityListKindDto::Talents,
-        ability_ids: vec![100100, 100200],
+    let command = SaveCommand::ApplyBatch {
+        commands: vec![SaveCommand::ReplaceAbilityList {
+            target: CharacterTargetDto::Companion { index: 0 },
+            list: AbilityListKindDto::Talents,
+            ability_ids: vec![100100, 100200],
+        }],
     };
 
     let json = serde_json::to_string(&command).unwrap();
     let decoded: SaveCommand = serde_json::from_str(&json).unwrap();
 
     assert_eq!(decoded, command);
+}
+
+#[test]
+fn apply_batch_command_wire_shape_matches_frontend_contract() {
+    let command = SaveCommand::ApplyBatch {
+        commands: vec![SaveCommand::SetBackpackItemStackSize {
+            index: 0,
+            stack_size: 9,
+        }],
+    };
+
+    assert_eq!(
+        serde_json::to_value(&command).unwrap(),
+        serde_json::json!({
+            "command": "apply_batch",
+            "commands": [
+                {
+                    "command": "set_backpack_item_stack_size",
+                    "index": 0,
+                    "stack_size": 9
+                }
+            ]
+        })
+    );
+}
+
+#[test]
+fn summary_result_wire_shape_matches_frontend_contract() {
+    let document = SaveDocument::open(dao_save_path()).unwrap();
+    let result = SaveCommandResult::Summary {
+        summary: document.summary(),
+    };
+    let json = serde_json::to_value(&result).unwrap();
+
+    assert_eq!(json["result"], "summary");
+    assert!(json["summary"]["source_path"].is_string());
+    assert!(json["summary"]["dirty"].is_boolean());
+    assert!(json["summary"]["money"].is_number());
+    assert!(json["summary"]["main_character_name"].is_string());
+    assert!(json["summary"]["companion_count"].is_number());
+    assert!(json["summary"]["backpack_count"].is_number());
+}
+
+#[test]
+fn apply_batch_returns_summary_after_successful_edits() {
+    let mut document = SaveDocument::open(dao_save_path()).unwrap();
+
+    let response = document
+        .execute(SaveCommand::ApplyBatch {
+            commands: vec![SaveCommand::SetMoney { money: 654321 }],
+        })
+        .unwrap();
+
+    match response {
+        SaveCommandResult::Summary { summary } => {
+            assert_eq!(summary.money, 654321);
+            assert!(summary.dirty);
+        }
+        other => panic!("unexpected response: {other:?}"),
+    }
+}
+
+#[test]
+fn apply_batch_restores_editor_state_after_failed_edit() {
+    let mut document = SaveDocument::open(dao_save_path()).unwrap();
+    let original = document.summary();
+
+    let error = document
+        .execute(SaveCommand::ApplyBatch {
+            commands: vec![
+                SaveCommand::SetMoney { money: 654321 },
+                SaveCommand::SetBackpackItemStackSize {
+                    index: 0,
+                    stack_size: 500,
+                },
+            ],
+        })
+        .unwrap_err();
+
+    assert_eq!(error.code, super::CommandErrorCode::InvalidStackSize);
+    let restored = document.summary();
+    assert_eq!(restored.money, original.money);
+    assert_eq!(restored.dirty, original.dirty);
 }
 
 #[test]
