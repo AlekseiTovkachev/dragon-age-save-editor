@@ -1,3 +1,5 @@
+import { FolderOpen, RotateCcw, Save, ShieldCheck } from "lucide-react";
+import { gameLabel } from "../lib/format";
 import type { SaveSummary } from "../types";
 
 type TopbarProps = {
@@ -6,14 +8,43 @@ type TopbarProps = {
   busy: boolean;
   onOpen: () => void;
   onSaveAs: () => void;
+  onCommitDrafts: () => void;
+  onResetDrafts: () => void;
 };
 
-export function Topbar({ summary, screenshotDataUrl, busy, onOpen, onSaveAs }: TopbarProps) {
+function saveName(summary: SaveSummary): string {
+  const parts = summary.source_path.split(/[\\/]/);
+  return parts[parts.length - 1] || summary.source_path;
+}
+
+export function Topbar({
+  summary,
+  screenshotDataUrl,
+  busy,
+  onOpen,
+  onSaveAs,
+  onCommitDrafts,
+  onResetDrafts,
+}: TopbarProps) {
   return (
     <header className="topbar">
-      <div>
+      <div className="topbar-title">
         <h1>Dragon Age Save Editor</h1>
-        <p>Open, edit, and save as a new file.</p>
+        <p>{summary ? `${gameLabel(summary.preferred_game)} - ${saveName(summary)}` : "Open a save to begin editing."}</p>
+        {summary ? <small>{summary.source_path}</small> : null}
+      </div>
+      <div className="topbar-document">
+        {summary ? (
+          <>
+            <span>{summary.main_character_name}</span>
+            <small>{summary.dirty ? "Unsaved changes" : "Saved copy ready"}</small>
+          </>
+        ) : (
+          <>
+            <span>No save loaded</span>
+            <small>Original files stay untouched</small>
+          </>
+        )}
       </div>
       <div className="toolbar">
         {summary && screenshotDataUrl ? (
@@ -25,8 +56,26 @@ export function Topbar({ summary, screenshotDataUrl, busy, onOpen, onSaveAs }: T
           </div>
         ) : null}
         {summary && !screenshotDataUrl ? <span className="topbar-preview-empty">No screenshot</span> : null}
-        <button onClick={onOpen} disabled={busy}>Open Save</button>
-        <button onClick={onSaveAs} disabled={busy || !summary}>Save As</button>
+        <button className="button-secondary" onClick={onOpen} disabled={busy}>
+          <FolderOpen size={17} aria-hidden="true" />
+          Open Save
+        </button>
+        {summary ? (
+          <>
+            <button className="button-secondary" onClick={onCommitDrafts} disabled={busy}>
+              <ShieldCheck size={17} aria-hidden="true" />
+              Commit Changes
+            </button>
+            <button className="button-secondary" onClick={onResetDrafts} disabled={busy}>
+              <RotateCcw size={17} aria-hidden="true" />
+              Reset Drafts
+            </button>
+          </>
+        ) : null}
+        <button className="button-primary" onClick={onSaveAs} disabled={busy || !summary || !summary.dirty}>
+          <Save size={17} aria-hidden="true" />
+          Save As
+        </button>
       </div>
     </header>
   );

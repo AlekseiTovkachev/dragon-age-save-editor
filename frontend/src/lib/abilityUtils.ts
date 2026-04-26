@@ -68,3 +68,134 @@ export function groupedAbilities(
 export function isUselessDa2Talent(ability: Ability): boolean {
   return ability.id < 100000 && ability.id !== 700000;
 }
+
+export function visibleAbilities(isDa2: boolean, list: AbilityListKind, abilities: Ability[]): Ability[] {
+  if (isDa2 && list === "talents") {
+    return abilities.filter((ability) => !isUselessDa2Talent(ability));
+  }
+  return abilities;
+}
+
+export function isCoreAbility(ability: Ability): boolean {
+  return ability.core_ids.length === 0;
+}
+
+export function abilityIsLocked(
+  list: AbilityListKind,
+  abilityId: number,
+  abilityDrafts: Record<AbilityListKind, Ability[]>,
+): boolean {
+  return abilityDrafts[list].some((ability) => {
+    if (ability.id === abilityId || !ability.core_ids.includes(abilityId)) {
+      return false;
+    }
+    return !ability.core_ids.some(
+      (coreId) => coreId !== abilityId && abilityDrafts[list].some((candidate) => candidate.id === coreId),
+    );
+  });
+}
+
+export function allKnownAbilities(
+  isDa2: boolean,
+  list: AbilityListKind,
+  availableAbilities: Record<AbilityListKind, Ability[]>,
+  abilityDrafts: Record<AbilityListKind, Ability[]>,
+): Ability[] {
+  const byId = new Map<number, Ability>();
+  for (const ability of visibleAbilities(isDa2, list, [...availableAbilities[list], ...abilityDrafts[list]])) {
+    byId.set(ability.id, ability);
+  }
+  return Array.from(byId.values());
+}
+
+export function coreAbilityOptions(
+  isDa2: boolean,
+  list: AbilityListKind,
+  availableAbilities: Record<AbilityListKind, Ability[]>,
+  abilityDrafts: Record<AbilityListKind, Ability[]> = { skills: [], talents: [], spells: [] },
+): Ability[] {
+  const selectedIds = new Set(abilityDrafts[list].map((ability) => ability.id));
+  return visibleAbilities(isDa2, list, availableAbilities[list]).filter(
+    (ability) => isCoreAbility(ability) && !selectedIds.has(ability.id),
+  );
+}
+
+function reachesSelectedAbility(
+  ability: Ability,
+  knownById: Map<number, Ability>,
+  selectedIds: Set<number>,
+  seen = new Set<number>(),
+): boolean {
+  if (seen.has(ability.id)) {
+    return false;
+  }
+  seen.add(ability.id);
+  return ability.core_ids.some((coreId) => {
+    if (selectedIds.has(coreId)) {
+      return true;
+    }
+    const core = knownById.get(coreId);
+    return core ? reachesSelectedAbility(core, knownById, selectedIds, seen) : false;
+  });
+}
+
+export function visibleTreeAbilities(
+  isDa2: boolean,
+  list: AbilityListKind,
+  availableAbilities: Record<AbilityListKind, Ability[]>,
+  abilityDrafts: Record<AbilityListKind, Ability[]>,
+): Ability[] {
+  const known = allKnownAbilities(isDa2, list, availableAbilities, abilityDrafts);
+  const knownById = new Map(known.map((ability) => [ability.id, ability]));
+  const selectedIds = new Set(abilityDrafts[list].map((ability) => ability.id));
+  const selectedOrder = new Map(abilityDrafts[list].map((ability, index) => [ability.id, index]));
+  return known
+    .filter(
+      (ability) =>
+        selectedIds.has(ability.id) ||
+        (!isCoreAbility(ability) && reachesSelectedAbility(ability, knownById, selectedIds)),
+    )
+    .sort((left, right) => {
+      const leftSelected = selectedOrder.get(left.id);
+      const rightSelected = selectedOrder.get(right.id);
+      if (leftSelected !== undefined && rightSelected !== undefined) {
+        return leftSelected - rightSelected;
+      }
+      if (leftSelected !== undefined) {
+        return -1;
+      }
+      if (rightSelected !== undefined) {
+        return 1;
+      }
+      return abilityLabel(left).localeCompare(abilityLabel(right), undefined, { sensitivity: "base" });
+    });
+}
+
+export function missingPrerequisiteChain(
+  ability: Ability,
+  knownById: Map<number, Ability>,
+  selectedIds: Set<number>,
+  seen = new Set<number>(),
+): Ability[] {
+  if (ability.core_ids.length === 0 || seen.has(ability.id)) {
+    return [];
+  }
+  seen.add(ability.id);
+
+  if (ability.core_ids.some((coreId) => selectedIds.has(coreId))) {
+    return [];
+  }
+
+  for (const coreId of ability.core_ids) {
+    const core = knownById.get(coreId);
+    if (!core) {
+      continue;
+    }
+    const chain = missingPrerequisiteChain(core, knownById, selectedIds, new Set(seen));
+    return [...chain, core].filter((candidate, index, candidates) => {
+      return !selectedIds.has(candidate.id) && candidates.findIndex((entry) => entry.id === candidate.id) === index;
+    });
+  }
+
+  return [];
+}
