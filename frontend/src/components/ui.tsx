@@ -98,6 +98,35 @@ export function ButtonRow({ children, className = "" }: { children: ReactNode; c
   return <div className={["button-row", className].filter(Boolean).join(" ")}>{children}</div>;
 }
 
+type GridTableProps = {
+  header: ReactNode;
+  body: ReactNode;
+  footer?: ReactNode;
+  className?: string;
+  bodyClassName?: string;
+};
+
+export function GridTable({ header, body, footer, className = "", bodyClassName = "" }: GridTableProps) {
+  return (
+    <div className={["grid-table", className].filter(Boolean).join(" ")}>
+      {header}
+      <ScrollRegion className={["grid-table-body", bodyClassName].filter(Boolean).join(" ")}>
+        {body}
+      </ScrollRegion>
+      {footer}
+    </div>
+  );
+}
+
+type GridTableRowProps = {
+  children: ReactNode;
+  className?: string;
+};
+
+export function GridTableRow({ children, className = "" }: GridTableRowProps) {
+  return <div className={["grid-table-row", className].filter(Boolean).join(" ")}>{children}</div>;
+}
+
 type ChoiceRowProps = LabelHTMLAttributes<HTMLLabelElement> & {
   kind: "checkbox" | "radio";
 };

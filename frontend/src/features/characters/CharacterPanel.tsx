@@ -289,60 +289,21 @@ function CharacterAbilities({
                   const groupKey = `${kind}-${group.label}`;
                   const isExpanded = expandedGroups[groupKey] ?? false;
                   return (
-                    <div key={groupKey} className="ability-group">
-                      <button
-                        className="ability-group-toggle"
-                        type="button"
-                        aria-expanded={isExpanded}
-                        onClick={() =>
-                          setExpandedGroups((current) => ({ ...current, [groupKey]: !isExpanded }))
-                        }
-                      >
-                        <span className="ability-group-title">
-                          {isExpanded ? (
-                            <ChevronDown size={16} strokeWidth={2.2} aria-hidden="true" />
-                          ) : (
-                            <ChevronRight size={16} strokeWidth={2.2} aria-hidden="true" />
-                          )}
-                          {group.label}
-                        </span>
-                        <span className="badge">{group.abilities.length}</span>
-                      </button>
-                      {isExpanded ? (
-                        <div className="ability-group-body">
-                          {group.abilities.map((ability) => {
-                            const selected = state.abilityDrafts[kind].some((entry) => entry.id === ability.id);
-                            const locked = selected && actions.abilityIsLocked(kind, ability.id);
-                            return (
-                              <div key={`${kind}-${ability.id}`} className="ability-entry">
-                                <div className="ability-entry-header">
-                                  <strong>{ability.name ?? `Ability ${ability.id}`}</strong>
-                                  {selected ? (
-                                    <button
-                                      onClick={() => actions.handleAbilityRemove(kind, ability.id)}
-                                      disabled={!canEdit || busy || locked}
-                                    >
-                                      Remove
-                                    </button>
-                                  ) : (
-                                    <button
-                                      onClick={() => actions.handleVisibleAbilityAdd(kind, ability.id)}
-                                      disabled={!canEdit || busy}
-                                    >
-                                      Add
-                                    </button>
-                                  )}
-                                </div>
-                                <span>{abilityLabel(ability)}</span>
-                                {locked ? (
-                                  <span className="muted">Required by another selected ability.</span>
-                                ) : null}
-                              </div>
-                            );
-                          })}
-                        </div>
-                      ) : null}
-                    </div>
+                    <AbilityGroup
+                      key={groupKey}
+                      group={group}
+                      kind={kind}
+                      expanded={isExpanded}
+                      selectedAbilities={state.abilityDrafts[kind]}
+                      canEdit={canEdit}
+                      busy={busy}
+                      onToggle={() =>
+                        setExpandedGroups((current) => ({ ...current, [groupKey]: !isExpanded }))
+                      }
+                      abilityIsLocked={actions.abilityIsLocked}
+                      onAbilityAdd={actions.handleVisibleAbilityAdd}
+                      onAbilityRemove={actions.handleAbilityRemove}
+                    />
                   );
                 })}
               </ScrollRegion>
@@ -351,5 +312,89 @@ function CharacterAbilities({
         })}
       </div>
     </>
+  );
+}
+
+type AbilityGroupProps = {
+  group: {
+    label: string;
+    abilities: Ability[];
+  };
+  kind: AbilityListKind;
+  expanded: boolean;
+  selectedAbilities: Ability[];
+  canEdit: boolean;
+  busy: boolean;
+  onToggle: () => void;
+  abilityIsLocked: (list: AbilityListKind, abilityId: number) => boolean;
+  onAbilityAdd: (list: AbilityListKind, abilityId: number) => void;
+  onAbilityRemove: (list: AbilityListKind, abilityId: number) => void;
+};
+
+function AbilityGroup({
+  group,
+  kind,
+  expanded,
+  selectedAbilities,
+  canEdit,
+  busy,
+  onToggle,
+  abilityIsLocked,
+  onAbilityAdd,
+  onAbilityRemove,
+}: AbilityGroupProps) {
+  return (
+    <div className="ability-group">
+      <button
+        className="ability-group-toggle"
+        type="button"
+        aria-expanded={expanded}
+        onClick={onToggle}
+      >
+        <span className="ability-group-title">
+          {expanded ? (
+            <ChevronDown size={16} strokeWidth={2.2} aria-hidden="true" />
+          ) : (
+            <ChevronRight size={16} strokeWidth={2.2} aria-hidden="true" />
+          )}
+          {group.label}
+        </span>
+        <span className="badge">{group.abilities.length}</span>
+      </button>
+      {expanded ? (
+        <div className="ability-group-body">
+          {group.abilities.map((ability) => {
+            const selected = selectedAbilities.some((entry) => entry.id === ability.id);
+            const locked = selected && abilityIsLocked(kind, ability.id);
+            return (
+              <div key={`${kind}-${ability.id}`} className="ability-entry">
+                <div className="ability-entry-header">
+                  <strong>{ability.name ?? `Ability ${ability.id}`}</strong>
+                  {selected ? (
+                    <button
+                      onClick={() => onAbilityRemove(kind, ability.id)}
+                      disabled={!canEdit || busy || locked}
+                    >
+                      Remove
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => onAbilityAdd(kind, ability.id)}
+                      disabled={!canEdit || busy}
+                    >
+                      Add
+                    </button>
+                  )}
+                </div>
+                <span>{abilityLabel(ability)}</span>
+                {locked ? (
+                  <span className="muted">Required by another selected ability.</span>
+                ) : null}
+              </div>
+            );
+          })}
+        </div>
+      ) : null}
+    </div>
   );
 }

@@ -1,7 +1,17 @@
 import { editableItemProperties, itemLabel } from "../lib/itemUtils";
 import type { ItemPropertyDraft } from "../lib/itemUtils";
 import type { Item, SelectableItemProperty } from "../types";
-import { ButtonRow, EmptyState, Field, FieldGrid, PanelBody, ScrollRegion, SelectInput, TextInput } from "./ui";
+import {
+  ButtonRow,
+  EmptyState,
+  Field,
+  FieldGrid,
+  GridTable,
+  GridTableRow,
+  PanelBody,
+  SelectInput,
+  TextInput,
+} from "./ui";
 
 type ItemMetadataDraft = {
   material: string;
@@ -136,58 +146,62 @@ export function ItemEditor({
             </section>
             <section className="properties-section">
               <div className="panel-heading"><h3>Properties</h3></div>
-              <div className="property-table">
-                <div className="property-row property-header">
-                  <span>Property</span>
-                  <span>Power</span>
-                  <span>Action</span>
-                </div>
-                <ScrollRegion className="property-list">
-                  {visibleItemPropertiesDraft.map(({ property, propertyIndex }) => (
-                    <div key={`${property.id}-${propertyIndex}`} className="property-row">
-                      <SelectInput
-                        value={property.id}
-                        onChange={(event) => onPropertyUpdate("id", propertyIndex, event.target.value)}
-                        disabled={!canEdit || busy}
-                      >
-                        {editableAvailableItemProperties.map((option) => (
-                          <option key={`existing-property-${propertyIndex}-${option.id}`} value={option.id}>
-                            {option.name ?? `Property ${option.id}`}
-                          </option>
-                        ))}
-                      </SelectInput>
-                      <TextInput
-                        value={property.power}
-                        onChange={(event) => onPropertyUpdate("power", propertyIndex, event.target.value)}
-                        disabled={!canEdit || busy}
-                      />
-                      <button onClick={() => onPropertyRemove(propertyIndex)} disabled={!canEdit || busy}>
-                        Remove
-                      </button>
-                    </div>
-                  ))}
-                </ScrollRegion>
-                <div className="property-row add-property">
-                  <SelectInput
-                    value={propertyDraft.property_id}
-                    onChange={(event) => onPropertyDraftChange({ property_id: event.target.value })}
-                    disabled={!canEdit || busy}
-                  >
-                    {editableAvailableItemProperties.map((property) => (
-                      <option key={`property-${property.id}`} value={property.id}>
-                        {property.name ?? `Property ${property.id}`}
-                      </option>
-                    ))}
-                  </SelectInput>
-                  <TextInput
-                    placeholder="Power"
-                    value={propertyDraft.power}
-                    onChange={(event) => onPropertyDraftChange({ power: event.target.value })}
-                    disabled={!canEdit || busy}
-                  />
-                  <button onClick={onPropertyAdd} disabled={!canEdit || busy}>Add</button>
-                </div>
-              </div>
+              <GridTable
+                className="property-table"
+                bodyClassName="property-list"
+                header={(
+                  <GridTableRow className="property-row property-header">
+                    <span>Property</span>
+                    <span>Power</span>
+                    <span>Action</span>
+                  </GridTableRow>
+                )}
+                body={visibleItemPropertiesDraft.map(({ property, propertyIndex }) => (
+                  <GridTableRow key={`${property.id}-${propertyIndex}`} className="property-row">
+                    <SelectInput
+                      value={property.id}
+                      onChange={(event) => onPropertyUpdate("id", propertyIndex, event.target.value)}
+                      disabled={!canEdit || busy}
+                    >
+                      {editableAvailableItemProperties.map((option) => (
+                        <option key={`existing-property-${propertyIndex}-${option.id}`} value={option.id}>
+                          {option.name ?? `Property ${option.id}`}
+                        </option>
+                      ))}
+                    </SelectInput>
+                    <TextInput
+                      value={property.power}
+                      onChange={(event) => onPropertyUpdate("power", propertyIndex, event.target.value)}
+                      disabled={!canEdit || busy}
+                    />
+                    <button onClick={() => onPropertyRemove(propertyIndex)} disabled={!canEdit || busy}>
+                      Remove
+                    </button>
+                  </GridTableRow>
+                ))}
+                footer={(
+                  <GridTableRow className="property-row add-property">
+                    <SelectInput
+                      value={propertyDraft.property_id}
+                      onChange={(event) => onPropertyDraftChange({ property_id: event.target.value })}
+                      disabled={!canEdit || busy}
+                    >
+                      {editableAvailableItemProperties.map((property) => (
+                        <option key={`property-${property.id}`} value={property.id}>
+                          {property.name ?? `Property ${property.id}`}
+                        </option>
+                      ))}
+                    </SelectInput>
+                    <TextInput
+                      placeholder="Power"
+                      value={propertyDraft.power}
+                      onChange={(event) => onPropertyDraftChange({ power: event.target.value })}
+                      disabled={!canEdit || busy}
+                    />
+                    <button onClick={onPropertyAdd} disabled={!canEdit || busy}>Add</button>
+                  </GridTableRow>
+                )}
+              />
             </section>
           </div>
         ) : <EmptyState>Select an item to edit metadata and properties.</EmptyState>}
