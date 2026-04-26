@@ -23,6 +23,19 @@ Run frontend checks:
 ```powershell
 npm run typecheck
 npm run lint
+npm run check
+```
+
+Run browser smoke tests with the mocked Tauri backend:
+
+```powershell
+npm run smoke
+```
+
+Run the full project verification gate:
+
+```powershell
+npm run verify
 ```
 
 Run Rust checks:
