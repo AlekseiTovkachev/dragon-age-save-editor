@@ -25,16 +25,23 @@
 ## Frontend
 
 - [ ] Handles every command result shape it sends.
+- [ ] Uses `expectResult` when a specific command result variant is expected.
 - [ ] Refreshes dirty state and summaries after mutating commands.
 - [ ] Preserves Apply/Reset behavior.
 - [ ] Preserves DAO, DAO Awakening, and DA2 visibility rules.
 - [ ] Keeps unknown/unsupported values visible but safe where applicable.
+- [ ] Updates `frontend/src/test/mockBackend.ts` for smoke-visible command behavior.
 
 ## Verification
 
-- [ ] `cargo test`
-- [ ] `cargo check`
-- [ ] `npm run check`
-- [ ] `npm run data:build`
-- [ ] `npm run data:verify`
-- [ ] `cargo check` in `src-tauri`
+- [ ] `npm run verify`
+- [ ] `npm run smoke` for main workflow or UI state changes.
+- [ ] `npm run coverage` when assessing test coverage or broadening behavior.
+- [ ] `npm run data:build` when seed/schema files changed.
+
+## Documentation
+
+- [ ] Updates `docs/architecture.md` if module ownership or flow changes.
+- [ ] Updates `docs/command-contract.md` if commands, DTOs, or error shapes change.
+- [ ] Updates `docs/testing.md` if verification, smoke, or coverage commands change.
+- [ ] Updates repo skills under `skills/*/SKILL.md` and `skills/*/agents/openai.yaml` if agent-facing conventions change.

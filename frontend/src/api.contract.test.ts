@@ -56,7 +56,7 @@ const commandFixtures = {
       { command: "set_backpack_item_stack_size", index: 0, stack_size: 9 },
     ],
   },
-  save_as: { command: "save_as", output_path: "C:/mock/save-copy.das" },
+  save_as: { command: "save_as", output_path: "/mock/save-copy.das" },
 } satisfies { [K in SaveCommand["command"]]: Extract<SaveCommand, { command: K }> };
 
 const errorFixtures = {
@@ -75,7 +75,7 @@ const resultFixtures = {
   summary: {
     result: "summary",
     summary: {
-      source_path: "C:/mock/save.das",
+      source_path: "/mock/save.das",
       dirty: false,
       preferred_game: "dao",
       money: 10,
@@ -134,9 +134,9 @@ const resultFixtures = {
   },
   saved: {
     result: "saved",
-    output_path: "C:/mock/save-copy.das",
+    output_path: "/mock/save-copy.das",
     summary: {
-      source_path: "C:/mock/save-copy.das",
+      source_path: "/mock/save-copy.das",
       dirty: false,
       preferred_game: "dao",
       money: 10,

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Codebase Map"
+  short_description: "Use the current Dragon Age Save Editor module map, ownership boundaries, and verification commands."
+  default_prompt: "Use the codebase map before making a cross-module change in Dragon Age Save Editor."

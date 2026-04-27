@@ -174,7 +174,7 @@ fn summary_result_wire_shape_matches_frontend_contract() {
 #[test]
 fn representative_result_wire_shapes_match_frontend_contract() {
     let summary = SaveSummaryDto {
-        source_path: "C:/mock/save.das".to_string(),
+        source_path: "/mock/save.das".to_string(),
         dirty: true,
         preferred_game: Some(GameIdDto::Dao),
         money: 123,
@@ -246,7 +246,7 @@ fn representative_result_wire_shapes_match_frontend_contract() {
         }],
     };
     let saved_result = SaveCommandResult::Saved {
-        output_path: "C:/mock/save-copy.das".to_string(),
+        output_path: "/mock/save-copy.das".to_string(),
         summary,
     };
 
@@ -593,6 +593,116 @@ fn save_as_writes_new_file_and_keeps_original_unchanged() {
 }
 
 #[test]
+fn dao_document_workflow_saves_and_reloads_main_usecase_edits() {
+    let input = dao_save_path();
+    let output = test_output_path("document-dao-main-workflow.das");
+    let mut document = SaveDocument::open(&input).unwrap();
+    let stackable_index = first_stackable_backpack_index(&mut document);
+
+    document
+        .execute(SaveCommand::ApplyBatch {
+            commands: vec![
+                SaveCommand::SetMoney { money: 654_321 },
+                SaveCommand::SetBackpackItemStackSize {
+                    index: stackable_index,
+                    stack_size: 5,
+                },
+                SaveCommand::ReplaceCraftingRecipeList {
+                    recipe_ids: vec![2, 11, 20019],
+                },
+            ],
+        })
+        .unwrap();
+    document
+        .execute(SaveCommand::SaveAs {
+            output_path: output.display().to_string(),
+        })
+        .unwrap();
+
+    let mut reloaded = SaveDocument::open(&output).unwrap();
+    match reloaded.execute(SaveCommand::GetSummary).unwrap() {
+        SaveCommandResult::Summary { summary } => {
+            assert_eq!(summary.money, 654_321);
+            assert!(!summary.dirty);
+        }
+        other => panic!("unexpected response: {other:?}"),
+    }
+    match reloaded.execute(SaveCommand::ListBackpackItems).unwrap() {
+        SaveCommandResult::Items { items } => {
+            assert_eq!(items[stackable_index].item.item_stacksize, Some(5));
+        }
+        other => panic!("unexpected response: {other:?}"),
+    }
+    match reloaded.execute(SaveCommand::ListCraftingRecipes).unwrap() {
+        SaveCommandResult::CraftingRecipes { recipe_ids } => {
+            assert_eq!(recipe_ids, vec![2, 11, 20019]);
+        }
+        other => panic!("unexpected response: {other:?}"),
+    }
+}
+
+#[test]
+fn da2_document_workflow_saves_and_reloads_plot_flag_edits() {
+    let output = test_output_path("document-da2-plot-workflow.das");
+    let mut document = SaveDocument::open(da2_save_path()).unwrap();
+    let (boolean_id, integer_id, integer_value) = match document
+        .execute(SaveCommand::ListAvailablePlotFlags)
+        .unwrap()
+    {
+        SaveCommandResult::AvailablePlotFlags { booleans, integers } => {
+            let boolean_id = booleans
+                .first()
+                .expect("expected DA2 boolean plot flags")
+                .id;
+            let integer = integers.first().expect("expected DA2 integer plot flags");
+            let integer_value = integer
+                .options
+                .iter()
+                .find(|option| option.value != 0)
+                .map(|option| option.value)
+                .unwrap_or(1);
+            (boolean_id, integer.id, integer_value)
+        }
+        other => panic!("unexpected response: {other:?}"),
+    };
+
+    document
+        .execute(SaveCommand::PatchPlotFlags {
+            booleans: vec![super::PlotBooleanValueDto {
+                id: boolean_id,
+                value: true,
+            }],
+            integers: vec![super::PlotIntegerValueDto {
+                id: integer_id,
+                value: integer_value,
+            }],
+        })
+        .unwrap();
+    document
+        .execute(SaveCommand::SaveAs {
+            output_path: output.display().to_string(),
+        })
+        .unwrap();
+
+    let mut reloaded = SaveDocument::open(&output).unwrap();
+    match reloaded.execute(SaveCommand::ListPlotFlags).unwrap() {
+        SaveCommandResult::PlotFlags { booleans, integers } => {
+            assert!(
+                booleans
+                    .iter()
+                    .any(|flag| flag.id == boolean_id && flag.value)
+            );
+            assert!(
+                integers
+                    .iter()
+                    .any(|flag| flag.id == integer_id && flag.value == integer_value)
+            );
+        }
+        other => panic!("unexpected response: {other:?}"),
+    }
+}
+
+#[test]
 fn replace_backpack_item_command_uses_same_resref_policy() {
     let mut document = SaveDocument::open(dao_save_path()).unwrap();
 
@@ -901,6 +1011,16 @@ fn test_output_path(name: &str) -> PathBuf {
     let dir = PathBuf::from("target").join("test-output");
     fs::create_dir_all(&dir).unwrap();
     dir.join(name)
+}
+
+fn first_stackable_backpack_index(document: &mut SaveDocument) -> usize {
+    match document.execute(SaveCommand::ListBackpackItems).unwrap() {
+        SaveCommandResult::Items { items } => items
+            .iter()
+            .position(|item| item.item.stackable)
+            .expect("expected stackable backpack item"),
+        other => panic!("unexpected response: {other:?}"),
+    }
 }
 
 fn corrupt_first_backpack_property_power_list(gff: &mut GffFile) {

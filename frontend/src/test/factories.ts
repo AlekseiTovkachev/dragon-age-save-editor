@@ -2,7 +2,7 @@ import type { Ability, Character, CraftingRecipe, IndexedItem, Item, SaveSummary
 
 export function summary(overrides: Partial<SaveSummary> = {}): SaveSummary {
   return {
-    source_path: "C:/saves/save.das",
+    source_path: "/saves/save.das",
     dirty: false,
     preferred_game: "dao",
     money: 100,

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Save Format"
+  short_description: "Reason about DAO, Awakening, and DA2 GFF4 save structure, extraction, and gamedata lookup."
+  default_prompt: "Use the save format guide before parsing, validating, or mutating Dragon Age save data."

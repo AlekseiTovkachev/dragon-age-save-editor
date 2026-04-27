@@ -2,9 +2,11 @@
 
 Use copied saves only. Keep the original `.das`, `.das.met`, and `screen.dds` files untouched until the edited copy has been checked in game.
 
+This checklist covers real desktop/manual behavior. Automated browser smoke coverage lives in `smoke/`; test strategy details are in `docs/testing.md`.
+
 Run the desktop app:
 
-```powershell
+```bash
 npm run tauri dev
 ```
 

@@ -19,6 +19,9 @@ cd src-tauri && cargo check
 # Game data
 npm run data:build   # rebuild data/gamedata.db from seeds/*.csv
 npm run data:verify   # verify gamedata integrity
+npm run verify       # full verification gate
+npm run smoke        # browser smoke tests with mocked Tauri backend
+npm run coverage     # frontend + Rust coverage reports
 ```
 
 ## Package Structure
@@ -36,13 +39,24 @@ npm run data:verify   # verify gamedata integrity
 
 ## Skills
 
-- `skills/codebase-map/` — module structure and conventions
-- `skills/save-format/` — GFF4 structure and domain models
-- `skills/editing-patterns/` — edit flow, validation, error types
+- `skills/codebase-map/SKILL.md` — module structure, ownership boundaries, verification commands
+- `skills/save-format/SKILL.md` — GFF4 structure, domain extraction, game-specific save behavior
+- `skills/editing-patterns/SKILL.md` — edit flow, validation, command contracts, test expectations
+- `skills/testing-and-coverage/SKILL.md` — test placement, smoke coverage, coverage commands
+- `skills/command-contract/SKILL.md` — Rust/TypeScript command DTO and result contract
+- `skills/gamedata-pipeline/SKILL.md` — seed data, generated DB, verifier rules
+- `skills/frontend-workflows/SKILL.md` — React hooks, panels, Apply/Reset and dirty-state flows
+- `skills/tauri-desktop/SKILL.md` — Tauri shell, capabilities, icons, native desktop behavior
+- `skills/fixture-safety/SKILL.md` — local sample-save and copied-save safety
 
-## Refactoring Plan
+## Current Docs
 
-See `docs/refactoring.md` for planned work (stat ID deduplication, value helpers, editor helper extraction).
+- `docs/architecture.md` — current system architecture
+- `docs/testing.md` — verification, smoke tests, and coverage
+- `docs/command-contract.md` — Rust/TypeScript command DTO contract
+- `docs/fixtures.md` — local sample-save guidance
+- `docs/roadmap.md` — current known gaps and near-term work
+- `docs/refactoring.md` and `docs/frontend-refactoring.md` — completed refactoring status plus remaining notes
 
 ## Editor Config
 

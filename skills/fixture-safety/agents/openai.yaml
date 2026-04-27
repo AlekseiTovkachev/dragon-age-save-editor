@@ -1,0 +1,4 @@
+interface:
+  display_name: "Fixture Safety"
+  short_description: "Handle local Dragon Age save fixtures and copied .das bundles without risking originals."
+  default_prompt: "Use fixture safety before reading, editing, testing, or documenting local save fixtures."

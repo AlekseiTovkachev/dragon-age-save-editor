@@ -1,0 +1,4 @@
+interface:
+  display_name: "Editing Patterns"
+  short_description: "Follow SaveEditor invariants, command flow, validation rules, and test expectations."
+  default_prompt: "Use the editing patterns before changing save mutation behavior or command workflows."

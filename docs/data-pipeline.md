@@ -16,20 +16,20 @@ It is generated from:
 
 Build:
 
-```powershell
+```bash
 npm run data:build
 ```
 
 Verify:
 
-```powershell
+```bash
 npm run data:verify
 ```
 
 Print a row-count report:
 
-```powershell
-python tools/gamedata/verify_gamedata.py --report
+```bash
+node tools/python.mjs tools/gamedata/verify_gamedata.py --report
 ```
 
 The verifier checks game keys, item category coverage, stackability rules, wiki URL shape, DAOA item coverage, and common mojibake markers.

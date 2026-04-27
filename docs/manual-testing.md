@@ -2,6 +2,8 @@
 
 Use copied saves only.
 
+This is a quick cross-game checklist. Use `docs/tauri-manual-qa-checklist.md` for detailed desktop UI QA and `docs/fixtures.md` for sample-save handling.
+
 ## DAO Vanilla
 
 - [ ] Open a vanilla DAO save.

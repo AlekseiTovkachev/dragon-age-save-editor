@@ -110,7 +110,7 @@ function createCharacter(): Character {
 function createState(game: "dao" | "da2"): MockState {
   return {
     summary: {
-      source_path: `C:/mock/${game}.das`,
+      source_path: `/mock/${game}.das`,
       dirty: false,
       preferred_game: game,
       money: 100,
@@ -137,6 +137,27 @@ function summaryResult(): SaveCommandResult {
   return { result: "summary", summary: state.summary! };
 }
 
+function failingCommand() {
+  return globalThis.localStorage?.getItem("smokeFailCommand");
+}
+
+function validationIsForcedInvalid() {
+  return globalThis.localStorage?.getItem("smokeInvalidValidation") === "1";
+}
+
+function knownAbility(id: number): Ability {
+  return Object.values(abilities)
+    .flat()
+    .find((ability) => ability.id === id) ?? { id, name: `Ability ${id}`, tree: null, ability_type: null, core_ids: [] };
+}
+
+function updateBackpackItem(index: number, update: (item: Item) => Item): Item {
+  state.backpack = state.backpack.map((entry) =>
+    entry.index === index ? { ...entry, item: update(entry.item) } : entry,
+  );
+  return state.backpack.find((entry) => entry.index === index)!.item;
+}
+
 function markDirty() {
   if (state.summary) {
     state.summary = { ...state.summary, dirty: true };
@@ -144,9 +165,26 @@ function markDirty() {
 }
 
 async function executeSingle(command: SaveCommand): Promise<SaveCommandResult> {
+  if (failingCommand() === command.command) {
+    throw { code: "io", message: `Mocked ${command.command} failure` };
+  }
+
   switch (command.command) {
     case "validate":
-      return { result: "validation", report: { is_valid: true, findings: [] } };
+      return {
+        result: "validation",
+        report: {
+          is_valid: !validationIsForcedInvalid(),
+          findings: validationIsForcedInvalid()
+            ? [{
+                severity: "error",
+                code: "missing_field",
+                path: "SAVEGAME_PARTYLIST",
+                message: "Mocked invalid save",
+              }]
+            : [],
+        },
+      };
     case "get_summary":
       return summaryResult();
     case "get_document_assets":
@@ -175,40 +213,94 @@ async function executeSingle(command: SaveCommand): Promise<SaveCommandResult> {
         booleans: Object.entries(state.plotBooleans).map(([id, value]) => ({ id: Number(id), value })),
         integers: Object.entries(state.plotIntegers).map(([id, value]) => ({ id: Number(id), value })),
       };
+    case "patch_core_stats":
+      state.character = {
+        ...state.character,
+        core_stats: { ...state.character.core_stats, ...command.patch },
+      };
+      markDirty();
+      return summaryResult();
+    case "patch_point_pools":
+      state.character = {
+        ...state.character,
+        point_pools: { ...state.character.point_pools, ...command.patch },
+      };
+      markDirty();
+      return summaryResult();
+    case "set_level":
+      state.character = { ...state.character, level: command.level };
+      markDirty();
+      return summaryResult();
+    case "set_experience":
+      state.character = { ...state.character, experience: command.experience };
+      markDirty();
+      return summaryResult();
+    case "set_approval":
+      state.character = { ...state.character, approval: command.approval };
+      markDirty();
+      return summaryResult();
+    case "replace_ability_list":
+      state.character = {
+        ...state.character,
+        [command.list]: command.ability_ids.map(knownAbility),
+      };
+      markDirty();
+      return summaryResult();
     case "set_money":
       state.summary = { ...state.summary!, money: command.money };
       markDirty();
       return summaryResult();
     case "set_backpack_item_stack_size":
-      state.backpack = state.backpack.map((entry) =>
-        entry.index === command.index
-          ? { ...entry, item: { ...entry.item, item_stacksize: command.stack_size } }
-          : entry,
-      );
+      updateBackpackItem(command.index, (item) => ({ ...item, item_stacksize: command.stack_size }));
       markDirty();
       return { result: "item", container: "backpack", index: command.index, item: state.backpack[command.index].item };
     case "patch_item_metadata":
-      state.backpack = state.backpack.map((entry) =>
-        entry.index === command.index
-          ? { ...entry, item: { ...entry.item, ...command.patch } }
-          : entry,
-      );
+      updateBackpackItem(command.index, (item) => ({ ...item, ...command.patch }));
       markDirty();
       return { result: "item", container: command.container, index: command.index, item: state.backpack[command.index].item };
     case "add_item_property":
-      state.backpack[command.index].item.properties.push({ id: command.property_id, name: "Added Property", power: command.power });
+      updateBackpackItem(command.index, (item) => ({
+        ...item,
+        properties: [
+          ...item.properties,
+          {
+            id: command.property_id,
+            name: itemProperties.find((property) => property.id === command.property_id)?.name ?? null,
+            power: command.power,
+          },
+        ],
+      }));
       markDirty();
       return { result: "item", container: command.container, index: command.index, item: state.backpack[command.index].item };
     case "remove_item_property":
-      state.backpack[command.index].item.properties.splice(command.property_index, 1);
+      updateBackpackItem(command.index, (item) => ({
+        ...item,
+        properties: item.properties.filter((_, index) => index !== command.property_index),
+      }));
       markDirty();
       return { result: "item", container: command.container, index: command.index, item: state.backpack[command.index].item };
     case "set_item_property_power":
-      state.backpack[command.index].item.properties[command.property_index].power = command.power;
+      updateBackpackItem(command.index, (item) => ({
+        ...item,
+        properties: item.properties.map((property, index) =>
+          index === command.property_index ? { ...property, power: command.power } : property,
+        ),
+      }));
       markDirty();
       return { result: "item", container: command.container, index: command.index, item: state.backpack[command.index].item };
     case "set_item_property_id":
-      state.backpack[command.index].item.properties[command.property_index].id = command.property_id;
+      updateBackpackItem(command.index, (item) => ({
+        ...item,
+        properties: item.properties.map((property, index) =>
+          index === command.property_index
+            ? {
+                ...property,
+                id: command.property_id,
+                name: itemProperties.find((option) => option.id === command.property_id)?.name ?? null,
+              }
+            : property,
+        ),
+      }));
       markDirty();
       return { result: "item", container: command.container, index: command.index, item: state.backpack[command.index].item };
     case "replace_crafting_recipe_list":
@@ -250,9 +342,9 @@ export async function mockExecuteCommand(command: SaveCommand): Promise<SaveComm
 }
 
 export async function mockOpenDialog(): Promise<string> {
-  return `C:/mock/${selectedGame()}.das`;
+  return `/mock/${selectedGame()}.das`;
 }
 
 export async function mockSaveDialog(): Promise<string> {
-  return `C:/mock/${selectedGame()}-edited.das`;
+  return `/mock/${selectedGame()}-edited.das`;
 }

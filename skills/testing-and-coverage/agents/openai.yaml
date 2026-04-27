@@ -1,0 +1,4 @@
+interface:
+  display_name: "Testing And Coverage"
+  short_description: "Choose the right test layer, smoke coverage, fixture handling, and verification command."
+  default_prompt: "Use the testing and coverage strategy before adding tests or assessing coverage."

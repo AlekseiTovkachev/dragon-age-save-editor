@@ -1,0 +1,4 @@
+interface:
+  display_name: "Command Contract"
+  short_description: "Keep Rust SaveCommand DTOs, TypeScript types, Tauri invokes, and smoke mocks in sync."
+  default_prompt: "Use the command contract before changing save commands, DTOs, or frontend command calls."

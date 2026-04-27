@@ -1,0 +1,4 @@
+interface:
+  display_name: "Frontend Workflows"
+  short_description: "Maintain React feature hooks, Apply/Reset behavior, dirty state, and smoke-visible UI flows."
+  default_prompt: "Use frontend workflows before changing panels, hooks, command planners, or UI commit/reset behavior."

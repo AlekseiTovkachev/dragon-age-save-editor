@@ -14,13 +14,13 @@ The app uses `data/gamedata.db` to enrich raw save data with item names, item ca
 
 Run the frontend build:
 
-```powershell
+```bash
 npm run build
 ```
 
 Run frontend checks:
 
-```powershell
+```bash
 npm run typecheck
 npm run lint
 npm run check
@@ -28,19 +28,27 @@ npm run check
 
 Run browser smoke tests with the mocked Tauri backend:
 
-```powershell
+```bash
 npm run smoke
 ```
 
 Run the full project verification gate:
 
-```powershell
+```bash
 npm run verify
 ```
 
+Generate coverage reports:
+
+```bash
+npm run coverage
+```
+
+Frontend reports are written under `coverage/frontend`; Rust reports are written under `coverage/rust`.
+
 Run Rust checks:
 
-```powershell
+```bash
 cargo test
 cargo check
 cd src-tauri
@@ -49,7 +57,7 @@ cargo check
 
 Rebuild and verify game data:
 
-```powershell
+```bash
 npm run data:build
 npm run data:verify
 ```
