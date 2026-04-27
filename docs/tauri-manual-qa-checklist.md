@@ -10,49 +10,49 @@ npm run tauri dev
 
 ## Startup And Shell
 
-- [ ] App window opens centered and fully visible, with no clipped bottom edge.
-- [ ] Header shows app title, save filename/path when loaded, game label, dirty/saved state, and screenshot/no-screenshot state.
-- [ ] Horizontal tabs are visible and usable.
-- [ ] Money display sits beside the tabs and stays compact.
-- [ ] `Open Save`, `Commit Changes`, `Reset Drafts`, and `Save As` are visible in the header after loading a save.
-- [ ] `Save As` is disabled before any committed backend edit makes the save dirty.
-- [ ] Error/warning banners are readable and dismissible if triggered.
+- [x] App window opens centered and fully visible, with no clipped bottom edge.
+- [x] Header shows app title, save filename/path when loaded, game label, dirty/saved state, and screenshot/no-screenshot state.
+- [x] Horizontal tabs are visible and usable.
+- [x] Money display sits beside the tabs and stays compact.
+- [x] `Open Save`, `Commit Changes`, `Reset Drafts`, and `Save As` are visible in the header after loading a save.
+- [x] `Save As` is disabled before any committed backend edit makes the save dirty.
+- [x] Error/warning banners are readable and dismissible if triggered.
 
 ## DAO Save
 
-- [ ] Open a vanilla DAO save.
-- [ ] `Characters`, `Inventory`, and `Recipes` tabs are visible.
-- [ ] `Plot Flags` tab is hidden.
-- [ ] Character overview fits without page-level scrolling at the intended Tauri window size.
-- [ ] Main character does not show an approval field.
-- [ ] Companion characters show approval when available.
-- [ ] Progress, attributes, and point pools fields are readable and not clipped.
-- [ ] Ability trees are collapsed by default or compact enough to scan.
-- [ ] Ability tree groups expand and collapse correctly.
-- [ ] Add/remove ability controls preserve prerequisite locking.
-- [ ] Equipment item list and editor render correctly.
-- [ ] Inventory item list shows only item name and amount when `item_stacksize > 1`.
-- [ ] Inventory item row text is vertically centered.
-- [ ] Money panel is compact and does not dominate the tab/header row.
-- [ ] Item overview and properties columns align at the top.
-- [ ] Item overview does not show duplicate name or stackable fields.
-- [ ] Property dropdown uses the dark DAO styling, not a white background.
-- [ ] Property table columns remain aligned while editing IDs and powers.
-- [ ] If an item has many properties, only the property list scrolls; overview and add-property controls stay usable.
-- [ ] Recipes render in compact columns at desktop width.
-- [ ] Recipe rows are readable and toggle correctly.
+- [x] Open a vanilla DAO save.
+- [x] `Characters`, `Inventory`, and `Recipes` tabs are visible.
+- [x] `Plot Flags` tab is hidden.
+- [x] Character overview fits without page-level scrolling at the intended Tauri window size.
+- [x] Main character does not show an approval field.
+- [x] Companion characters show approval when available.
+- [x] Progress, attributes, and point pools fields are readable and not clipped.
+- [x] Ability trees are collapsed by default or compact enough to scan.
+- [x] Ability tree groups expand and collapse correctly.
+- [x] Add/remove ability controls preserve prerequisite locking.
+- [x] Equipment item list and editor render correctly.
+- [x] Inventory item list shows only item name and amount when `item_stacksize > 1`.
+- [x] Inventory item row text is vertically centered.
+- [x] Money panel is compact and does not dominate the tab/header row.
+- [x] Item overview and properties columns align at the top.
+- [x] Item overview does not show duplicate name or stackable fields.
+- [x] Property dropdown uses the dark DAO styling, not a white background.
+- [x] Property table columns remain aligned while editing IDs and powers.
+- [x] If an item has many properties, only the property list scrolls; overview and add-property controls stay usable.
+- [x] Recipes render in compact columns at desktop width.
+- [x] Recipe rows are readable and toggle correctly.
 
 ## DA2 Save
 
-- [ ] Open a DA2 save.
-- [ ] `Plot Flags` tab is visible.
-- [ ] DA2 abilities load into the expected combined talent/spell behavior.
-- [ ] DA2 item property IDs and powers display correctly.
+- [x] Open a DA2 save.
+- [x] `Plot Flags` tab is visible.
+- [x] DA2 abilities load into the expected combined talent/spell behavior.
+- [x] DA2 item property IDs and powers display correctly.
 - [ ] Editing DA2 item property powers preserves float/bitcast behavior after commit and reload.
-- [ ] DA2 crafting recipes load and toggle correctly.
-- [ ] Plot flag integer groups render readable radio options.
-- [ ] Plot flag boolean groups render readable checkbox rows.
-- [ ] Plot flag changes can be drafted, committed, saved, and reloaded.
+- [x] DA2 crafting recipes load and toggle correctly.
+- [x] Plot flag integer groups render readable radio options.
+- [x] Plot flag boolean groups render readable checkbox rows.
+- [x] Plot flag changes can be drafted, committed, saved, and reloaded.
 
 ## Commit And Reset Model
 
