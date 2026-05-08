@@ -1,6 +1,4 @@
 import { ChevronDown, ChevronRight } from "lucide-react";
-import { ItemEditor } from "../../components/ItemEditor";
-import { ItemList } from "../../components/ItemList";
 import {
   EmptyState,
   Field,
@@ -21,6 +19,8 @@ import type { CharacterTab } from "../../lib/navigation";
 import { useState } from "react";
 import type { Dispatch, SetStateAction } from "react";
 import type { Ability, AbilityListKind, Character, CharacterSummary } from "../../types";
+import { InlineItemEditor } from "../inventory/InlineItemEditor";
+import { InventoryTable } from "../inventory/InventoryTable";
 import type { InventoryPanelActions, InventoryPanelState } from "../inventory/InventoryPanel";
 
 type CharacterPanelProps = {
@@ -118,38 +118,47 @@ export function CharacterPanel({
               ) : null}
 
               {characterTab === "equipment" ? (
-                <div className="character-equipment-layout">
-                  <ItemList items={inventoryState.items} selectedIndex={inventoryState.itemIndex} onSelect={inventoryActions.setItemIndex} />
-                  <div className="equipment-detail scroll-panel">
-                    <ItemEditor
-                      item={inventoryState.selectedItem}
-                      itemIndex={inventoryState.itemIndex}
-                      canEdit={canEdit}
-                      busy={busy}
-                      allowRemove={false}
-                      canEditStackSize={inventoryState.canEditStackSize}
-                      canCloneBackpackItem={inventoryState.canCloneBackpackItem}
-                      canEditMaterial={inventoryState.canEditMaterial}
-                      metadataDraft={inventoryState.itemMetadataDraft}
-                      propertyDraft={inventoryState.propertyDraft}
-                      itemPropertiesDraft={inventoryState.itemPropertiesDraft}
-                      availableItemProperties={inventoryState.availableItemProperties}
-                      onMetadataChange={(patch) => inventoryActions.setItemMetadataDraft((current) => ({ ...current, ...patch }))}
-                      onPropertyDraftChange={(patch) => inventoryActions.setPropertyDraft((current) => ({ ...current, ...patch }))}
-                      onPropertyAdd={inventoryActions.handlePropertyAddDraft}
-                      onPropertyRemove={inventoryActions.handlePropertyRemoveDraft}
-                      onPropertyUpdate={inventoryActions.handlePropertyUpdateDraft}
-                      onRemove={() => void inventoryActions.handleBackpackRemove()}
-                      onClone={() => void inventoryActions.handleBackpackClone()}
-                      onWikiOpen={(url) => void inventoryActions.handleWikiOpen(url)}
-                    />
-                  </div>
-                </div>
+                <CharacterEquipment
+                  inventoryState={inventoryState}
+                  inventoryActions={inventoryActions}
+                  canEdit={canEdit}
+                  busy={busy}
+                />
               ) : null}
             </>
           ) : <EmptyState>Choose a character to edit.</EmptyState>}
         </PanelBody>
       </Panel>
+    </section>
+  );
+}
+
+function CharacterEquipment({
+  inventoryState,
+  inventoryActions,
+  canEdit,
+  busy,
+}: Pick<CharacterPanelProps, "inventoryState" | "inventoryActions" | "canEdit" | "busy">) {
+  return (
+    <section className="character-equipment-layout">
+      <p className="muted editor-help">
+        Items currently carried by this character. The save format doesn't track equipment slots, so items are listed
+        flat - click any row to edit material, properties, and metadata.
+      </p>
+      <InventoryTable
+        items={inventoryState.items}
+        selectedIndex={inventoryState.itemIndex}
+        onSelect={inventoryActions.setItemIndex}
+        renderInlineEditor={() => (
+          <InlineItemEditor
+            state={inventoryState}
+            actions={inventoryActions}
+            canEdit={canEdit}
+            busy={busy}
+            allowBackpackActions={false}
+          />
+        )}
+      />
     </section>
   );
 }

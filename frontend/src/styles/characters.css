@@ -47,16 +47,14 @@
 
 .character-equipment-layout {
   display: grid;
-  grid-template-columns: minmax(230px, 310px) minmax(0, 1fr);
-  gap: 1rem;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 0.85rem;
   min-height: 0;
   height: 100%;
 }
 
-.equipment-detail {
-  min-height: 0;
-  overflow: hidden;
-  padding: 1rem;
+.character-equipment-layout .editor-help {
+  padding: 0.75rem 0.85rem;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--surface-strong);

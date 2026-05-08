@@ -42,7 +42,13 @@ function installCommandResponses() {
       case "get_document_assets":
         return { result: "document_assets", assets: { screenshot_data_url: "data:image/png;base64,abc" } };
       case "list_characters":
-        return { result: "characters", characters: [{ target: "main_character", name: "Hero" }] };
+        return {
+          result: "characters",
+          characters: [
+            { target: "main_character", name: "Hero" },
+            { target: { companion: { index: 0 } }, name: "Alistair" },
+          ],
+        };
       case "get_character":
         return { result: "character", target: "main_character", character: currentCharacter };
       case "list_available_abilities":
@@ -58,6 +64,8 @@ function installCommandResponses() {
       case "list_available_plot_flags":
         return { result: "available_plot_flags", booleans: [], integers: [] };
       case "list_backpack_items":
+        return { result: "items", items: [{ index: 0, item: currentItem }] };
+      case "list_equipment_items":
         return { result: "items", items: [{ index: 0, item: currentItem }] };
       case "set_money":
         return { result: "summary", summary: summary({ money: command.money as number, dirty: true }) };
@@ -334,5 +342,36 @@ describe("useSaveEditorApp", () => {
       commands: [{ command: "set_backpack_item_stack_size", index: 0, stack_size: 42 }],
     });
     expect(result.current.inventoryPanel.state.moneyDraft).toBe("999");
+  });
+
+  it("loads equipment items for the active character equipment tab", async () => {
+    mocks.open.mockResolvedValue("C:/save.das");
+    mocks.openDocument.mockResolvedValue(summary());
+    const { result } = renderHook(() => useSaveEditorApp());
+
+    await act(async () => {
+      await result.current.handleOpen();
+    });
+    act(() => {
+      result.current.setCharacterTab("equipment");
+    });
+
+    await waitFor(() =>
+      expect(mocks.executeCommand).toHaveBeenCalledWith({
+        command: "list_equipment_items",
+        target: "main_character",
+      }),
+    );
+
+    act(() => {
+      result.current.characterPanel.actions.setCharacterKey("companion:0");
+    });
+
+    await waitFor(() =>
+      expect(mocks.executeCommand).toHaveBeenCalledWith({
+        command: "list_equipment_items",
+        target: { companion: { index: 0 } },
+      }),
+    );
   });
 });

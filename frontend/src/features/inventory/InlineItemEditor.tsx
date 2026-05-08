@@ -6,9 +6,16 @@ type InlineItemEditorProps = {
   actions: InventoryPanelActions;
   canEdit: boolean;
   busy: boolean;
+  allowBackpackActions?: boolean;
 };
 
-export function InlineItemEditor({ state, actions, canEdit, busy }: InlineItemEditorProps) {
+export function InlineItemEditor({
+  state,
+  actions,
+  canEdit,
+  busy,
+  allowBackpackActions = true,
+}: InlineItemEditorProps) {
   return (
     <div className="inline-item-editor">
       <ItemEditor
@@ -16,9 +23,9 @@ export function InlineItemEditor({ state, actions, canEdit, busy }: InlineItemEd
         itemIndex={state.itemIndex}
         canEdit={canEdit}
         busy={busy}
-        allowRemove
+        allowRemove={allowBackpackActions}
         canEditStackSize={state.canEditStackSize}
-        canCloneBackpackItem={state.canCloneBackpackItem}
+        canCloneBackpackItem={allowBackpackActions && state.canCloneBackpackItem}
         canEditMaterial={state.canEditMaterial}
         metadataDraft={state.itemMetadataDraft}
         propertyDraft={state.propertyDraft}
@@ -29,8 +36,16 @@ export function InlineItemEditor({ state, actions, canEdit, busy }: InlineItemEd
         onPropertyAdd={actions.handlePropertyAddDraft}
         onPropertyRemove={actions.handlePropertyRemoveDraft}
         onPropertyUpdate={actions.handlePropertyUpdateDraft}
-        onRemove={() => void actions.handleBackpackRemove()}
-        onClone={() => void actions.handleBackpackClone()}
+        onRemove={() => {
+          if (allowBackpackActions) {
+            void actions.handleBackpackRemove();
+          }
+        }}
+        onClone={() => {
+          if (allowBackpackActions) {
+            void actions.handleBackpackClone();
+          }
+        }}
         onWikiOpen={(url) => void actions.handleWikiOpen(url)}
       />
     </div>
