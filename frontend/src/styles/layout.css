@@ -13,59 +13,9 @@
   overflow: hidden;
 }
 
-.topbar {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  padding: 1rem 1.25rem;
-  background: rgba(18, 13, 10, 0.96);
-  border-bottom: 1px solid var(--line);
-}
-
-.topbar {
-  justify-content: space-between;
-}
-
-.topbar-title {
-  min-width: 260px;
-  max-width: 50%;
-}
-
-.topbar h1,
 .panel h2,
 .panel h3 {
   margin: 0;
-}
-
-.topbar h1 {
-  font-size: 1.35rem;
-  letter-spacing: 0;
-}
-
-.topbar p,
-.topbar-title small,
-.topbar-document small {
-  margin: 0.2rem 0 0;
-  color: var(--muted);
-}
-
-.topbar-title p,
-.topbar-title small {
-  display: block;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.topbar-document {
-  display: grid;
-  justify-items: end;
-  min-width: 160px;
-  margin-left: auto;
-}
-
-.topbar-document span {
-  font-weight: 800;
 }
 
 .toolbar {
@@ -74,64 +24,6 @@
   justify-content: flex-end;
   flex-wrap: wrap;
   gap: 0.75rem;
-}
-
-.topbar-preview {
-  position: relative;
-  display: grid;
-  place-items: center;
-  width: 50px;
-  height: 50px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: var(--surface-muted);
-  outline: none;
-}
-
-.topbar-preview-image {
-  max-width: 42px;
-  max-height: 42px;
-  width: auto;
-  height: auto;
-  object-fit: contain;
-  display: block;
-}
-
-.topbar-preview-popover {
-  display: none;
-  position: absolute;
-  top: calc(100% + 0.5rem);
-  right: 0;
-  z-index: 20;
-  padding: 0.75rem;
-  background: var(--surface-strong);
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  box-shadow: var(--shadow);
-}
-
-.topbar-preview:hover .topbar-preview-popover,
-.topbar-preview:focus-within .topbar-preview-popover,
-.topbar-preview:focus .topbar-preview-popover {
-  display: block;
-}
-
-.topbar-preview-popover img {
-  max-width: 320px;
-  max-height: 320px;
-  width: auto;
-  height: auto;
-  object-fit: contain;
-  display: block;
-}
-
-.topbar-preview-empty {
-  color: var(--muted);
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  padding: 0.55rem 0.7rem;
-  white-space: nowrap;
-  background: var(--surface-muted);
 }
 
 .content {
@@ -198,22 +90,7 @@
   padding-right: 0.3rem;
 }
 
-@media (max-width: 1050px) {
-  .topbar-title {
-    max-width: none;
-  }
-}
-
 @media (max-width: 820px) {
-  .topbar {
-    flex-wrap: wrap;
-  }
-
-  .topbar-document {
-    justify-items: start;
-    margin-left: 0;
-  }
-
   .split-section,
   .inventory-layout,
   .character-equipment-layout {

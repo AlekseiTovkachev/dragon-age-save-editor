@@ -1,16 +1,10 @@
 .list-panel,
 .detail-panel,
-.finding-list,
-.item-list,
 .property-list,
 .properties-section {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-}
-
-.item-list {
-  flex: 1 1 auto;
 }
 
 .inventory-panel {
@@ -239,21 +233,6 @@
 
 .inline-item-editor .panel-heading {
   margin-bottom: 0.75rem;
-}
-
-.item-list .list-row {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center;
-  min-height: 2.65rem;
-  padding-block: 0.45rem;
-}
-
-.item-list .list-row strong {
-  overflow: hidden;
-  line-height: 1.2;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .item-amount {

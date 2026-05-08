@@ -1,5 +1,4 @@
 import type {
-  ButtonHTMLAttributes,
   ChangeEvent,
   InputHTMLAttributes,
   LabelHTMLAttributes,
@@ -40,19 +39,6 @@ export function ScrollRegion({ children, className = "" }: { children: ReactNode
 
 export function EmptyState({ children }: { children: ReactNode }) {
   return <p className="muted">{children}</p>;
-}
-
-type ListRowProps = ButtonHTMLAttributes<HTMLButtonElement> & {
-  active?: boolean;
-};
-
-export function ListRow({ active = false, className = "", children, ...props }: ListRowProps) {
-  const classes = ["list-row", active ? "active" : "", className].filter(Boolean).join(" ");
-  return (
-    <button className={classes} {...props}>
-      {children}
-    </button>
-  );
 }
 
 type FieldProps = LabelHTMLAttributes<HTMLLabelElement> & {

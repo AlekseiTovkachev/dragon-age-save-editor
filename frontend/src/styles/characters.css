@@ -337,13 +337,6 @@
   align-items: flex-start;
 }
 
-.character-tabbar {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  gap: 0.5rem;
-}
-
 .character-equipment-layout {
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
