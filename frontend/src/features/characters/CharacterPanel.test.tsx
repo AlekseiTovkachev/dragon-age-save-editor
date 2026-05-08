@@ -1,9 +1,10 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { character, indexedItem } from "../../test/factories";
+import { ability, character, indexedItem } from "../../test/factories";
 import { CharacterPanel } from "./CharacterPanel";
 import type { CharacterPanelActions, CharacterPanelState } from "./CharacterPanel";
 import type { InventoryPanelActions, InventoryPanelState } from "../inventory/InventoryPanel";
+import type { Ability, AbilityListKind } from "../../types";
 
 function characterState(): CharacterPanelState {
   return {
@@ -22,7 +23,7 @@ function characterState(): CharacterPanelState {
   };
 }
 
-function characterActions(): CharacterPanelActions {
+function characterActions(overrides: Partial<CharacterPanelActions> = {}): CharacterPanelActions {
   return {
     setCharacterKey: vi.fn(),
     setLevelDraft: vi.fn(),
@@ -38,6 +39,7 @@ function characterActions(): CharacterPanelActions {
     abilityIsLocked: () => false,
     handleAbilityRemove: vi.fn(),
     handleVisibleAbilityAdd: vi.fn(),
+    ...overrides,
   };
 }
 
@@ -76,6 +78,64 @@ function inventoryActions(): InventoryPanelActions {
     handleBackpackClone: vi.fn(),
     handleWikiOpen: vi.fn(),
   };
+}
+
+function renderCharacterPanel(
+  state: CharacterPanelState,
+  actions: CharacterPanelActions,
+  characterTab: "overview" | "abilities" | "equipment" = "abilities",
+) {
+  return render(
+    <CharacterPanel
+      state={state}
+      actions={actions}
+      inventoryState={inventoryState()}
+      inventoryActions={inventoryActions()}
+      characterTab={characterTab}
+      setCharacterTab={vi.fn()}
+      canEdit
+      busy={false}
+    />,
+  );
+}
+
+const abilityCatalog: Record<AbilityListKind, Ability[]> = {
+  skills: [
+    ability(4001, { name: "Combat Training", tree: "Combat Training", ability_type: "Skill" }),
+    ability(4002, { name: "Improved Combat Training", tree: "Combat Training", ability_type: "Skill", core_ids: [4001] }),
+    ability(4101, { name: "Coercion", tree: "Social", ability_type: "Skill" }),
+  ],
+  talents: [
+    ability(100, { name: "Shield Bash", tree: "Weapon and Shield", ability_type: "Warrior" }),
+    ability(101, { name: "Shield Pummel", tree: "Weapon and Shield", ability_type: "Warrior", core_ids: [100] }),
+    ability(120, { name: "Riposte", tree: "Dual Weapon", ability_type: "Rogue" }),
+  ],
+  spells: [
+    ability(200, { name: "Flame Blast", tree: "Primal", ability_type: "Mage" }),
+    ability(201, { name: "Flaming Weapons", tree: "Primal", ability_type: "Mage", core_ids: [200] }),
+  ],
+};
+
+function abilityBrowserState(overrides: Partial<CharacterPanelState> = {}): CharacterPanelState {
+  const skills = [abilityCatalog.skills[0]];
+  const talents = [abilityCatalog.talents[0]];
+  const spells = [abilityCatalog.spells[0]];
+
+  return {
+    ...characterState(),
+    character: character({ skills, talents, spells }),
+    visibleAbilityKinds: ["skills", "talents", "spells"],
+    availableAbilities: abilityCatalog,
+    abilityDrafts: { skills, talents, spells },
+    ...overrides,
+  };
+}
+
+function abilityBrowserActions(overrides: Partial<CharacterPanelActions> = {}): CharacterPanelActions {
+  return characterActions({
+    visibleTreeAbilities: (list) => abilityCatalog[list],
+    ...overrides,
+  });
 }
 
 describe("CharacterPanel equipment tab", () => {
@@ -157,5 +217,95 @@ describe("CharacterPanel equipment tab", () => {
     expect(screen.queryByRole("button", { name: "Clone Item" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Remove Item" })).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Add" })).toBeInTheDocument();
+  });
+});
+
+describe("CharacterPanel abilities tab", () => {
+  it("renders ability kind tabs and switches the active rank ladder", () => {
+    renderCharacterPanel(abilityBrowserState(), abilityBrowserActions());
+
+    expect(screen.getByRole("navigation", { name: "Ability lists" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Skills/ })).toHaveClass("is-active");
+    expect(screen.getByRole("heading", { name: "Combat Training ranks", level: 3 })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /Talents/ }));
+
+    expect(screen.getByRole("button", { name: /Talents/ })).toHaveClass("is-active");
+    expect(screen.getByRole("heading", { name: "Weapon and Shield Talents ranks", level: 3 })).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Combat Training ranks", level: 3 })).not.toBeInTheDocument();
+  });
+
+  it("filters by tree name and by rank ability name", () => {
+    renderCharacterPanel(abilityBrowserState(), abilityBrowserActions());
+
+    fireEvent.click(screen.getByRole("button", { name: /Talents/ }));
+    expect(screen.getByRole("option", { name: /Weapon and Shield Talents/ })).toBeInTheDocument();
+    expect(screen.getByRole("option", { name: /Dual Weapon Talents/ })).toBeInTheDocument();
+
+    fireEvent.change(screen.getByRole("searchbox", { name: "Search abilities" }), {
+      target: { value: "dual weapon" },
+    });
+    expect(screen.queryByRole("option", { name: /Weapon and Shield Talents/ })).not.toBeInTheDocument();
+    expect(screen.getByRole("option", { name: /Dual Weapon Talents/ })).toBeInTheDocument();
+    expect(screen.getByText("Riposte")).toBeInTheDocument();
+
+    fireEvent.change(screen.getByRole("searchbox", { name: "Search abilities" }), {
+      target: { value: "shield pummel" },
+    });
+    expect(screen.getByRole("option", { name: /Weapon and Shield Talents/ })).toBeInTheDocument();
+    expect(screen.queryByRole("option", { name: /Dual Weapon Talents/ })).not.toBeInTheDocument();
+    expect(screen.getByText("Shield Pummel")).toBeInTheDocument();
+  });
+
+  it("changes the rank ladder when a tree is selected", () => {
+    renderCharacterPanel(abilityBrowserState(), abilityBrowserActions());
+
+    fireEvent.click(screen.getByRole("button", { name: /Talents/ }));
+    expect(screen.getByRole("heading", { name: "Weapon and Shield Talents ranks", level: 3 })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("option", { name: /Dual Weapon Talents/ }));
+
+    expect(screen.getByRole("heading", { name: "Dual Weapon Talents ranks", level: 3 })).toBeInTheDocument();
+    expect(screen.getByText("Riposte")).toBeInTheDocument();
+    expect(screen.queryByText("Shield Bash")).not.toBeInTheDocument();
+  });
+
+  it("calls ability add and remove handlers with the active kind and ability id", () => {
+    const handleVisibleAbilityAdd = vi.fn();
+    const handleAbilityRemove = vi.fn();
+    renderCharacterPanel(
+      abilityBrowserState(),
+      abilityBrowserActions({
+        handleVisibleAbilityAdd,
+        handleAbilityRemove,
+      }),
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /Talents/ }));
+    fireEvent.click(screen.getByRole("button", { name: "Add Shield Pummel" }));
+    fireEvent.click(screen.getByRole("button", { name: "Remove Shield Bash" }));
+
+    expect(handleVisibleAbilityAdd).toHaveBeenCalledWith("talents", 101);
+    expect(handleAbilityRemove).toHaveBeenCalledWith("talents", 100);
+  });
+
+  it("disables removal for locked owned abilities and shows the required state", () => {
+    const handleAbilityRemove = vi.fn();
+    renderCharacterPanel(
+      abilityBrowserState(),
+      abilityBrowserActions({
+        abilityIsLocked: (list, abilityId) => list === "talents" && abilityId === 100,
+        handleAbilityRemove,
+      }),
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /Talents/ }));
+
+    expect(screen.getByText("Locked ranks are required by another ability.")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Required Shield Bash" })).toBeDisabled();
+
+    fireEvent.click(screen.getByRole("button", { name: "Required Shield Bash" }));
+
+    expect(handleAbilityRemove).not.toHaveBeenCalled();
   });
 });
