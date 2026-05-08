@@ -28,11 +28,11 @@ React UI
 
 ## Rust Library
 
-- `src/gff4`: binary format reader/writer, value model, schema, headers, and field ID constants.
+- `src/gff4`: binary format reader/writer, value model, numeric conversion/range helpers, schema, headers, and field ID constants.
 - `src/domain`: extracted save model and game data concepts.
 - `src/domain/game.rs`: game-specific behavior.
 - `src/domain/stats.rs`: stat IDs and point-pool helpers.
-- `src/edit`: `SaveEditor`, edit request types, edit errors, and raw mutation helpers.
+- `src/edit`: `SaveEditor`, edit request types, edit errors, target access helpers, and raw mutation helpers.
 - `src/app`: command layer, DTOs, document wrapper, catalogs, and command errors.
 - `src/validate`: structural validation.
 

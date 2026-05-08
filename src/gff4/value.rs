@@ -1,4 +1,5 @@
 use crate::gff4::fields::{field_id_by_name, field_name_by_id};
+use crate::gff4::numeric;
 use crate::gff4::schema::ValueType;
 
 #[derive(Debug, Clone, PartialEq)]
@@ -303,60 +304,23 @@ impl Value {
     }
 
     pub fn to_u32_compatible(&self) -> Option<u32> {
-        match self {
-            Value::UInt8(v) => Some(*v as u32),
-            Value::UInt16(v) => Some(*v as u32),
-            Value::UInt32(v) => Some(*v),
-            Value::Int8(v) if *v >= 0 => Some(*v as u32),
-            Value::Int16(v) if *v >= 0 => Some(*v as u32),
-            Value::Int32(v) if *v >= 0 => Some(*v as u32),
-            Value::Float32(v) if v.is_finite() && *v >= 0.0 => Some(*v as u32),
-            Value::Float64(v) if v.is_finite() && *v >= 0.0 => Some(*v as u32),
-            _ => None,
-        }
+        numeric::to_u32_compatible(self)
     }
 
     pub fn to_u16_compatible(&self) -> Option<u16> {
-        self.to_u32_compatible()
-            .and_then(|value| u16::try_from(value).ok())
+        numeric::to_u16_compatible(self)
     }
 
     pub fn to_i32_compatible(&self) -> Option<i32> {
-        match self {
-            Value::UInt8(v) => Some(*v as i32),
-            Value::UInt16(v) => Some(*v as i32),
-            Value::UInt32(v) => i32::try_from(*v).ok(),
-            Value::Int8(v) => Some(*v as i32),
-            Value::Int16(v) => Some(*v as i32),
-            Value::Int32(v) => Some(*v),
-            Value::Float32(v) if v.is_finite() => Some(*v as i32),
-            Value::Float64(v) if v.is_finite() => Some(*v as i32),
-            _ => None,
-        }
+        numeric::to_i32_compatible(self)
     }
 
     pub fn to_f32_compatible(&self) -> Option<f32> {
-        match self {
-            Value::Float32(v) => Some(*v),
-            Value::Float64(v) => Some(*v as f32),
-            Value::UInt8(v) => Some(*v as f32),
-            Value::UInt16(v) => Some(*v as f32),
-            Value::UInt32(v) => Some(*v as f32),
-            Value::Int8(v) => Some(*v as f32),
-            Value::Int16(v) => Some(*v as f32),
-            Value::Int32(v) => Some(*v as f32),
-            _ => None,
-        }
+        numeric::to_f32_compatible(self)
     }
 
     pub fn to_da2_property_power(&self) -> Option<f32> {
-        match self {
-            Value::UInt32(v) => Some(f32::from_bits(*v)),
-            Value::Int32(v) => Some(f32::from_bits(*v as u32)),
-            Value::UInt64(v) => u32::try_from(*v).ok().map(f32::from_bits),
-            Value::Int64(v) if *v >= 0 => u32::try_from(*v).ok().map(f32::from_bits),
-            _ => self.to_f32_compatible(),
-        }
+        numeric::to_da2_property_power(self)
     }
 
     pub fn is_null(&self) -> bool {

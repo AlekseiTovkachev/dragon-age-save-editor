@@ -7,18 +7,17 @@ use crate::domain::character::Character;
 use crate::domain::game::{AbilityListStyle, GameBehavior, PropertyPowerEncoding};
 use crate::domain::gamedata::{GameDataLookup, GameId};
 use crate::domain::item::Item;
-use crate::domain::save::{SaveGame, WORLD_VAULT_ID_LABEL, WORLD_VAULT_VALUE_LABEL};
+use crate::domain::save::{WORLD_VAULT_ID_LABEL, WORLD_VAULT_VALUE_LABEL};
+use crate::edit::targets::RawSaveTargets;
 use crate::gff4::fields::{
-    ITEM_COST, ITEM_STACKSIZE, OBJECT_ID, SAVEGAME_BACKPACK, SAVEGAME_EQUIPMENT_ITEMS,
-    SAVEGAME_ITEM_MATERIALTYPE, SAVEGAME_OBJECT_PLOT, SAVEGAME_PARTYLIST, SAVEGAME_SKILLLIST,
-    SAVEGAME_SPELLLIST, SAVEGAME_TALENTLIST, SAVEGAME_WORLDDATABASE,
+    ITEM_COST, ITEM_STACKSIZE, OBJECT_ID, SAVEGAME_ITEM_MATERIALTYPE, SAVEGAME_OBJECT_PLOT,
+    SAVEGAME_PARTYLIST, SAVEGAME_SKILLLIST, SAVEGAME_SPELLLIST, SAVEGAME_TALENTLIST,
+    SAVEGAME_WORLDDATABASE,
 };
+use crate::gff4::numeric::{self, NumericWriteError};
 use crate::gff4::{FieldValue, GffFile, GffStruct, Value};
 use std::collections::BTreeSet;
 
-const SAVEGAME_PLAYERCHAR_NAME: &str = "SAVEGAME_PLAYERCHAR";
-const SAVEGAME_PLAYERCHAR_CHAR_NAME: &str = "SAVEGAME_PLAYERCHAR_CHAR";
-const SAVEGAME_PARTYPOOLMEMBERS_NAME: &str = "SAVEGAME_PARTYPOOLMEMBERS";
 pub(super) const SAVEGAME_CREATURE_STATS_NAME: &str = "SAVEGAME_CREATURE_STATS";
 pub(super) const SAVEGAME_STATLIST_NAME: &str = "SAVEGAME_STATLIST";
 pub(super) const SAVEGAME_STATPROPERTY_INDEX_NAME: &str = "SAVEGAME_STATPROPERTY_INDEX";
@@ -34,166 +33,6 @@ pub(super) fn raw_party_mut(raw: &mut GffFile) -> Result<&mut GffStruct, EditErr
         .ok_or_else(|| EditError::MissingField {
             path: "root.SAVEGAME_PARTYLIST".to_string(),
         })
-}
-
-pub(super) fn raw_character(
-    raw: &GffFile,
-    target: CharacterTarget,
-) -> Result<&GffStruct, EditError> {
-    match target {
-        CharacterTarget::MainCharacter => {
-            let player = raw
-                .root()
-                .get_struct_by_name(SAVEGAME_PLAYERCHAR_NAME)
-                .ok_or_else(|| EditError::MissingField {
-                    path: "root.SAVEGAME_PLAYERCHAR".to_string(),
-                })?;
-            player
-                .get_struct_by_name(SAVEGAME_PLAYERCHAR_CHAR_NAME)
-                .ok_or_else(|| EditError::MissingField {
-                    path: "root.SAVEGAME_PLAYERCHAR.SAVEGAME_PLAYERCHAR_CHAR".to_string(),
-                })
-        }
-        CharacterTarget::Companion(index) => {
-            let party = raw.root().get_struct(SAVEGAME_PARTYLIST).ok_or_else(|| {
-                EditError::MissingField {
-                    path: "root.SAVEGAME_PARTYLIST".to_string(),
-                }
-            })?;
-            let companions = party
-                .get_list_by_name(SAVEGAME_PARTYPOOLMEMBERS_NAME)
-                .ok_or_else(|| EditError::MissingField {
-                    path: "root.SAVEGAME_PARTYLIST.SAVEGAME_PARTYPOOLMEMBERS".to_string(),
-                })?;
-
-            companions
-                .iter()
-                .filter_map(Value::as_struct)
-                .nth(index)
-                .ok_or(EditError::InvalidTarget { target })
-        }
-    }
-}
-
-pub(super) fn raw_character_mut(
-    raw: &mut GffFile,
-    target: CharacterTarget,
-) -> Result<&mut GffStruct, EditError> {
-    match target {
-        CharacterTarget::MainCharacter => {
-            let player = raw
-                .root_mut()
-                .get_struct_mut_by_name(SAVEGAME_PLAYERCHAR_NAME)
-                .ok_or_else(|| EditError::MissingField {
-                    path: "root.SAVEGAME_PLAYERCHAR".to_string(),
-                })?;
-            player
-                .get_struct_mut_by_name(SAVEGAME_PLAYERCHAR_CHAR_NAME)
-                .ok_or_else(|| EditError::MissingField {
-                    path: "root.SAVEGAME_PLAYERCHAR.SAVEGAME_PLAYERCHAR_CHAR".to_string(),
-                })
-        }
-        CharacterTarget::Companion(index) => {
-            let party = raw_party_mut(raw)?;
-            let companions = party
-                .get_list_mut_by_name(SAVEGAME_PARTYPOOLMEMBERS_NAME)
-                .ok_or_else(|| EditError::MissingField {
-                    path: "root.SAVEGAME_PARTYLIST.SAVEGAME_PARTYPOOLMEMBERS".to_string(),
-                })?;
-
-            let mut current_struct_index = 0usize;
-            for value in companions {
-                if let Value::Struct(structure) = value {
-                    if current_struct_index == index {
-                        return Ok(structure.as_mut());
-                    }
-                    current_struct_index += 1;
-                }
-            }
-
-            Err(EditError::InvalidTarget { target })
-        }
-    }
-}
-
-pub(super) fn raw_item(
-    raw: &GffFile,
-    container: InventoryContainer,
-    index: usize,
-) -> Result<&GffStruct, EditError> {
-    let items = match container {
-        InventoryContainer::Backpack => raw
-            .root()
-            .get_struct(SAVEGAME_PARTYLIST)
-            .ok_or_else(|| EditError::MissingField {
-                path: "root.SAVEGAME_PARTYLIST".to_string(),
-            })?
-            .get_list(SAVEGAME_BACKPACK)
-            .ok_or_else(|| EditError::MissingField {
-                path: "root.SAVEGAME_PARTYLIST.SAVEGAME_BACKPACK".to_string(),
-            })?,
-        InventoryContainer::Equipment { target } => raw_character(raw, target)?
-            .get_list(SAVEGAME_EQUIPMENT_ITEMS)
-            .ok_or_else(|| EditError::MissingField {
-                path: "character.SAVEGAME_EQUIPMENT_ITEMS".to_string(),
-            })?,
-    };
-    let raw_index =
-        nth_struct_index(items, index).ok_or(EditError::InvalidItemIndex { container, index })?;
-    items[raw_index]
-        .as_struct()
-        .ok_or(EditError::InvalidItemIndex { container, index })
-}
-
-pub(super) fn raw_item_mut(
-    raw: &mut GffFile,
-    container: InventoryContainer,
-    index: usize,
-) -> Result<&mut GffStruct, EditError> {
-    let items = match container {
-        InventoryContainer::Backpack => raw_party_mut(raw)?
-            .get_list_mut(SAVEGAME_BACKPACK)
-            .ok_or_else(|| EditError::MissingField {
-                path: "root.SAVEGAME_PARTYLIST.SAVEGAME_BACKPACK".to_string(),
-            })?,
-        InventoryContainer::Equipment { target } => raw_character_mut(raw, target)?
-            .get_list_mut(SAVEGAME_EQUIPMENT_ITEMS)
-            .ok_or_else(|| EditError::MissingField {
-                path: "character.SAVEGAME_EQUIPMENT_ITEMS".to_string(),
-            })?,
-    };
-    let raw_index =
-        nth_struct_index(items, index).ok_or(EditError::InvalidItemIndex { container, index })?;
-    items[raw_index]
-        .as_struct_mut()
-        .ok_or(EditError::InvalidItemIndex { container, index })
-}
-
-pub(super) fn item_mut(
-    save: &mut SaveGame,
-    container: InventoryContainer,
-    index: usize,
-) -> Result<&mut Item, EditError> {
-    match container {
-        InventoryContainer::Backpack => save
-            .backpack
-            .get_mut(index)
-            .ok_or(EditError::InvalidItemIndex { container, index }),
-        InventoryContainer::Equipment { target } => match target {
-            CharacterTarget::MainCharacter => save
-                .main_character
-                .equipment
-                .get_mut(index)
-                .ok_or(EditError::InvalidItemIndex { container, index }),
-            CharacterTarget::Companion(companion_index) => save
-                .companions
-                .get_mut(companion_index)
-                .ok_or(EditError::InvalidTarget { target })?
-                .equipment
-                .get_mut(index)
-                .ok_or(EditError::InvalidItemIndex { container, index }),
-        },
-    }
 }
 
 pub(super) fn set_or_insert_world_vault_bool(
@@ -405,7 +244,8 @@ pub(super) fn uses_combined_ability_list(
         return Ok(false);
     }
 
-    let raw_character = raw_character(raw, target)?;
+    let raw_targets = RawSaveTargets::new(raw);
+    let raw_character = raw_targets.character(target)?;
     let Some(stats) = raw_character.get_struct_by_name(SAVEGAME_CREATURE_STATS_NAME) else {
         return Ok(false);
     };
@@ -427,19 +267,6 @@ pub(super) fn ability_list_label(list: AbilityListKind) -> u32 {
         AbilityListKind::Talents => SAVEGAME_TALENTLIST,
         AbilityListKind::Spells => SAVEGAME_SPELLLIST,
     }
-}
-
-pub(super) fn nth_struct_index(values: &[Value], target_index: usize) -> Option<usize> {
-    let mut struct_index = 0usize;
-    for (index, value) in values.iter().enumerate() {
-        if matches!(value, Value::Struct(_)) {
-            if struct_index == target_index {
-                return Some(index);
-            }
-            struct_index += 1;
-        }
-    }
-    None
 }
 
 pub(super) fn next_object_id(raw: &GffFile) -> Result<u32, EditError> {
@@ -1124,59 +951,7 @@ pub(super) fn set_numeric_value(
     new_value: u32,
     path: &str,
 ) -> Result<(), EditError> {
-    match value {
-        Value::UInt8(existing) => {
-            *existing = u8::try_from(new_value).map_err(|_| EditError::NumericRange {
-                path: path.to_string(),
-                detail: format!("{new_value} does not fit into u8"),
-            })?;
-            Ok(())
-        }
-        Value::Int8(existing) => {
-            *existing = i8::try_from(new_value).map_err(|_| EditError::NumericRange {
-                path: path.to_string(),
-                detail: format!("{new_value} does not fit into i8"),
-            })?;
-            Ok(())
-        }
-        Value::UInt16(existing) => {
-            *existing = u16::try_from(new_value).map_err(|_| EditError::NumericRange {
-                path: path.to_string(),
-                detail: format!("{new_value} does not fit into u16"),
-            })?;
-            Ok(())
-        }
-        Value::Int16(existing) => {
-            *existing = i16::try_from(new_value).map_err(|_| EditError::NumericRange {
-                path: path.to_string(),
-                detail: format!("{new_value} does not fit into i16"),
-            })?;
-            Ok(())
-        }
-        Value::UInt32(existing) => {
-            *existing = new_value;
-            Ok(())
-        }
-        Value::Int32(existing) => {
-            *existing = i32::try_from(new_value).map_err(|_| EditError::NumericRange {
-                path: path.to_string(),
-                detail: format!("{new_value} does not fit into i32"),
-            })?;
-            Ok(())
-        }
-        Value::Float32(existing) => {
-            *existing = new_value as f32;
-            Ok(())
-        }
-        Value::Float64(existing) => {
-            *existing = new_value as f64;
-            Ok(())
-        }
-        other => Err(EditError::UnsupportedNumericValue {
-            path: path.to_string(),
-            actual: other.type_name(),
-        }),
-    }
+    numeric::set_u32_compatible(value, new_value).map_err(|err| numeric_write_error(err, path))
 }
 
 pub(super) fn set_signed_numeric_value(
@@ -1184,59 +959,7 @@ pub(super) fn set_signed_numeric_value(
     new_value: i32,
     path: &str,
 ) -> Result<(), EditError> {
-    match value {
-        Value::UInt8(existing) => {
-            *existing = u8::try_from(new_value).map_err(|_| EditError::NumericRange {
-                path: path.to_string(),
-                detail: format!("{new_value} does not fit into u8"),
-            })?;
-            Ok(())
-        }
-        Value::Int8(existing) => {
-            *existing = i8::try_from(new_value).map_err(|_| EditError::NumericRange {
-                path: path.to_string(),
-                detail: format!("{new_value} does not fit into i8"),
-            })?;
-            Ok(())
-        }
-        Value::UInt16(existing) => {
-            *existing = u16::try_from(new_value).map_err(|_| EditError::NumericRange {
-                path: path.to_string(),
-                detail: format!("{new_value} does not fit into u16"),
-            })?;
-            Ok(())
-        }
-        Value::Int16(existing) => {
-            *existing = i16::try_from(new_value).map_err(|_| EditError::NumericRange {
-                path: path.to_string(),
-                detail: format!("{new_value} does not fit into i16"),
-            })?;
-            Ok(())
-        }
-        Value::UInt32(existing) => {
-            *existing = u32::try_from(new_value).map_err(|_| EditError::NumericRange {
-                path: path.to_string(),
-                detail: format!("{new_value} does not fit into u32"),
-            })?;
-            Ok(())
-        }
-        Value::Int32(existing) => {
-            *existing = new_value;
-            Ok(())
-        }
-        Value::Float32(existing) => {
-            *existing = new_value as f32;
-            Ok(())
-        }
-        Value::Float64(existing) => {
-            *existing = new_value as f64;
-            Ok(())
-        }
-        other => Err(EditError::UnsupportedNumericValue {
-            path: path.to_string(),
-            actual: other.type_name(),
-        }),
-    }
+    numeric::set_i32_compatible(value, new_value).map_err(|err| numeric_write_error(err, path))
 }
 
 pub(super) fn set_float_value(
@@ -1244,88 +967,7 @@ pub(super) fn set_float_value(
     new_value: f32,
     path: &str,
 ) -> Result<(), EditError> {
-    match value {
-        Value::Float32(existing) => {
-            *existing = new_value;
-            Ok(())
-        }
-        Value::Float64(existing) => {
-            *existing = new_value as f64;
-            Ok(())
-        }
-        Value::UInt8(existing) => {
-            if new_value.is_finite() && new_value >= 0.0 && new_value <= u8::MAX as f32 {
-                *existing = new_value as u8;
-                Ok(())
-            } else {
-                Err(EditError::NumericRange {
-                    path: path.to_string(),
-                    detail: format!("{new_value} does not fit into u8"),
-                })
-            }
-        }
-        Value::Int8(existing) => {
-            if new_value.is_finite() && new_value >= i8::MIN as f32 && new_value <= i8::MAX as f32 {
-                *existing = new_value as i8;
-                Ok(())
-            } else {
-                Err(EditError::NumericRange {
-                    path: path.to_string(),
-                    detail: format!("{new_value} does not fit into i8"),
-                })
-            }
-        }
-        Value::UInt16(existing) => {
-            if new_value.is_finite() && new_value >= 0.0 && new_value <= u16::MAX as f32 {
-                *existing = new_value as u16;
-                Ok(())
-            } else {
-                Err(EditError::NumericRange {
-                    path: path.to_string(),
-                    detail: format!("{new_value} does not fit into u16"),
-                })
-            }
-        }
-        Value::Int16(existing) => {
-            if new_value.is_finite() && new_value >= i16::MIN as f32 && new_value <= i16::MAX as f32
-            {
-                *existing = new_value as i16;
-                Ok(())
-            } else {
-                Err(EditError::NumericRange {
-                    path: path.to_string(),
-                    detail: format!("{new_value} does not fit into i16"),
-                })
-            }
-        }
-        Value::UInt32(existing) => {
-            if new_value.is_finite() && new_value >= 0.0 && new_value <= u32::MAX as f32 {
-                *existing = new_value as u32;
-                Ok(())
-            } else {
-                Err(EditError::NumericRange {
-                    path: path.to_string(),
-                    detail: format!("{new_value} does not fit into u32"),
-                })
-            }
-        }
-        Value::Int32(existing) => {
-            if new_value.is_finite() && new_value >= i32::MIN as f32 && new_value <= i32::MAX as f32
-            {
-                *existing = new_value as i32;
-                Ok(())
-            } else {
-                Err(EditError::NumericRange {
-                    path: path.to_string(),
-                    detail: format!("{new_value} does not fit into i32"),
-                })
-            }
-        }
-        other => Err(EditError::UnsupportedNumericValue {
-            path: path.to_string(),
-            actual: other.type_name(),
-        }),
-    }
+    numeric::set_f32_compatible(value, new_value).map_err(|err| numeric_write_error(err, path))
 }
 
 pub(super) fn set_property_power_value(
@@ -1336,24 +978,20 @@ pub(super) fn set_property_power_value(
 ) -> Result<(), EditError> {
     match preferred_game.property_power_encoding() {
         PropertyPowerEncoding::Float => set_float_value(value, new_value, path),
-        PropertyPowerEncoding::Da2Bitcast => match value {
-            Value::UInt32(existing) => {
-                *existing = new_value.to_bits();
-                Ok(())
-            }
-            Value::Int32(existing) => {
-                *existing = i32::from_ne_bytes(new_value.to_bits().to_ne_bytes());
-                Ok(())
-            }
-            Value::UInt64(existing) => {
-                *existing = new_value.to_bits() as u64;
-                Ok(())
-            }
-            Value::Int64(existing) => {
-                *existing = new_value.to_bits() as i64;
-                Ok(())
-            }
-            _ => set_float_value(value, new_value, path),
+        PropertyPowerEncoding::Da2Bitcast => numeric::set_da2_property_power(value, new_value)
+            .map_err(|err| numeric_write_error(err, path)),
+    }
+}
+
+fn numeric_write_error(err: NumericWriteError, path: &str) -> EditError {
+    match err {
+        NumericWriteError::Unsupported { actual } => EditError::UnsupportedNumericValue {
+            path: path.to_string(),
+            actual,
+        },
+        NumericWriteError::Range { detail } => EditError::NumericRange {
+            path: path.to_string(),
+            detail,
         },
     }
 }

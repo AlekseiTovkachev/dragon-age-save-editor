@@ -14,6 +14,7 @@ use crate::gff4::fields::{
     SAVEGAME_PARTYLIST, SAVEGAME_PARTYPOOLMEMBERS, SAVEGAME_SKILLLIST, SAVEGAME_SPELLLIST,
     SAVEGAME_STATLIST, SAVEGAME_TALENTLIST, TEMPLATERESREF, field_id_by_name,
 };
+use crate::gff4::numeric;
 use crate::gff4::{GffFile, GffStruct, Value};
 use std::collections::BTreeMap;
 use std::error::Error;
@@ -622,13 +623,11 @@ fn require_u32(source: &GffStruct, label: u32, path: &str) -> Result<u32, Extrac
         .ok_or_else(|| ExtractError::MissingField {
             path: path.to_string(),
         })?;
-    value
-        .to_u32_compatible()
-        .ok_or_else(|| ExtractError::TypeMismatch {
-            path: path.to_string(),
-            expected: "UInt32-compatible number",
-            actual: value.type_name(),
-        })
+    numeric::to_u32_compatible(value).ok_or_else(|| ExtractError::TypeMismatch {
+        path: path.to_string(),
+        expected: "UInt32-compatible number",
+        actual: value.type_name(),
+    })
 }
 
 fn require_u32_by_name(source: &GffStruct, name: &str, path: &str) -> Result<u32, ExtractError> {
@@ -637,13 +636,11 @@ fn require_u32_by_name(source: &GffStruct, name: &str, path: &str) -> Result<u32
         .ok_or_else(|| ExtractError::MissingField {
             path: path.to_string(),
         })?;
-    value
-        .to_u32_compatible()
-        .ok_or_else(|| ExtractError::TypeMismatch {
-            path: path.to_string(),
-            expected: "UInt32-compatible number",
-            actual: value.type_name(),
-        })
+    numeric::to_u32_compatible(value).ok_or_else(|| ExtractError::TypeMismatch {
+        path: path.to_string(),
+        expected: "UInt32-compatible number",
+        actual: value.type_name(),
+    })
 }
 
 fn require_i32_by_name(source: &GffStruct, name: &str, path: &str) -> Result<i32, ExtractError> {
@@ -652,21 +649,21 @@ fn require_i32_by_name(source: &GffStruct, name: &str, path: &str) -> Result<i32
         .ok_or_else(|| ExtractError::MissingField {
             path: path.to_string(),
         })?;
-    value
-        .to_i32_compatible()
-        .ok_or_else(|| ExtractError::TypeMismatch {
-            path: path.to_string(),
-            expected: "Int32-compatible number",
-            actual: value.type_name(),
-        })
+    numeric::to_i32_compatible(value).ok_or_else(|| ExtractError::TypeMismatch {
+        path: path.to_string(),
+        expected: "Int32-compatible number",
+        actual: value.type_name(),
+    })
 }
 
 fn optional_u32(source: &GffStruct, label: u32) -> Option<u32> {
-    source.get(label).and_then(Value::to_u32_compatible)
+    source.get(label).and_then(numeric::to_u32_compatible)
 }
 
 fn optional_u32_by_name(source: &GffStruct, name: &str) -> Option<u32> {
-    source.get_by_name(name).and_then(Value::to_u32_compatible)
+    source
+        .get_by_name(name)
+        .and_then(numeric::to_u32_compatible)
 }
 
 fn optional_i32(source: &GffStruct, label: u32) -> Option<i32> {
@@ -701,7 +698,10 @@ fn extract_u32_list(source: &GffStruct, label: u32) -> Vec<u32> {
 }
 
 fn extract_u32_values(items: &[Value]) -> Vec<u32> {
-    items.iter().filter_map(Value::to_u32_compatible).collect()
+    items
+        .iter()
+        .filter_map(numeric::to_u32_compatible)
+        .collect()
 }
 
 fn extract_plot_flags(root: &GffStruct) -> PlotFlags {
@@ -722,13 +722,13 @@ fn extract_world_vault_bools(world_vault: &GffStruct) -> BTreeMap<u16, bool> {
     for entry in entries.iter().filter_map(Value::as_struct) {
         let Some(id) = entry
             .get(WORLD_VAULT_ID_LABEL)
-            .and_then(Value::to_u16_compatible)
+            .and_then(numeric::to_u16_compatible)
         else {
             continue;
         };
         let Some(value) = entry
             .get(WORLD_VAULT_VALUE_LABEL)
-            .and_then(Value::to_u32_compatible)
+            .and_then(numeric::to_u32_compatible)
         else {
             continue;
         };
@@ -745,13 +745,13 @@ fn extract_world_vault_ints(world_vault: &GffStruct) -> BTreeMap<u16, i32> {
     for entry in entries.iter().filter_map(Value::as_struct) {
         let Some(id) = entry
             .get(WORLD_VAULT_ID_LABEL)
-            .and_then(Value::to_u16_compatible)
+            .and_then(numeric::to_u16_compatible)
         else {
             continue;
         };
         let Some(value) = entry
             .get(WORLD_VAULT_VALUE_LABEL)
-            .and_then(Value::to_i32_compatible)
+            .and_then(numeric::to_i32_compatible)
         else {
             continue;
         };
@@ -765,13 +765,16 @@ fn extract_property_power_values(items: &[Value], preferred_game: Option<GameId>
         PropertyPowerEncoding::Float => extract_f32_values(items),
         PropertyPowerEncoding::Da2Bitcast => items
             .iter()
-            .filter_map(Value::to_da2_property_power)
+            .filter_map(numeric::to_da2_property_power)
             .collect(),
     }
 }
 
 fn extract_f32_values(items: &[Value]) -> Vec<f32> {
-    items.iter().filter_map(Value::to_f32_compatible).collect()
+    items
+        .iter()
+        .filter_map(numeric::to_f32_compatible)
+        .collect()
 }
 
 fn value_to_display_string(value: &Value) -> Option<String> {

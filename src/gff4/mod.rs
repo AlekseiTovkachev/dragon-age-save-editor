@@ -1,5 +1,6 @@
 pub mod fields;
 pub mod header;
+pub mod numeric;
 pub mod reader;
 pub mod schema;
 pub mod value;

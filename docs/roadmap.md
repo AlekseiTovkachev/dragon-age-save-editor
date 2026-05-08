@@ -4,7 +4,6 @@ This is the current working roadmap. Historical completed refactors live in `doc
 
 ## Near-Term
 
-- Consolidate GFF numeric conversion helpers so extraction and editing reject invalid values consistently.
 - Expand write/reload tests around item metadata, item property power encoding, and DA2 plot flags.
 - Keep smoke tests aligned with main user workflows when UI flow changes.
 - Refresh manual QA checklist statuses after each substantial desktop UI pass.

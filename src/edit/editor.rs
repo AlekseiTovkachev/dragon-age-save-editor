@@ -15,6 +15,10 @@ use crate::domain::stats::{
     level_stat_id, point_pool_stat_id,
 };
 use crate::edit::internal::*;
+use crate::edit::targets::{
+    DomainSaveTargets, domain_character_mut, domain_item_mut, nth_struct_index, raw_character,
+    raw_character_mut, raw_item, raw_item_mut,
+};
 #[cfg(test)]
 use crate::gff4::fields::{ITEM_STACKSIZE, SAVEGAME_WORLDDATABASE};
 use crate::gff4::fields::{
@@ -377,7 +381,10 @@ impl SaveEditor {
     ) -> Result<(), EditError> {
         let raw_item = raw_item_mut(&mut self.raw, container, index)?;
         apply_item_metadata_patch_to_struct(raw_item, patch)?;
-        apply_item_metadata_patch_to_domain(item_mut(&mut self.save, container, index)?, patch);
+        apply_item_metadata_patch_to_domain(
+            domain_item_mut(&mut self.save, container, index)?,
+            patch,
+        );
         Ok(())
     }
 
@@ -388,7 +395,7 @@ impl SaveEditor {
         lookup: Option<&dyn GameDataLookup>,
         preferred_game: Option<GameId>,
     ) -> Result<(), EditError> {
-        let item = item_mut(&mut self.save, container, index)?;
+        let item = domain_item_mut(&mut self.save, container, index)?;
         item.material_info = match (lookup, item.material) {
             (Some(lookup), Some(material_code)) => lookup
                 .material_info(material_code, preferred_game)
@@ -569,7 +576,7 @@ impl SaveEditor {
             self.save.preferred_game,
         )?;
         properties.push(property_id, power)?;
-        item_mut(&mut self.save, container, index)?
+        domain_item_mut(&mut self.save, container, index)?
             .properties
             .push(ItemProperty {
                 id: property_id,
@@ -590,7 +597,7 @@ impl SaveEditor {
             ItemProperties::from_item(raw_item, container, index, self.save.preferred_game)?;
         raw_properties.remove(property_index)?;
 
-        let properties = &mut item_mut(&mut self.save, container, index)?.properties;
+        let properties = &mut domain_item_mut(&mut self.save, container, index)?.properties;
         if property_index >= properties.len() {
             return Err(EditError::InvalidPropertyIndex {
                 container,
@@ -609,7 +616,11 @@ impl SaveEditor {
         property_index: usize,
         power: f32,
     ) -> Result<(), EditError> {
-        if property_index >= item_mut(&mut self.save, container, index)?.properties.len() {
+        if property_index
+            >= domain_item_mut(&mut self.save, container, index)?
+                .properties
+                .len()
+        {
             return Err(EditError::InvalidPropertyIndex {
                 container,
                 item_index: index,
@@ -620,7 +631,7 @@ impl SaveEditor {
         let mut raw_properties =
             ItemProperties::from_item(raw_item, container, index, self.save.preferred_game)?;
         raw_properties.set_power(property_index, power)?;
-        let properties = &mut item_mut(&mut self.save, container, index)?.properties;
+        let properties = &mut domain_item_mut(&mut self.save, container, index)?.properties;
         let property =
             properties
                 .get_mut(property_index)
@@ -642,7 +653,11 @@ impl SaveEditor {
         lookup: Option<&dyn GameDataLookup>,
     ) -> Result<(), EditError> {
         let preferred_game = self.save.preferred_game;
-        if property_index >= item_mut(&mut self.save, container, index)?.properties.len() {
+        if property_index
+            >= domain_item_mut(&mut self.save, container, index)?
+                .properties
+                .len()
+        {
             return Err(EditError::InvalidPropertyIndex {
                 container,
                 item_index: index,
@@ -653,7 +668,7 @@ impl SaveEditor {
         let mut raw_properties =
             ItemProperties::from_item(raw_item, container, index, self.save.preferred_game)?;
         raw_properties.set_id(property_index, property_id)?;
-        let property = item_mut(&mut self.save, container, index)?
+        let property = domain_item_mut(&mut self.save, container, index)?
             .properties
             .get_mut(property_index)
             .ok_or(EditError::InvalidPropertyIndex {
@@ -676,25 +691,11 @@ impl SaveEditor {
     }
 
     fn character(&self, target: CharacterTarget) -> Result<&Character, EditError> {
-        match target {
-            CharacterTarget::MainCharacter => Ok(&self.save.main_character),
-            CharacterTarget::Companion(index) => self
-                .save
-                .companions
-                .get(index)
-                .ok_or(EditError::InvalidTarget { target }),
-        }
+        DomainSaveTargets::new(&self.save).character(target)
     }
 
     fn character_mut(&mut self, target: CharacterTarget) -> Result<&mut Character, EditError> {
-        match target {
-            CharacterTarget::MainCharacter => Ok(&mut self.save.main_character),
-            CharacterTarget::Companion(index) => self
-                .save
-                .companions
-                .get_mut(index)
-                .ok_or(EditError::InvalidTarget { target }),
-        }
+        domain_character_mut(&mut self.save, target)
     }
 
     fn character_ability_list_mut(

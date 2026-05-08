@@ -1,6 +1,7 @@
 mod editor;
 mod errors;
 mod internal;
+mod targets;
 mod types;
 
 pub use editor::SaveEditor;
