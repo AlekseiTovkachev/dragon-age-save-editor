@@ -13,6 +13,64 @@
   flex: 1 1 auto;
 }
 
+.inventory-panel {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 0.85rem;
+  min-height: 0;
+  height: 100%;
+}
+
+.inventory-toolbar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(165px, auto);
+  align-items: start;
+  gap: 1rem;
+  padding: 0.85rem;
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  background: var(--surface-strong);
+  box-shadow: var(--shadow);
+}
+
+.inventory-toolbar-summary {
+  display: grid;
+  grid-template-columns: auto minmax(220px, 0.5fr);
+  align-items: center;
+  gap: 0.65rem 1rem;
+  min-width: 0;
+}
+
+.inventory-toolbar h2,
+.inventory-toolbar p {
+  margin: 0;
+}
+
+.inventory-toolbar h2 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 1.8rem;
+  color: var(--ink);
+}
+
+.inventory-toolbar p {
+  margin-top: 0.2rem;
+  color: var(--ink-3);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+}
+
+.inventory-search {
+  min-width: 0;
+}
+
+.inventory-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  grid-column: 1 / -1;
+}
+
 .inventory-money-control {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
@@ -31,6 +89,156 @@
 .inventory-money-control input {
   min-height: 2rem;
   padding: 0.35rem 0.5rem;
+}
+
+.inventory-table-shell {
+  min-height: 0;
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  background: var(--surface-strong);
+  box-shadow: var(--shadow);
+}
+
+.inventory-table {
+  width: 100%;
+  min-width: 860px;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.inventory-table th,
+.inventory-table td {
+  border-bottom: 1px solid var(--line);
+  padding: 0;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.inventory-table th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--surface-muted);
+}
+
+.inventory-table th:nth-child(1) {
+  width: 36%;
+}
+
+.inventory-table th:nth-child(2) {
+  width: 18%;
+}
+
+.inventory-table th:nth-child(3),
+.inventory-table th:nth-child(5),
+.inventory-table th:nth-child(6) {
+  width: 9%;
+}
+
+.inventory-table th:nth-child(4) {
+  width: 19%;
+}
+
+.inventory-sort {
+  appearance: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  width: 100%;
+  min-height: 2.35rem;
+  padding: 0.55rem 0.7rem;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.inventory-sort:hover,
+.inventory-sort:focus-visible,
+.inventory-sort.is-active {
+  color: var(--gold-2);
+  background: rgba(199, 154, 72, 0.08);
+}
+
+.inventory-row {
+  background: var(--bg-1);
+}
+
+.inventory-row:hover,
+.inventory-row.is-expanded,
+.inventory-row.is-selected {
+  background: var(--bg-2);
+}
+
+.inventory-row td {
+  padding: 0.5rem 0.7rem;
+  color: var(--ink-2);
+  font-size: 0.86rem;
+}
+
+.inventory-expand-button {
+  appearance: none;
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  width: 100%;
+  min-height: 2.45rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.inventory-expand-button svg {
+  flex: 0 0 auto;
+  color: var(--gold-2);
+}
+
+.inventory-expand-button span {
+  display: grid;
+  min-width: 0;
+}
+
+.inventory-expand-button strong,
+.inventory-expand-button small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.inventory-expand-button strong {
+  color: var(--ink);
+}
+
+.inventory-expand-button small {
+  margin-top: 0.15rem;
+  color: var(--ink-4);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+}
+
+.inventory-inline-row td {
+  padding: 0;
+  background: var(--bg);
+}
+
+.inline-item-editor {
+  padding: 0.85rem;
+  border-top: 1px solid rgba(199, 154, 72, 0.35);
+  box-shadow: inset 3px 0 0 rgba(199, 154, 72, 0.55);
+}
+
+.inline-item-editor .panel-heading {
+  margin-bottom: 0.75rem;
 }
 
 .item-list .list-row {
@@ -223,5 +431,15 @@
 @media (max-width: 1120px) {
   .item-editor-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .inventory-toolbar {
+    display: grid;
+  }
+
+  .inventory-money-control {
+    width: 100%;
   }
 }

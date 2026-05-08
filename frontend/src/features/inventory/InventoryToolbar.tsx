@@ -1,0 +1,78 @@
+import { NumericInput } from "../../components/ui";
+import type { InventoryCategoryFilter } from "./InventoryPanel";
+
+type InventoryToolbarProps = {
+  itemCount: number;
+  totalItemCount: number;
+  categories: InventoryCategoryFilter[];
+  category: string;
+  search: string;
+  moneyDraft: string;
+  canEdit: boolean;
+  busy: boolean;
+  onCategoryChange: (value: string) => void;
+  onSearchChange: (value: string) => void;
+  onMoneyChange: (value: string) => void;
+};
+
+export function InventoryToolbar({
+  itemCount,
+  totalItemCount,
+  categories,
+  category,
+  search,
+  moneyDraft,
+  canEdit,
+  busy,
+  onCategoryChange,
+  onSearchChange,
+  onMoneyChange,
+}: InventoryToolbarProps) {
+  const countLabel =
+    itemCount === totalItemCount
+      ? itemCount === 1
+        ? "1 item"
+        : `${itemCount} items`
+      : `${itemCount} of ${totalItemCount} items`;
+
+  return (
+    <div className="inventory-toolbar">
+      <div className="inventory-toolbar-summary">
+        <div>
+          <h2>Inventory</h2>
+          <p>{countLabel}</p>
+        </div>
+        <input
+          className="search-input inventory-search"
+          type="search"
+          value={search}
+          placeholder="Search inventory"
+          aria-label="Search inventory"
+          onChange={(event) => onSearchChange(event.target.value)}
+        />
+        <div className="inventory-chip-row" aria-label="Inventory categories">
+          {categories.map((entry) => (
+            <button
+              className={["cat-chip", entry.value === category ? "is-active" : ""].filter(Boolean).join(" ")}
+              type="button"
+              key={entry.value}
+              aria-pressed={entry.value === category}
+              onClick={() => onCategoryChange(entry.value)}
+            >
+              {entry.label}
+            </button>
+          ))}
+        </div>
+      </div>
+      <label className="inventory-money-control">
+        <span>Money</span>
+        <NumericInput
+          value={moneyDraft}
+          min={0}
+          onChange={(event) => onMoneyChange(event.target.value)}
+          disabled={!canEdit || busy}
+        />
+      </label>
+    </div>
+  );
+}

@@ -1,9 +1,9 @@
-import { ItemEditor } from "../../components/ItemEditor";
-import { ItemList } from "../../components/ItemList";
-import { NumericInput, Panel } from "../../components/ui";
-import type { Dispatch, SetStateAction } from "react";
+import { useMemo, useState, type Dispatch, type SetStateAction } from "react";
 import type { ItemPropertyDraft } from "../../lib/itemUtils";
 import type { IndexedItem, Item, SelectableItemProperty } from "../../types";
+import { InlineItemEditor } from "./InlineItemEditor";
+import { InventoryTable } from "./InventoryTable";
+import { InventoryToolbar } from "./InventoryToolbar";
 import type { ItemMetadataDraft, PropertyDraft } from "./useInventoryEditor";
 
 type InventoryPanelProps = {
@@ -40,51 +40,89 @@ export type InventoryPanelActions = {
   handleWikiOpen: (url: string) => Promise<void>;
 };
 
+export type InventoryCategoryFilter = {
+  value: string;
+  label: string;
+};
+
+const ALL_CATEGORY: InventoryCategoryFilter = { value: "__all__", label: "All" };
+
+function normalizedText(value: string | number | null | undefined) {
+  return value === null || value === undefined ? "" : String(value).toLowerCase();
+}
+
+function itemMatchesSearch({ item }: IndexedItem, query: string) {
+  if (!query) {
+    return true;
+  }
+
+  const searchableValues = [
+    item.name,
+    item.resref,
+    item.category.label,
+    item.category.value,
+    item.material_info?.name,
+    item.material_info?.code,
+    item.material,
+    ...item.properties.flatMap((property) => [property.name, property.id]),
+  ];
+
+  return searchableValues.some((value) => normalizedText(value).includes(query));
+}
+
+export function inventoryCategories(items: IndexedItem[]): InventoryCategoryFilter[] {
+  const categories = new Map<string, string>();
+  for (const { item } of items) {
+    if (!categories.has(item.category.value)) {
+      categories.set(item.category.value, item.category.label);
+    }
+  }
+
+  return [
+    ALL_CATEGORY,
+    ...Array.from(categories, ([value, label]) => ({ value, label })).sort((a, b) =>
+      a.label.localeCompare(b.label, undefined, { sensitivity: "base" }),
+    ),
+  ];
+}
+
+export function filterInventoryItems(items: IndexedItem[], category: string, search: string): IndexedItem[] {
+  const query = search.trim().toLowerCase();
+  return items.filter((entry) => {
+    const matchesCategory = category === ALL_CATEGORY.value || entry.item.category.value === category;
+    return matchesCategory && itemMatchesSearch(entry, query);
+  });
+}
+
 export function InventoryPanel({ state, actions, canEdit, busy }: InventoryPanelProps) {
+  const [search, setSearch] = useState("");
+  const [category, setCategory] = useState(ALL_CATEGORY.value);
+  const categories = useMemo(() => inventoryCategories(state.items), [state.items]);
+  const filteredItems = useMemo(() => filterInventoryItems(state.items, category, search), [category, search, state.items]);
+
   return (
-    <section className="split-section inventory-layout">
-      <Panel
-        className="list-panel"
-        title="Inventory"
-        headingAction={
-          <label className="inventory-money-control">
-            <span>Money</span>
-            <NumericInput
-              value={state.moneyDraft}
-              min={0}
-              onChange={(event) => actions.setMoneyDraft(event.target.value)}
-              disabled={!canEdit || busy}
-            />
-          </label>
-        }
-      >
-        <h3>Backpack</h3>
-        <ItemList items={state.items} selectedIndex={state.itemIndex} onSelect={actions.setItemIndex} />
-      </Panel>
-      <Panel className="detail-panel" scroll>
-        <ItemEditor
-          item={state.selectedItem}
-          itemIndex={state.itemIndex}
-          canEdit={canEdit}
-          busy={busy}
-          allowRemove
-          canEditStackSize={state.canEditStackSize}
-          canCloneBackpackItem={state.canCloneBackpackItem}
-          canEditMaterial={state.canEditMaterial}
-          metadataDraft={state.itemMetadataDraft}
-          propertyDraft={state.propertyDraft}
-          itemPropertiesDraft={state.itemPropertiesDraft}
-          availableItemProperties={state.availableItemProperties}
-          onMetadataChange={(patch) => actions.setItemMetadataDraft((current) => ({ ...current, ...patch }))}
-          onPropertyDraftChange={(patch) => actions.setPropertyDraft((current) => ({ ...current, ...patch }))}
-          onPropertyAdd={actions.handlePropertyAddDraft}
-          onPropertyRemove={actions.handlePropertyRemoveDraft}
-          onPropertyUpdate={actions.handlePropertyUpdateDraft}
-          onRemove={() => void actions.handleBackpackRemove()}
-          onClone={() => void actions.handleBackpackClone()}
-          onWikiOpen={(url) => void actions.handleWikiOpen(url)}
-        />
-      </Panel>
+    <section className="inventory-panel">
+      <InventoryToolbar
+        itemCount={filteredItems.length}
+        totalItemCount={state.items.length}
+        categories={categories}
+        category={category}
+        search={search}
+        moneyDraft={state.moneyDraft}
+        canEdit={canEdit}
+        busy={busy}
+        onCategoryChange={setCategory}
+        onSearchChange={setSearch}
+        onMoneyChange={actions.setMoneyDraft}
+      />
+      <InventoryTable
+        items={filteredItems}
+        selectedIndex={state.itemIndex}
+        onSelect={actions.setItemIndex}
+        renderInlineEditor={() => (
+          <InlineItemEditor state={state} actions={actions} canEdit={canEdit} busy={busy} />
+        )}
+      />
     </section>
   );
 }
