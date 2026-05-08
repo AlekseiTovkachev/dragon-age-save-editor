@@ -2,19 +2,13 @@ import { ChevronDown, ChevronRight } from "lucide-react";
 import {
   EmptyState,
   Field,
-  FieldGrid,
-  ListRow,
   NumericInput,
-  Panel,
-  PanelBody,
   ScrollRegion,
-  SectionCard,
   SelectInput,
 } from "../../components/ui";
 import { abilityLabel, groupedAbilities } from "../../lib/abilityUtils";
+import { isDirty } from "../../lib/dirty";
 import { titleCase } from "../../lib/format";
-import { targetKey } from "../../lib/itemUtils";
-import { CHARACTER_TAB_TITLES, CHARACTER_TABS } from "../../lib/navigation";
 import type { CharacterTab } from "../../lib/navigation";
 import { useState } from "react";
 import type { Dispatch, SetStateAction } from "react";
@@ -22,6 +16,9 @@ import type { Ability, AbilityListKind, Character, CharacterSummary } from "../.
 import { InlineItemEditor } from "../inventory/InlineItemEditor";
 import { InventoryTable } from "../inventory/InventoryTable";
 import type { InventoryPanelActions, InventoryPanelState } from "../inventory/InventoryPanel";
+import { CharacterHeader } from "./CharacterHeader";
+import { CharacterSubtabs } from "./CharacterSubtabs";
+import { PartyRail } from "./PartyRail";
 
 type CharacterPanelProps = {
   state: CharacterPanelState;
@@ -76,59 +73,50 @@ export function CharacterPanel({
   canEdit,
   busy,
 }: CharacterPanelProps) {
+  const overviewDirty = hasOverviewDirtyFields(state);
+  const abilityDirty = hasAbilityDirtyFields(state);
+  const characterDirty = overviewDirty || abilityDirty;
+
   return (
-    <section className="split-section">
-      <Panel className="list-panel" title="Party">
-        {state.characters.map((entry) => (
-          <ListRow
-            key={targetKey(entry.target)}
-            active={targetKey(entry.target) === state.characterKey}
-            onClick={() => actions.setCharacterKey(targetKey(entry.target))}
-          >
-            {entry.name}
-          </ListRow>
-        ))}
-      </Panel>
-      <Panel className="detail-panel" scroll>
-        <div className="panel-heading character-heading">
-          <h2>{state.character?.name ?? "Character"}</h2>
-          <div className="character-tabbar">
-            {CHARACTER_TABS.map((tab) => (
-              <button
-                type="button"
-                key={tab}
-                className={characterTab === tab ? "nav-link active" : "nav-link"}
-                onMouseDown={(event) => event.preventDefault()}
-                onClick={() => setCharacterTab(tab)}
-              >
-                {CHARACTER_TAB_TITLES[tab]}
-              </button>
-            ))}
+    <section className="char-layout">
+      <PartyRail
+        characters={state.characters}
+        activeKey={state.characterKey}
+        activeLevel={state.character?.level}
+        activeDirty={characterDirty}
+        onSelect={actions.setCharacterKey}
+      />
+      <div className="char-detail">
+        {state.character ? (
+          <>
+            <div className="char-topline">
+              <CharacterHeader character={state.character} dirty={characterDirty} />
+              <CharacterSubtabs activeTab={characterTab} onSelect={setCharacterTab} />
+            </div>
+
+            {characterTab === "overview" ? (
+              <CharacterOverview state={state} actions={actions} canEdit={canEdit} busy={busy} />
+            ) : null}
+
+            {characterTab === "abilities" ? (
+              <CharacterAbilities state={state} actions={actions} canEdit={canEdit} busy={busy} />
+            ) : null}
+
+            {characterTab === "equipment" ? (
+              <CharacterEquipment
+                inventoryState={inventoryState}
+                inventoryActions={inventoryActions}
+                canEdit={canEdit}
+                busy={busy}
+              />
+            ) : null}
+          </>
+        ) : (
+          <div className="card-2">
+            <EmptyState>Choose a character to edit.</EmptyState>
           </div>
-        </div>
-        <PanelBody>
-          {state.character ? (
-            <>
-              {characterTab === "overview" ? (
-                <CharacterOverview state={state} actions={actions} canEdit={canEdit} busy={busy} />
-              ) : null}
-
-              {characterTab === "abilities" ? (
-                <CharacterAbilities state={state} actions={actions} canEdit={canEdit} busy={busy} />
-              ) : null}
-
-              {characterTab === "equipment" ? (
-                <CharacterEquipment
-                  inventoryState={inventoryState}
-                  inventoryActions={inventoryActions}
-                  canEdit={canEdit}
-                  busy={busy}
-                />
-              ) : null}
-            </>
-          ) : <EmptyState>Choose a character to edit.</EmptyState>}
-        </PanelBody>
-      </Panel>
+        )}
+      </div>
     </section>
   );
 }
@@ -170,19 +158,24 @@ function CharacterOverview({
   busy,
 }: Pick<CharacterPanelProps, "state" | "actions" | "canEdit" | "busy">) {
   return (
-    <>
-      <SectionCard title="Progress" className="character-field-section">
-        <FieldGrid>
-          <Field label="Level">
+    <div className="character-overview">
+      <section className="card-2">
+        <div className="card-head">
+          <h3 className="card-title">Progress</h3>
+        </div>
+        <div className="grid-progress">
+          <Field label="Level" className="num">
             <NumericInput
+              className={isDirty(state.levelDraft, state.character?.level ?? null) ? "inp dirty" : "inp"}
               value={state.levelDraft}
               min={0}
               onChange={(event) => actions.setLevelDraft(event.target.value)}
               disabled={!canEdit || busy}
             />
           </Field>
-          <Field label="Experience">
+          <Field label="Experience" className="num">
             <NumericInput
+              className={isDirty(state.experienceDraft, state.character?.experience ?? null) ? "inp dirty" : "inp"}
               value={state.experienceDraft}
               min={0}
               onChange={(event) => actions.setExperienceDraft(event.target.value)}
@@ -191,8 +184,9 @@ function CharacterOverview({
             />
           </Field>
           {state.characterKey !== "main" ? (
-            <Field label="Approval">
+            <Field label="Approval" className="num">
               <NumericInput
+                className={isDirty(state.approvalDraft, state.character?.approval ?? null) ? "inp dirty" : "inp"}
                 value={state.approvalDraft}
                 min={0}
                 onChange={(event) => actions.setApprovalDraft(event.target.value)}
@@ -201,13 +195,21 @@ function CharacterOverview({
               />
             </Field>
           ) : null}
-        </FieldGrid>
-      </SectionCard>
-      <SectionCard title="Attributes" className="character-field-section">
-        <FieldGrid>
+        </div>
+      </section>
+      <section className="card-2">
+        <div className="card-head">
+          <h3 className="card-title">Attributes</h3>
+        </div>
+        <div className="grid-attrs">
           {Object.entries(state.statsDraft).map(([key, value]) => (
-            <Field key={key} label={titleCase(key)}>
+            <Field key={key} label={titleCase(key)} className="num">
               <NumericInput
+                className={
+                  isDirty(value, state.character?.core_stats[key as keyof typeof state.character.core_stats] ?? null)
+                    ? "inp dirty"
+                    : "inp"
+                }
                 value={value}
                 min={0}
                 onChange={(event) => actions.setStatsDraft((current) => ({ ...current, [key]: event.target.value }))}
@@ -215,18 +217,29 @@ function CharacterOverview({
               />
             </Field>
           ))}
-        </FieldGrid>
-      </SectionCard>
-      <SectionCard title="Point Pools" className="character-field-section">
-        <FieldGrid>
+        </div>
+      </section>
+      <section className="card-2">
+        <div className="card-head">
+          <h3 className="card-title">Point Pools</h3>
+        </div>
+        <div className="grid-pools">
           {[ 
             ["attribute_points", "Attribute Points"],
             ["skill_points", "Skill Points"],
             ["talent_points", "Talent Points"],
             ["specialization_points", "Specialization Points"],
           ].map(([key, label]) => (
-            <Field key={key} label={label}>
+            <Field key={key} label={label} className="num">
               <NumericInput
+                className={
+                  isDirty(
+                    state.pointPoolsDraft[key] ?? "",
+                    state.character?.point_pools[key as keyof typeof state.character.point_pools] ?? null,
+                  )
+                    ? "inp dirty"
+                    : "inp"
+                }
                 value={state.pointPoolsDraft[key] ?? ""}
                 min={0}
                 onChange={(event) =>
@@ -241,10 +254,38 @@ function CharacterOverview({
               />
             </Field>
           ))}
-        </FieldGrid>
-      </SectionCard>
-    </>
+        </div>
+      </section>
+    </div>
   );
+}
+
+function hasOverviewDirtyFields(state: CharacterPanelState) {
+  if (!state.character) {
+    return false;
+  }
+  return (
+    isDirty(state.levelDraft, state.character.level) ||
+    isDirty(state.experienceDraft, state.character.experience) ||
+    isDirty(state.approvalDraft, state.character.approval) ||
+    Object.entries(state.statsDraft).some(([key, value]) =>
+      isDirty(value, state.character?.core_stats[key as keyof Character["core_stats"]] ?? null),
+    ) ||
+    Object.entries(state.pointPoolsDraft).some(([key, value]) =>
+      isDirty(value, state.character?.point_pools[key as keyof Character["point_pools"]] ?? null),
+    )
+  );
+}
+
+function hasAbilityDirtyFields(state: CharacterPanelState) {
+  if (!state.character) {
+    return false;
+  }
+  return state.visibleAbilityKinds.some((kind) => {
+    const committedIds = state.character?.[kind].map((ability) => ability.id).sort((a, b) => a - b) ?? [];
+    const draftIds = state.abilityDrafts[kind].map((ability) => ability.id).sort((a, b) => a - b);
+    return committedIds.length !== draftIds.length || committedIds.some((id, index) => id !== draftIds[index]);
+  });
 }
 
 function CharacterAbilities({

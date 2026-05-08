@@ -79,6 +79,57 @@ function inventoryActions(): InventoryPanelActions {
 }
 
 describe("CharacterPanel equipment tab", () => {
+  it("renders the redesigned party rail, character header, subtabs, and overview cards", () => {
+    render(
+      <CharacterPanel
+        state={characterState()}
+        actions={characterActions()}
+        inventoryState={inventoryState()}
+        inventoryActions={inventoryActions()}
+        characterTab="overview"
+        setCharacterTab={vi.fn()}
+        canEdit
+        busy={false}
+      />,
+    );
+
+    expect(screen.getByRole("complementary", { name: "Party members" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Hero", level: 2 })).toBeInTheDocument();
+    expect(screen.getByRole("navigation", { name: "Character sections" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Progress", level: 3 })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Attributes", level: 3 })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Point Pools", level: 3 })).toBeInTheDocument();
+  });
+
+  it("marks overview numeric inputs dirty per field", () => {
+    const state = {
+      ...characterState(),
+      levelDraft: "2",
+      statsDraft: { strength: "10", magic: "99" },
+      pointPoolsDraft: { attribute_points: "1", skill_points: "5" },
+    };
+
+    render(
+      <CharacterPanel
+        state={state}
+        actions={characterActions()}
+        inventoryState={inventoryState()}
+        inventoryActions={inventoryActions()}
+        characterTab="overview"
+        setCharacterTab={vi.fn()}
+        canEdit
+        busy={false}
+      />,
+    );
+
+    expect(screen.getByLabelText("Level")).toHaveClass("dirty");
+    expect(screen.getByLabelText("Strength")).not.toHaveClass("dirty");
+    expect(screen.getByLabelText("Magic")).toHaveClass("dirty");
+    expect(screen.getByLabelText("Attribute Points")).not.toHaveClass("dirty");
+    expect(screen.getByLabelText("Skill Points")).toHaveClass("dirty");
+    expect(screen.getByText("Modified")).toBeInTheDocument();
+  });
+
   it("uses the inventory table with an equipment-only inline editor", () => {
     render(
       <CharacterPanel
