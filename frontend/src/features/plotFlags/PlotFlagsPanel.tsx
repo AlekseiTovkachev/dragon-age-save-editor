@@ -125,6 +125,7 @@ export function PlotFlagsPanel({ state, actions, summary, canEdit, busy }: PlotF
                   type="button"
                   className={["cat-chip", entry === category ? "is-active" : ""].filter(Boolean).join(" ")}
                   onClick={() => setCategory(entry)}
+                  aria-pressed={entry === category}
                 >
                   {entry}
                 </button>

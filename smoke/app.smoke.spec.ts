@@ -72,6 +72,25 @@ test("edits character progress, attributes, and point pools with reset and commi
   await expect(level).toHaveValue("8");
 });
 
+test("edits equipped item metadata through the character equipment tab", async ({ page }) => {
+  await openMockSave(page);
+
+  await page.getByRole("button", { name: "Equipment" }).click();
+  await page.getByRole("button", { name: /Equipped Sword/ }).click();
+
+  const itemLevel = page.getByLabel("Item Level");
+  await expect(itemLevel).toHaveValue("0");
+  await itemLevel.fill("5");
+  await page.getByRole("button", { name: /apply drafts/i }).click();
+
+  await expect(page.getByText("Unsaved changes")).toBeVisible();
+  await expect(itemLevel).toHaveValue("5");
+
+  await itemLevel.fill("6");
+  await page.getByRole("button", { name: /reset drafts/i }).click();
+  await expect(itemLevel).toHaveValue("5");
+});
+
 test("edits item metadata and properties in the backpack", async ({ page }) => {
   await openMockSave(page);
 

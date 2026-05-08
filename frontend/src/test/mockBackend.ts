@@ -3,6 +3,7 @@ import type {
   Character,
   CraftingRecipe,
   IndexedItem,
+  InventoryContainer,
   Item,
   PlotBooleanFlag,
   PlotIntegerFlag,
@@ -158,6 +159,17 @@ function updateBackpackItem(index: number, update: (item: Item) => Item): Item {
   return state.backpack.find((entry) => entry.index === index)!.item;
 }
 
+function updateInventoryItem(container: InventoryContainer, index: number, update: (item: Item) => Item): Item {
+  if (container === "backpack") {
+    return updateBackpackItem(index, update);
+  }
+  state.character = {
+    ...state.character,
+    equipment: state.character.equipment.map((item, itemIndex) => itemIndex === index ? update(item) : item),
+  };
+  return state.character.equipment[index];
+}
+
 function markDirty() {
   if (state.summary) {
     state.summary = { ...state.summary, dirty: true };
@@ -255,54 +267,64 @@ async function executeSingle(command: SaveCommand): Promise<SaveCommandResult> {
       markDirty();
       return { result: "item", container: "backpack", index: command.index, item: state.backpack[command.index].item };
     case "patch_item_metadata":
-      updateBackpackItem(command.index, (item) => ({ ...item, ...command.patch }));
-      markDirty();
-      return { result: "item", container: command.container, index: command.index, item: state.backpack[command.index].item };
+      {
+        const item = updateInventoryItem(command.container, command.index, (entry) => ({ ...entry, ...command.patch }));
+        markDirty();
+        return { result: "item", container: command.container, index: command.index, item };
+      }
     case "add_item_property":
-      updateBackpackItem(command.index, (item) => ({
-        ...item,
-        properties: [
-          ...item.properties,
-          {
-            id: command.property_id,
-            name: itemProperties.find((property) => property.id === command.property_id)?.name ?? null,
-            power: command.power,
-          },
-        ],
-      }));
-      markDirty();
-      return { result: "item", container: command.container, index: command.index, item: state.backpack[command.index].item };
+      {
+        const item = updateInventoryItem(command.container, command.index, (entry) => ({
+          ...entry,
+          properties: [
+            ...entry.properties,
+            {
+              id: command.property_id,
+              name: itemProperties.find((property) => property.id === command.property_id)?.name ?? null,
+              power: command.power,
+            },
+          ],
+        }));
+        markDirty();
+        return { result: "item", container: command.container, index: command.index, item };
+      }
     case "remove_item_property":
-      updateBackpackItem(command.index, (item) => ({
-        ...item,
-        properties: item.properties.filter((_, index) => index !== command.property_index),
-      }));
-      markDirty();
-      return { result: "item", container: command.container, index: command.index, item: state.backpack[command.index].item };
+      {
+        const item = updateInventoryItem(command.container, command.index, (entry) => ({
+          ...entry,
+          properties: entry.properties.filter((_, index) => index !== command.property_index),
+        }));
+        markDirty();
+        return { result: "item", container: command.container, index: command.index, item };
+      }
     case "set_item_property_power":
-      updateBackpackItem(command.index, (item) => ({
-        ...item,
-        properties: item.properties.map((property, index) =>
-          index === command.property_index ? { ...property, power: command.power } : property,
-        ),
-      }));
-      markDirty();
-      return { result: "item", container: command.container, index: command.index, item: state.backpack[command.index].item };
+      {
+        const item = updateInventoryItem(command.container, command.index, (entry) => ({
+          ...entry,
+          properties: entry.properties.map((property, index) =>
+            index === command.property_index ? { ...property, power: command.power } : property,
+          ),
+        }));
+        markDirty();
+        return { result: "item", container: command.container, index: command.index, item };
+      }
     case "set_item_property_id":
-      updateBackpackItem(command.index, (item) => ({
-        ...item,
-        properties: item.properties.map((property, index) =>
-          index === command.property_index
-            ? {
-                ...property,
-                id: command.property_id,
-                name: itemProperties.find((option) => option.id === command.property_id)?.name ?? null,
-              }
-            : property,
-        ),
-      }));
-      markDirty();
-      return { result: "item", container: command.container, index: command.index, item: state.backpack[command.index].item };
+      {
+        const item = updateInventoryItem(command.container, command.index, (entry) => ({
+          ...entry,
+          properties: entry.properties.map((property, index) =>
+            index === command.property_index
+              ? {
+                  ...property,
+                  id: command.property_id,
+                  name: itemProperties.find((option) => option.id === command.property_id)?.name ?? null,
+                }
+              : property,
+          ),
+        }));
+        markDirty();
+        return { result: "item", container: command.container, index: command.index, item };
+      }
     case "replace_crafting_recipe_list":
       state.recipes = command.recipe_ids;
       markDirty();

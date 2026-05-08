@@ -62,7 +62,6 @@ function SortHeader({ label, column, sortKey, sortDirection, onSort }: SortHeade
       className={active ? "inventory-sort is-active" : "inventory-sort"}
       type="button"
       aria-label={`Sort by ${label} ${nextDirection}`}
-      aria-sort={active ? (sortDirection === "asc" ? "ascending" : "descending") : "none"}
       onClick={() => onSort(column)}
     >
       <span>{label}</span>
@@ -99,12 +98,15 @@ export function InventoryTable({ items, selectedIndex, onSelect, renderInlineEdi
     setSortDirection("asc");
   };
 
+  const ariaSort = (column: SortKey) =>
+    sortKey === column ? (sortDirection === "asc" ? "ascending" : "descending") : "none";
+
   return (
     <div className="inventory-table-shell">
       <table className="inventory-table">
         <thead>
           <tr>
-            <th scope="col">
+            <th scope="col" aria-sort={ariaSort("name")}>
               <SortHeader
                 label="Item"
                 column="name"
@@ -113,7 +115,7 @@ export function InventoryTable({ items, selectedIndex, onSelect, renderInlineEdi
                 onSort={handleSort}
               />
             </th>
-            <th scope="col">
+            <th scope="col" aria-sort={ariaSort("category")}>
               <SortHeader
                 label="Category"
                 column="category"
@@ -122,7 +124,7 @@ export function InventoryTable({ items, selectedIndex, onSelect, renderInlineEdi
                 onSort={handleSort}
               />
             </th>
-            <th scope="col">
+            <th scope="col" aria-sort={ariaSort("stack")}>
               <SortHeader
                 label="Qty"
                 column="stack"
@@ -131,7 +133,7 @@ export function InventoryTable({ items, selectedIndex, onSelect, renderInlineEdi
                 onSort={handleSort}
               />
             </th>
-            <th scope="col">
+            <th scope="col" aria-sort={ariaSort("material")}>
               <SortHeader
                 label="Material"
                 column="material"
@@ -140,7 +142,7 @@ export function InventoryTable({ items, selectedIndex, onSelect, renderInlineEdi
                 onSort={handleSort}
               />
             </th>
-            <th scope="col">
+            <th scope="col" aria-sort={ariaSort("level")}>
               <SortHeader
                 label="Level"
                 column="level"
@@ -149,7 +151,7 @@ export function InventoryTable({ items, selectedIndex, onSelect, renderInlineEdi
                 onSort={handleSort}
               />
             </th>
-            <th scope="col">
+            <th scope="col" aria-sort={ariaSort("properties")}>
               <SortHeader
                 label="Props"
                 column="properties"

@@ -22,7 +22,7 @@ React UI
 - `frontend/src/features/inventory`: inventory drafts, item command planning, inventory panel.
 - `frontend/src/features/crafting`: recipe drafts and panel.
 - `frontend/src/features/plotFlags`: DA2 plot flag drafts and panel.
-- `frontend/src/components`: reusable UI controls and item/tab/topbar components.
+- `frontend/src/components`: reusable UI controls and item editor primitives.
 - `frontend/src/lib`: pure formatting, grouping, navigation, and draft helpers.
 - `frontend/src/test`: factories, setup, and mocked backend used by unit and smoke tests.
 
