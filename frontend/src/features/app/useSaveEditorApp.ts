@@ -302,6 +302,13 @@ export function useSaveEditorApp() {
     },
   };
 
+  const sectionCounts = {
+    characters: characterPanel.state.characters.length,
+    inventory: summary?.backpack_count || 0,
+    recipes: craftingPanel.state.craftingRecipeDrafts.length,
+    plot_flags: plotFlagsPanel.state.groupedPlotIntegers.reduce((total, group) => total + group.flags.length, 0),
+  } satisfies Record<Section, number>;
+
   return {
     section: activeSection,
     setSection: handleSectionSelect,
@@ -310,6 +317,7 @@ export function useSaveEditorApp() {
     summary,
     screenshotDataUrl,
     visibleSections,
+    sectionCounts,
     canEdit: Boolean(summary),
     operation,
     characterPanel,
