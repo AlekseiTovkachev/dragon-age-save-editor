@@ -1,6 +1,6 @@
 import { ItemEditor } from "../../components/ItemEditor";
 import { ItemList } from "../../components/ItemList";
-import { Panel } from "../../components/ui";
+import { NumericInput, Panel } from "../../components/ui";
 import type { Dispatch, SetStateAction } from "react";
 import type { ItemPropertyDraft } from "../../lib/itemUtils";
 import type { IndexedItem, Item, SelectableItemProperty } from "../../types";
@@ -43,7 +43,21 @@ export type InventoryPanelActions = {
 export function InventoryPanel({ state, actions, canEdit, busy }: InventoryPanelProps) {
   return (
     <section className="split-section inventory-layout">
-      <Panel className="list-panel" title="Inventory">
+      <Panel
+        className="list-panel"
+        title="Inventory"
+        headingAction={
+          <label className="inventory-money-control">
+            <span>Money</span>
+            <NumericInput
+              value={state.moneyDraft}
+              min={0}
+              onChange={(event) => actions.setMoneyDraft(event.target.value)}
+              disabled={!canEdit || busy}
+            />
+          </label>
+        }
+      >
         <h3>Backpack</h3>
         <ItemList items={state.items} selectedIndex={state.itemIndex} onSelect={actions.setItemIndex} />
       </Panel>

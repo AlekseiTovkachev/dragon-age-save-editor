@@ -13,6 +13,26 @@
   flex: 1 1 auto;
 }
 
+.inventory-money-control {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 165px;
+}
+
+.inventory-money-control span {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.inventory-money-control input {
+  min-height: 2rem;
+  padding: 0.35rem 0.5rem;
+}
+
 .item-list .list-row {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;

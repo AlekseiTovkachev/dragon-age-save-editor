@@ -291,7 +291,9 @@ export function useSaveEditorApp() {
 
   const plotFlagsPanel = {
     state: {
+      plotIntegerValues: plotFlagsEditor.plotIntegerValues,
       plotIntegerDrafts: plotFlagsEditor.plotIntegerDrafts,
+      plotBooleanValues: plotFlagsEditor.plotBooleanValues,
       plotBooleanDrafts: plotFlagsEditor.plotBooleanDrafts,
       groupedPlotIntegers: plotFlagsEditor.groupedPlotIntegers,
       groupedPlotBooleans: plotFlagsEditor.groupedPlotBooleans,

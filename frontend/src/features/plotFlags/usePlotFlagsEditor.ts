@@ -154,7 +154,9 @@ export function usePlotFlagsEditor({ run, refreshSummary }: UsePlotFlagsEditorOp
   );
 
   return {
+    plotBooleanValues,
     plotBooleanDrafts,
+    plotIntegerValues,
     plotIntegerDrafts,
     groupedPlotBooleans: groupedBooleanFlags,
     groupedPlotIntegers: groupedIntegerFlags,

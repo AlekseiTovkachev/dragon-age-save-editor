@@ -31,7 +31,7 @@ test("opens a DAO save, resets inventory drafts, commits, and saves a copy", asy
 
   await stackSize.fill("12");
   await page.getByLabel("Money").fill("999");
-  await page.getByRole("button", { name: /commit changes/i }).click();
+  await page.getByRole("button", { name: /apply drafts/i }).click();
 
   await expect(page.getByText("Unsaved changes")).toBeVisible();
   await expect(page.getByRole("button", { name: /save as/i })).toBeEnabled();
@@ -61,7 +61,7 @@ test("edits character progress, attributes, and point pools with reset and commi
   await level.fill("8");
   await strength.fill("22");
   await talentPoints.fill("6");
-  await page.getByRole("button", { name: /commit changes/i }).click();
+  await page.getByRole("button", { name: /apply drafts/i }).click();
   await expect(page.getByText("Unsaved changes")).toBeVisible();
   await expect(level).toHaveValue("8");
   await expect(strength).toHaveValue("22");
@@ -84,7 +84,7 @@ test("edits item metadata and properties in the backpack", async ({ page }) => {
   await page.locator(".add-property").getByPlaceholder("Power").fill("3");
   await page.locator(".add-property").getByRole("button", { name: "Add" }).click();
 
-  await page.getByRole("button", { name: /commit changes/i }).click();
+  await page.getByRole("button", { name: /apply drafts/i }).click();
   await expect(page.getByText("Unsaved changes")).toBeVisible();
   await expect(page.getByLabel("Item Level")).toHaveValue("4");
   await expect(page.locator(".property-list .property-row").nth(1).locator("select")).toHaveValue("9");
@@ -103,7 +103,7 @@ test("resets and commits crafting recipe changes", async ({ page }) => {
   await expect(lyriumPotion).not.toBeChecked();
 
   await lyriumPotion.check();
-  await page.getByRole("button", { name: /commit changes/i }).click();
+  await page.getByRole("button", { name: /apply drafts/i }).click();
   await expect(page.getByText("Unsaved changes")).toBeVisible();
   await expect(lyriumPotion).toBeChecked();
 });
@@ -113,7 +113,8 @@ test("opens a DA2 save and shows plot flags", async ({ page }) => {
 
   await expect(page.getByRole("button", { name: "Plot Flags" })).toBeVisible();
   await page.getByRole("button", { name: "Plot Flags" }).click();
-  await expect(page.getByRole("heading", { name: "DA2 Plot Flags" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Plot Flags" })).toBeVisible();
+  await expect(page.getByText("These are imported from DAO.")).toBeVisible();
   await expect(page.getByText("Act 1 major choice")).toBeVisible();
 });
 
@@ -121,21 +122,24 @@ test("resets, commits, and saves DA2 plot flag drafts", async ({ page }) => {
   await openMockSave(page, "da2");
 
   await page.getByRole("button", { name: "Plot Flags" }).click();
-  const picked = page.getByLabel("Picked");
-  const helpedMages = page.getByLabel(/Helped the mages/);
+  const majorChoice = page.locator(".plot-card").filter({ hasText: "Act 1 major choice" });
+  const mageChoice = page.locator(".plot-card").filter({ hasText: "Helped the mages" });
+  const picked = majorChoice.getByRole("radio", { name: "Picked" });
+  const unset = majorChoice.getByRole("radio", { name: "Unset" });
+  const helpedMages = mageChoice.getByRole("radio", { name: "Yes" });
 
-  await picked.check();
-  await helpedMages.check();
+  await picked.click();
+  await helpedMages.click();
   await page.getByRole("button", { name: /reset drafts/i }).click();
-  await expect(page.getByLabel("Unset")).toBeChecked();
-  await expect(helpedMages).not.toBeChecked();
+  await expect(unset).toHaveAttribute("aria-checked", "true");
+  await expect(helpedMages).toHaveAttribute("aria-checked", "false");
 
-  await picked.check();
-  await helpedMages.check();
-  await page.getByRole("button", { name: /commit changes/i }).click();
+  await picked.click();
+  await helpedMages.click();
+  await page.getByRole("button", { name: /apply drafts/i }).click();
   await expect(page.getByText("Unsaved changes")).toBeVisible();
-  await expect(picked).toBeChecked();
-  await expect(helpedMages).toBeChecked();
+  await expect(picked).toHaveAttribute("aria-checked", "true");
+  await expect(helpedMages).toHaveAttribute("aria-checked", "true");
 
   await page.getByRole("button", { name: /save as/i }).click();
   await expect(page.getByText("Saved copy ready")).toBeVisible();
@@ -156,8 +160,9 @@ test("shows recoverable errors for invalid opens and failed commits", async ({ p
     localStorage.setItem("smokeFailCommand", "set_money");
   });
   await page.getByRole("button", { name: /open save/i }).click();
+  await page.getByRole("button", { name: "Inventory" }).click();
   await page.getByLabel("Money").fill("777");
-  await page.getByRole("button", { name: /commit changes/i }).click();
+  await page.getByRole("button", { name: /apply drafts/i }).click();
   await expect(page.getByText(/io: Mocked set_money failure/)).toBeVisible();
   await expect(page.getByText("Saved copy ready")).toBeVisible();
 });
