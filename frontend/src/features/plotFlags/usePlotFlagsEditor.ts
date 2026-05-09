@@ -9,6 +9,8 @@ import {
 } from "../../lib/plotFlagUtils";
 import type { PlotBooleanFlag, PlotIntegerFlag } from "../../types";
 import type { AsyncRun } from "../shared/types";
+import { applyImplications } from "./plotFlagImplications";
+import { validatePlotFlags } from "./plotFlagValidation";
 
 type UsePlotFlagsEditorOptions = {
   run: AsyncRun;
@@ -62,12 +64,27 @@ export function usePlotFlagsEditor({ run, refreshSummary }: UsePlotFlagsEditorOp
   }, []);
 
   const handleBooleanToggle = useCallback((id: number, value: boolean) => {
-    setPlotBooleanDrafts((current) => ({ ...current, [id]: value }));
+    const merged = applyImplications(
+      { ...plotBooleanDraftsRef.current, [id]: value },
+      plotIntegerDraftsRef.current,
+    );
+    setPlotBooleanDrafts(merged.bools);
+    setPlotIntegerDrafts(merged.ints);
   }, []);
 
   const handleIntegerChange = useCallback((id: number, value: number) => {
     setPlotIntegerDrafts((current) => ({ ...current, [id]: value }));
   }, []);
+
+  const handleBooleanBatch = useCallback(
+    (boolChanges: Record<number, boolean>, intChanges: Record<number, number> = {}) => {
+      setPlotBooleanDrafts((current) => ({ ...current, ...boolChanges }));
+      if (Object.keys(intChanges).length > 0) {
+        setPlotIntegerDrafts((current) => ({ ...current, ...intChanges }));
+      }
+    },
+    [],
+  );
 
   const commitPlotFlagDrafts = useCallback(async () => {
     return run(async () => {
@@ -153,6 +170,11 @@ export function usePlotFlagsEditor({ run, refreshSummary }: UsePlotFlagsEditorOp
     [availablePlotIntegers],
   );
 
+  const hasPlotWarnings = useMemo(
+    () => validatePlotFlags(plotBooleanDrafts, plotIntegerDrafts).length > 0,
+    [plotBooleanDrafts, plotIntegerDrafts],
+  );
+
   return {
     plotBooleanValues,
     plotBooleanDrafts,
@@ -164,10 +186,12 @@ export function usePlotFlagsEditor({ run, refreshSummary }: UsePlotFlagsEditorOp
     refreshAvailablePlotFlags,
     handleBooleanToggle,
     handleIntegerChange,
+    handleBooleanBatch,
     commitPlotFlagDrafts,
     resetLoadedDrafts,
     commitDrafts,
     resetToCommittedDrafts,
     clear,
+    hasPlotWarnings,
   };
 }

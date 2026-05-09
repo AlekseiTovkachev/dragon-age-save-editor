@@ -4,6 +4,7 @@ type SaveActionsProps = {
   hasSummary: boolean;
   dirty: boolean;
   busy: boolean;
+  hasPlotWarnings: boolean;
   onOpen: () => void;
   onSaveAs: () => void;
   onCommitDrafts: () => void;
@@ -14,6 +15,7 @@ export function SaveActions({
   hasSummary,
   dirty,
   busy,
+  hasPlotWarnings,
   onOpen,
   onSaveAs,
   onCommitDrafts,
@@ -29,7 +31,7 @@ export function SaveActions({
       </button>
       {hasSummary ? (
         <>
-          <button type="button" className="nav-item" onClick={onCommitDrafts} disabled={busy}>
+          <button type="button" className="nav-item" onClick={onCommitDrafts} disabled={busy || hasPlotWarnings}>
             <span className="icn">
               <ShieldCheck size={18} strokeWidth={1.8} aria-hidden="true" />
             </span>

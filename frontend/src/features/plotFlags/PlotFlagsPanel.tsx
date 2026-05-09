@@ -2,6 +2,8 @@ import { useMemo, useState, type ReactNode } from "react";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { EmptyState, Panel, PanelBody } from "../../components/ui";
 import type { PlotBooleanFlag, PlotIntegerFlag, SaveSummary } from "../../types";
+import { validatePlotFlags, type PlotWarning } from "./plotFlagValidation";
+import { applyImplications } from "./plotFlagImplications";
 
 type PlotFlagsPanelProps = {
   state: PlotFlagsPanelState;
@@ -33,6 +35,7 @@ export type PlotFlagsPanelState = {
 export type PlotFlagsPanelActions = {
   handleIntegerChange: (id: number, value: number) => void;
   handleBooleanToggle: (id: number, value: boolean) => void;
+  handleBooleanBatch: (boolChanges: Record<number, boolean>, intChanges?: Record<number, number>) => void;
 };
 
 // ─── Declarative spec types ──────────────────────────────────────────────────
@@ -89,7 +92,7 @@ type PlotExclusiveGroupCardProps = {
   committedValues: Record<number, boolean>;
   draftValues: Record<number, boolean>;
   disabled: boolean;
-  onToggle: (id: number, value: boolean) => void;
+  onSelect: (def: ExclusiveBooleanGroup, opt: ExclusiveBooleanOption | null) => void;
 };
 
 // ─── PLOT_SECTIONS ────────────────────────────────────────────────────────────
@@ -181,7 +184,18 @@ const PLOT_SECTIONS: PlotSection[] = [
   {
     title: "Arl of Redcliffe",
     items: [
-      { kind: "boolean", id: 2099, label: "Village abandoned" },
+      {
+        kind: "exclusive",
+        def: {
+          label: "Village",
+          flagIds: [2098, 2099],
+          options: [
+            { label: "Defended", setTrue: [2098] },
+            { label: "Abandoned", setTrue: [2099] },
+          ],
+          hasNone: true,
+        },
+      },
       {
         kind: "exclusive",
         def: {
@@ -434,8 +448,8 @@ const PLOT_SECTIONS: PlotSection[] = [
   {
     title: "Warden's Keep (DLC)",
     items: [
-      { kind: "boolean", id: 2069, label: "Completed" },
-      { kind: "boolean", id: 2067, label: "Sophia killed", showIf: { id: 2069, value: true } },
+      { kind: "boolean", id: 2094, label: "Started" },
+      { kind: "boolean", id: 2067, label: "Sophia killed", showIf: { id: 2094, value: true } },
       {
         kind: "exclusive",
         def: {
@@ -448,7 +462,7 @@ const PLOT_SECTIONS: PlotSection[] = [
           ],
           hasNone: true,
         },
-        showIf: { id: 2069, value: true },
+        showIf: { id: 2094, value: true },
       },
     ],
   },
@@ -532,11 +546,32 @@ function getSelectedOption(
 function handleExclusiveSelect(
   def: ExclusiveBooleanGroup,
   opt: ExclusiveBooleanOption | null,
-  onToggle: (id: number, value: boolean) => void,
+  currentBools: Record<number, boolean>,
+  currentInts: Record<number, number>,
+  onBatch: PlotFlagsPanelActions["handleBooleanBatch"],
 ) {
+  // Step 1: group changes
+  const groupChanges: Record<number, boolean> = {};
   for (const id of def.flagIds) {
-    onToggle(id, opt !== null && opt.setTrue.includes(id));
+    groupChanges[id] = opt !== null && opt.setTrue.includes(id);
   }
+  // Step 2: merge into current state and run implications
+  const merged = applyImplications(
+    { ...currentBools, ...groupChanges },
+    { ...currentInts },
+  );
+  // Step 3: compute what actually changed from base
+  const boolDiff: Record<number, boolean> = {};
+  for (const [idStr, value] of Object.entries(merged.bools)) {
+    const id = Number(idStr);
+    if (Boolean(currentBools[id]) !== value) boolDiff[id] = value;
+  }
+  const intDiff: Record<number, number> = {};
+  for (const [idStr, value] of Object.entries(merged.ints)) {
+    const id = Number(idStr);
+    if ((currentInts[id] ?? 0) !== value) intDiff[id] = value;
+  }
+  onBatch(boolDiff, Object.keys(intDiff).length > 0 ? intDiff : undefined);
 }
 
 function stripGroupPrefix(description: string, groupLabel: string): string {
@@ -593,6 +628,11 @@ export function PlotFlagsPanel({ state, actions, summary, canEdit, busy }: PlotF
     return n;
   }, [state.plotBooleanDrafts]);
 
+  const warnings = useMemo(
+    () => validatePlotFlags(state.plotBooleanDrafts, state.plotIntegerDrafts),
+    [state.plotBooleanDrafts, state.plotIntegerDrafts],
+  );
+
   if (summary.preferred_game !== "da2") {
     return (
       <Panel className="detail-panel" title="DA2 Plot Flags" scroll>
@@ -647,6 +687,8 @@ export function PlotFlagsPanel({ state, actions, summary, canEdit, busy }: PlotF
               ))}
             </div>
           </div>
+
+          <PlotWarningsPanel warnings={warnings} />
 
           {isFiltering ? (
             <FlatFilteredView
@@ -755,7 +797,9 @@ function SectionedView({ state, boolFlagMap, intFlagMap, disabled, actions }: Vi
             committedValues={state.plotBooleanValues}
             draftValues={state.plotBooleanDrafts}
             disabled={disabled}
-            onToggle={actions.handleBooleanToggle}
+            onSelect={(def, opt) =>
+              handleExclusiveSelect(def, opt, state.plotBooleanDrafts, state.plotIntegerDrafts, actions.handleBooleanBatch)
+            }
           />,
         );
       }
@@ -841,7 +885,9 @@ function FlatFilteredView({ query, category, state, boolFlagMap, intFlagMap, dis
             committedValues={state.plotBooleanValues}
             draftValues={state.plotBooleanDrafts}
             disabled={disabled}
-            onToggle={actions.handleBooleanToggle}
+            onSelect={(def, opt) =>
+              handleExclusiveSelect(def, opt, state.plotBooleanDrafts, state.plotIntegerDrafts, actions.handleBooleanBatch)
+            }
           />,
         );
       }
@@ -923,7 +969,7 @@ function PlotBooleanCard({ flag, committedValue, draftValue, disabled, onToggle,
   );
 }
 
-function PlotExclusiveGroupCard({ def, flags, committedValues, draftValues, disabled, onToggle }: PlotExclusiveGroupCardProps) {
+function PlotExclusiveGroupCard({ def, flags, committedValues, draftValues, disabled, onSelect }: PlotExclusiveGroupCardProps) {
   const options: ExclusiveBooleanOption[] = def.options ?? flags.map((f) => ({
     label: stripGroupPrefix(f.description, def.label),
     setTrue: [f.id],
@@ -948,7 +994,7 @@ function PlotExclusiveGroupCard({ def, flags, committedValues, draftValues, disa
               key={`excl-${i}`}
               type="button"
               className={["plot-opt", selected ? "is-active" : ""].filter(Boolean).join(" ")}
-              onClick={() => handleExclusiveSelect(def, opt, onToggle)}
+              onClick={() => onSelect(def, opt)}
               disabled={disabled}
               role="radio"
               aria-checked={selected}
@@ -963,7 +1009,7 @@ function PlotExclusiveGroupCard({ def, flags, committedValues, draftValues, disa
             key="none"
             type="button"
             className={["plot-opt", noneSelected ? "is-active" : ""].filter(Boolean).join(" ")}
-            onClick={() => handleExclusiveSelect(def, null, onToggle)}
+            onClick={() => onSelect(def, null)}
             disabled={disabled}
             role="radio"
             aria-checked={noneSelected}
@@ -1007,6 +1053,28 @@ function PlotCardFooter({ meta, modified }: PlotCardFooterProps) {
       ) : (
         <span>unchanged</span>
       )}
+    </div>
+  );
+}
+
+// ─── PlotWarningsPanel ────────────────────────────────────────────────────────
+
+function PlotWarningsPanel({ warnings }: { warnings: PlotWarning[] }) {
+  if (warnings.length === 0) return null;
+  return (
+    <div className="plot-warnings" role="alert" aria-label="Plot flag warnings">
+      <div className="plot-warnings-header">
+        <span className="plot-warnings-icon" aria-hidden="true">!</span>
+        <span>{warnings.length} {warnings.length === 1 ? "warning" : "warnings"}</span>
+      </div>
+      <ul className="plot-warnings-list">
+        {warnings.map((w, i) => (
+          <li key={i} className="plot-warning-item">
+            <span className="plot-warning-section">{w.section}</span>
+            <span className="plot-warning-msg">{w.message}</span>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

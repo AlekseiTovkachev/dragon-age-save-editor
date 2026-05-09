@@ -94,14 +94,14 @@ pub(crate) const DA2_PLOT_BOOLEAN_FLAGS: &[StaticPlotBooleanFlag] = &[
     ),
     da2_plot_bool!(
         2007,
-        "ARL_REMOVE_DEMON_CONNOR_FREED",
-        "Connor lives",
+        "ARL_REMOVE_DEMON_CONNOR_ALIVE",
+        "Connor alive (demon removed)",
         "Redcliffe"
     ),
     da2_plot_bool!(
         2008,
-        "ARL_REMOVE_DEMON_ISOLDE_KNOCKED_OUT",
-        "Connor dies",
+        "ARL_REMOVE_DEMON_CONNOR_KILLED",
+        "Connor killed by Warden",
         "Redcliffe"
     ),
     da2_plot_bool!(
@@ -122,17 +122,17 @@ pub(crate) const DA2_PLOT_BOOLEAN_FLAGS: &[StaticPlotBooleanFlag] = &[
         "Demon's offer was accepted in the Fade",
         "Redcliffe"
     ),
-    da2_plot_bool!(2012, "MAGES_IN_ARMY", "Mages recruited", "Broken Circle"),
+    da2_plot_bool!(2012, "CIR_MAIN_MAGES_IN_ARMY", "Mages recruited", "Broken Circle"),
     da2_plot_bool!(
         2013,
-        "TEMPLARS_IN_ARMY",
+        "CIR_MAIN_TEMPLARS_IN_ARMY",
         "Templars recruited",
         "Broken Circle"
     ),
     da2_plot_bool!(
         2014,
-        "GENITIVI_RETURNS_TO_DENERIM",
-        "Andraste's ashes revealed",
+        "URN_ASHES_REVEALED_TO_WORLD",
+        "Sacred Ashes revealed to the world",
         "Urn of Sacred Ashes"
     ),
     da2_plot_bool!(
@@ -155,13 +155,13 @@ pub(crate) const DA2_PLOT_BOOLEAN_FLAGS: &[StaticPlotBooleanFlag] = &[
     ),
     da2_plot_bool!(
         2018,
-        "ORZ_MAIN___PLOT_04_COMPLETED_KING_IS_BHELEN",
+        "ORZ_MAIN_KING_IS_BHELEN",
         "Bhelen crowned king",
         "Orzammar"
     ),
     da2_plot_bool!(
         2019,
-        "ORZ_MAIN___PLOT_04_COMPLETED_KING_IS_HARROWMONT",
+        "ORZ_MAIN_KING_IS_HARROWMONT",
         "Harrowmont crowned king",
         "Orzammar"
     ),
@@ -173,8 +173,8 @@ pub(crate) const DA2_PLOT_BOOLEAN_FLAGS: &[StaticPlotBooleanFlag] = &[
     ),
     da2_plot_bool!(
         2021,
-        "LANDSMEET_ALISTAIR_IS_KING",
-        "Alistair rules",
+        "LANDSMEET_ALISTAIR_IS_SOLE_KING",
+        "Alistair rules alone",
         "Landsmeet"
     ),
     da2_plot_bool!(
@@ -191,8 +191,8 @@ pub(crate) const DA2_PLOT_BOOLEAN_FLAGS: &[StaticPlotBooleanFlag] = &[
     ),
     da2_plot_bool!(
         2024,
-        "LANDSMEET_PLAYER_IS_KING",
-        "Warden becomes king",
+        "LANDSMEET_ANORA_ENGAGED_TO_PLAYER",
+        "Anora engaged to the Warden (prince-consort)",
         "Landsmeet"
     ),
     da2_plot_bool!(
@@ -207,22 +207,22 @@ pub(crate) const DA2_PLOT_BOOLEAN_FLAGS: &[StaticPlotBooleanFlag] = &[
         "Alistair rules with the Warden",
         "Landsmeet"
     ),
-    da2_plot_bool!(2027, "LANDSMEET_ANORA_IS_QUEEN", "Anora rules", "Landsmeet"),
+    da2_plot_bool!(2027, "LANDSMEET_ANORA_IS_SOLE_QUEEN", "Anora rules alone", "Landsmeet"),
     da2_plot_bool!(
         2028,
-        "CLIMAX_ARCHDEMON_ALISTAIR_KILLS_ARCHDEMON",
+        "CLIMAX_ALISTAIR_KILLS_ARCHDEMON",
         "Alistair kills the Archdemon",
         "Finale"
     ),
     da2_plot_bool!(
         2029,
-        "CLIMAX_ARCHDEMON_LOGHAIN_KILLS_ARCHDEMON",
+        "CLIMAX_LOGHAIN_KILLS_ARCHDEMON",
         "Loghain kills the Archdemon",
         "Finale"
     ),
     da2_plot_bool!(
         2030,
-        "CLIMAX_ARCHDEMON_PC_KILLS_ARCHDEMON",
+        "CLIMAX_PLAYER_KILLS_ARCHDEMON",
         "Warden kills the Archdemon",
         "Finale"
     ),
@@ -415,7 +415,7 @@ pub(crate) const DA2_PLOT_BOOLEAN_FLAGS: &[StaticPlotBooleanFlag] = &[
     ),
     da2_plot_bool!(
         2063,
-        "LTM_MAIN___PLOT_03_KILLED_ARCHITECT",
+        "LTM_MAIN_KILLED_ARCHITECT",
         "Architect dies",
         "Awakening"
     ),
@@ -523,19 +523,19 @@ pub(crate) const DA2_PLOT_BOOLEAN_FLAGS: &[StaticPlotBooleanFlag] = &[
     ),
     da2_plot_bool!(
         2081,
-        "ORZ_ANVIL___PLOT_08_COMPLETED_BRANKA_ALIVE",
-        "Support Branka, Anvil saved",
+        "ORZ_ANVIL_BRANKA_ALIVE",
+        "Support Branka, Anvil preserved",
         "Orzammar"
     ),
     da2_plot_bool!(
         2082,
-        "ORZ_ANVIL___PLOT_08_COMPLETED_BRANKA_SUICIDES",
+        "ORZ_ANVIL_BRANKA_SUICIDES",
         "Support Branka, Anvil destroyed",
         "Orzammar"
     ),
     da2_plot_bool!(
         2083,
-        "ORZ_ANVIL___PLOT_08_COMPLETED_CARIDIN",
+        "ORZ_ANVIL_COMPLETED_CARIDIN",
         "Support Caridin, Anvil destroyed",
         "Orzammar"
     ),
@@ -588,7 +588,7 @@ pub(crate) const DA2_PLOT_BOOLEAN_FLAGS: &[StaticPlotBooleanFlag] = &[
     ),
     da2_plot_bool!(
         2096,
-        "LTM_MAIN___PLOT_03_DEAL_WITH_ARCHITECT",
+        "LTM_MAIN_DEAL_WITH_ARCHITECT",
         "Architect lives",
         "Awakening"
     ),
@@ -600,8 +600,8 @@ pub(crate) const DA2_PLOT_BOOLEAN_FLAGS: &[StaticPlotBooleanFlag] = &[
     ),
     da2_plot_bool!(
         2098,
-        "ARL_SIEGE_SIEGE_OVER",
-        "Redcliffe siege completed",
+        "ARL_SIEGE_VILLAGE_DEFENDED",
+        "Redcliffe village defended",
         "Redcliffe"
     ),
     da2_plot_bool!(

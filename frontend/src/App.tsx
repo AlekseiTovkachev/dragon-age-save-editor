@@ -19,6 +19,7 @@ function App() {
           activeSection={app.section}
           sectionCounts={app.sectionCounts}
           busy={app.operation.busy}
+          hasPlotWarnings={app.hasPlotWarnings}
           onSectionSelect={app.setSection}
           onOpen={() => void app.handleOpen()}
           onSaveAs={() => void app.handleSaveAs()}

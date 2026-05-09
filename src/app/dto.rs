@@ -274,3 +274,9 @@ pub struct PlotIntegerOptionDto {
     pub value: i32,
     pub label: String,
 }
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct PlotFlagWarningDto {
+    pub section: String,
+    pub message: String,
+}

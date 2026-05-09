@@ -302,6 +302,7 @@ export function useSaveEditorApp() {
     actions: {
       handleIntegerChange: plotFlagsEditor.handleIntegerChange,
       handleBooleanToggle: plotFlagsEditor.handleBooleanToggle,
+      handleBooleanBatch: plotFlagsEditor.handleBooleanBatch,
     },
   };
 
@@ -322,6 +323,7 @@ export function useSaveEditorApp() {
     visibleSections,
     sectionCounts,
     canEdit: Boolean(summary),
+    hasPlotWarnings: plotFlagsEditor.hasPlotWarnings,
     operation,
     characterPanel,
     inventoryPanel,

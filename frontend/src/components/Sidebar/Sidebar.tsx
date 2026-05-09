@@ -11,6 +11,7 @@ type SidebarProps = {
   activeSection: Section;
   sectionCounts: SectionCounts;
   busy: boolean;
+  hasPlotWarnings: boolean;
   onSectionSelect: (section: Section) => void;
   onOpen: () => void;
   onSaveAs: () => void;
@@ -25,6 +26,7 @@ export function Sidebar({
   activeSection,
   sectionCounts,
   busy,
+  hasPlotWarnings,
   onSectionSelect,
   onOpen,
   onSaveAs,
@@ -45,6 +47,7 @@ export function Sidebar({
         hasSummary={Boolean(summary)}
         dirty={Boolean(summary?.dirty)}
         busy={busy}
+        hasPlotWarnings={hasPlotWarnings}
         onOpen={onOpen}
         onSaveAs={onSaveAs}
         onCommitDrafts={onCommitDrafts}

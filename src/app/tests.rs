@@ -521,7 +521,7 @@ fn da2_plot_flags_include_full_article_30_catalog() {
             assert!(
                 booleans
                     .iter()
-                    .any(|flag| flag.id == 2007 && flag.description == "Connor lives")
+                    .any(|flag| flag.id == 2007 && flag.description == "Connor alive (demon removed)")
             );
             assert!(booleans.iter().any(|flag| flag.id == 2108));
             assert_eq!(booleans.len(), 109);
@@ -650,9 +650,13 @@ fn da2_document_workflow_saves_and_reloads_plot_flag_edits() {
         .unwrap()
     {
         SaveCommandResult::AvailablePlotFlags { booleans, integers } => {
+            // Pick a boolean ID that is not in the origin group (2000-2005),
+            // since implications triggered by existing save flags can clear origin group flags.
+            let origin_group: &[u16] = &[2000, 2001, 2002, 2003, 2004, 2005];
             let boolean_id = booleans
-                .first()
-                .expect("expected DA2 boolean plot flags")
+                .iter()
+                .find(|f| !origin_group.contains(&f.id))
+                .expect("expected a DA2 boolean plot flag outside the origin group")
                 .id;
             let integer = integers.first().expect("expected DA2 integer plot flags");
             let integer_value = integer
