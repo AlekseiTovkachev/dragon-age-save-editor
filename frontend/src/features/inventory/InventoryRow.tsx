@@ -1,4 +1,3 @@
-import { ChevronDown, ChevronRight } from "lucide-react";
 import type { KeyboardEvent, MouseEvent } from "react";
 import { itemLabel } from "../../lib/itemUtils";
 import type { IndexedItem } from "../../types";
@@ -8,6 +7,7 @@ type InventoryRowProps = {
   expanded: boolean;
   selected: boolean;
   onToggle: (index: number) => void;
+  hideMaterial?: boolean;
 };
 
 function displayValue(value: string | number | null | undefined) {
@@ -17,7 +17,7 @@ function displayValue(value: string | number | null | undefined) {
   return value;
 }
 
-export function InventoryRow({ entry, expanded, selected, onToggle }: InventoryRowProps) {
+export function InventoryRow({ entry, expanded, selected, onToggle, hideMaterial }: InventoryRowProps) {
   const { item } = entry;
   const amount = item.item_stacksize && item.item_stacksize > 1 ? `x${item.item_stacksize}` : "-";
   const material = item.material_info?.name ?? (item.material ? `Tier ${item.material}` : null);
@@ -51,7 +51,6 @@ export function InventoryRow({ entry, expanded, selected, onToggle }: InventoryR
           type="button"
           aria-expanded={expanded}
         >
-          {expanded ? <ChevronDown aria-hidden="true" size={16} /> : <ChevronRight aria-hidden="true" size={16} />}
           <span>
             <strong>{itemLabel(item, entry.index)}</strong>
             <small>{item.resref ?? `Item ${entry.index}`}</small>
@@ -60,7 +59,7 @@ export function InventoryRow({ entry, expanded, selected, onToggle }: InventoryR
       </td>
       <td>{item.category.label}</td>
       <td>{amount}</td>
-      <td>{displayValue(material)}</td>
+      {!hideMaterial ? <td>{displayValue(material)}</td> : null}
       <td>{displayValue(item.item_level)}</td>
       <td>{item.properties.length}</td>
     </tr>

@@ -121,6 +121,14 @@
   justify-content: space-between;
   gap: 0.5rem;
   margin-top: 0.5rem;
+  overflow: hidden;
+}
+
+.id-card .row-status .chip {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 1;
 }
 
 .shot-popover {

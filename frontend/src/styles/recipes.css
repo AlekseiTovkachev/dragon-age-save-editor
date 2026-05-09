@@ -57,10 +57,30 @@
 }
 
 .recipe-card-head {
+  appearance: none;
+  width: 100%;
   display: flex;
   justify-content: space-between;
-  align-items: baseline;
+  align-items: center;
   gap: 0.8rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.recipe-card-head:hover h3 {
+  color: var(--gold-2);
+}
+
+.recipe-head-right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+  color: var(--ink-3);
 }
 
 .recipe-card h3 {

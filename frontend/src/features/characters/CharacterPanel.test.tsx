@@ -213,9 +213,11 @@ describe("CharacterPanel equipment tab", () => {
 
     fireEvent.click(screen.getByRole("button", { name: /Sword/ }));
 
-    expect(screen.getByRole("heading", { name: "Overview", level: 3 })).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Clone Item" })).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Remove Item" })).not.toBeInTheDocument();
+    expect(screen.getByText("Properties (1)")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Clone" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Remove" })).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "+ add property" }));
     expect(screen.getByRole("button", { name: "Add" })).toBeInTheDocument();
   });
 });

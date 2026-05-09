@@ -15,7 +15,7 @@ export function targetKey(target: CharacterTarget): string {
 
 export function itemLabel(item: Item, index: number): string {
   if (item.name) {
-    return item.name;
+    return item.name.trim();
   }
   if (item.resref) {
     return `<${item.resref}>`;

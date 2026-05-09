@@ -54,6 +54,7 @@ function App() {
             actions={app.inventoryPanel.actions}
             canEdit={app.canEdit}
             busy={app.operation.busy}
+            hideMaterial={app.summary.preferred_game === "da2"}
           />
         ) : null}
 

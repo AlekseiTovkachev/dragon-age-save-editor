@@ -14,8 +14,6 @@ function saveName(summary: SaveSummary): string {
 export function SaveIdentityCard({ summary, screenshotDataUrl }: SaveIdentityCardProps) {
   const title = summary?.main_character_name || "No save loaded";
   const meta = summary ? `${gameLabel(summary.preferred_game)} - ${saveName(summary)}` : "Open a save to begin editing.";
-  const status = summary?.dirty ? "Unsaved changes" : summary ? "Saved copy ready" : "Original files stay untouched";
-  const dotColor = summary?.dirty ? "var(--blood-2)" : "var(--gold)";
 
   return (
     <div className="id-card" tabIndex={0}>
@@ -27,13 +25,15 @@ export function SaveIdentityCard({ summary, screenshotDataUrl }: SaveIdentityCar
       <div className="meta" title={summary?.source_path || undefined}>
         {meta}
       </div>
-      <div className="row-status">
-        <span className={summary?.dirty ? "chip blood" : "chip gold"}>
-          <span className="dot" style={{ background: dotColor }} aria-hidden="true" />
-          {status}
-        </span>
-        {summary ? <span className="mono muted">{summary.companion_count + 1} party</span> : null}
-      </div>
+      {summary ? (
+        <div className="row-status">
+          <span className={summary.dirty ? "chip blood" : "chip gold"}>
+            <span className="dot" style={{ background: summary.dirty ? "var(--blood-2)" : "var(--gold)" }} aria-hidden="true" />
+            {summary.dirty ? "Unsaved changes" : "Saved copy ready"}
+          </span>
+          <span className="mono muted">{summary.companion_count + 1} party</span>
+        </div>
+      ) : null}
       {summary && screenshotDataUrl ? (
         <div className="shot-popover">
           <div className="popover-shot">

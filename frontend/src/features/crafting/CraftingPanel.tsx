@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { ChevronDown, ChevronRight } from "lucide-react";
 import { ChoiceRow, EmptyState, Panel, PanelBody } from "../../components/ui";
 import type { RecipeChecklistGroup } from "../../lib/recipeUtils";
 
@@ -109,39 +110,50 @@ type RecipeCategoryCardProps = {
 };
 
 function RecipeCategoryCard({ group, actions, selectedIds, disabled }: RecipeCategoryCardProps) {
+  const [expanded, setExpanded] = useState(false);
   const knownInGroup = group.ids.filter((recipeId) => selectedIds.includes(recipeId)).length;
 
   return (
     <section className="recipe-card" aria-labelledby={`recipe-group-${group.category}`}>
-      <div className="recipe-card-head">
+      <button
+        className="recipe-card-head"
+        type="button"
+        onClick={() => setExpanded((v) => !v)}
+        aria-expanded={expanded}
+      >
         <h3 id={`recipe-group-${group.category}`}>{group.category}</h3>
-        <span className="mono muted">
-          {knownInGroup} / {group.ids.length}
-        </span>
-      </div>
-      <div className="recipe-rows">
-        {group.ids.map((recipeId) => {
-          const knownRecipe = actions.recipeIsKnown(recipeId);
-          return (
-            <ChoiceRow
-              key={`recipe-${recipeId}`}
-              kind="checkbox"
-              className={["recipe-row", selectedIds.includes(recipeId) ? "is-known" : ""].filter(Boolean).join(" ")}
-            >
-              <input
-                type="checkbox"
-                checked={selectedIds.includes(recipeId)}
-                onChange={(event) => actions.handleToggle(recipeId, event.target.checked)}
-                disabled={disabled || !knownRecipe}
-              />
-              <span className="recipe-label">
-                {actions.recipeLabel(recipeId)}
-                {knownRecipe ? "" : " (unknown, preserved)"}
-              </span>
-            </ChoiceRow>
-          );
-        })}
-      </div>
+        <div className="recipe-head-right">
+          <span className="mono muted">{knownInGroup} / {group.ids.length}</span>
+          {expanded
+            ? <ChevronDown size={14} aria-hidden="true" />
+            : <ChevronRight size={14} aria-hidden="true" />}
+        </div>
+      </button>
+      {expanded ? (
+        <div className="recipe-rows">
+          {group.ids.map((recipeId) => {
+            const knownRecipe = actions.recipeIsKnown(recipeId);
+            return (
+              <ChoiceRow
+                key={`recipe-${recipeId}`}
+                kind="checkbox"
+                className={["recipe-row", selectedIds.includes(recipeId) ? "is-known" : ""].filter(Boolean).join(" ")}
+              >
+                <input
+                  type="checkbox"
+                  checked={selectedIds.includes(recipeId)}
+                  onChange={(event) => actions.handleToggle(recipeId, event.target.checked)}
+                  disabled={disabled || !knownRecipe}
+                />
+                <span className="recipe-label">
+                  {actions.recipeLabel(recipeId)}
+                  {knownRecipe ? "" : " (unknown, preserved)"}
+                </span>
+              </ChoiceRow>
+            );
+          })}
+        </div>
+      ) : null}
     </section>
   );
 }

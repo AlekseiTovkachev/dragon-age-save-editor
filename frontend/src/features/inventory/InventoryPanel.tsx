@@ -11,6 +11,7 @@ type InventoryPanelProps = {
   actions: InventoryPanelActions;
   canEdit: boolean;
   busy: boolean;
+  hideMaterial?: boolean;
 };
 
 export type InventoryPanelState = {
@@ -94,7 +95,7 @@ export function filterInventoryItems(items: IndexedItem[], category: string, sea
   });
 }
 
-export function InventoryPanel({ state, actions, canEdit, busy }: InventoryPanelProps) {
+export function InventoryPanel({ state, actions, canEdit, busy, hideMaterial }: InventoryPanelProps) {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState(ALL_CATEGORY.value);
   const categories = useMemo(() => inventoryCategories(state.items), [state.items]);
@@ -119,6 +120,7 @@ export function InventoryPanel({ state, actions, canEdit, busy }: InventoryPanel
         items={filteredItems}
         selectedIndex={state.itemIndex}
         onSelect={actions.setItemIndex}
+        hideMaterial={hideMaterial}
         renderInlineEditor={() => (
           <InlineItemEditor state={state} actions={actions} canEdit={canEdit} busy={busy} />
         )}

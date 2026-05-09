@@ -1,4 +1,3 @@
-import { NumericInput } from "../../components/ui";
 import type { InventoryCategoryFilter } from "./InventoryPanel";
 
 type InventoryToolbarProps = {
@@ -64,15 +63,26 @@ export function InventoryToolbar({
           ))}
         </div>
       </div>
-      <label className="inventory-money-control">
+      <div className="gold-pill">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true">
+          <circle cx="6.5" cy="6.5" r="5.5" stroke="currentColor" strokeWidth="1.2"/>
+          <text x="6.5" y="10" textAnchor="middle" fontSize="7" fill="currentColor" fontFamily="serif">g</text>
+        </svg>
         <span>Money</span>
-        <NumericInput
-          value={moneyDraft}
+        <input
+          className="amt-input"
+          type="number"
           min={0}
-          onChange={(event) => onMoneyChange(event.target.value)}
+          value={moneyDraft}
           disabled={!canEdit || busy}
+          onChange={(event) => onMoneyChange(event.target.value)}
+          onBlur={(event) => {
+            const n = Number(event.target.value);
+            if (isNaN(n) || n < 0) onMoneyChange("0");
+          }}
+          aria-label="Party gold"
         />
-      </label>
+      </div>
     </div>
   );
 }

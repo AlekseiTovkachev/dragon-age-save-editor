@@ -1,18 +1,12 @@
-import { useMemo } from "react";
-import { editableItemProperties, itemLabel } from "../lib/itemUtils";
+import { useMemo, useState } from "react";
+import { editableItemProperties } from "../lib/itemUtils";
 import type { ItemPropertyDraft } from "../lib/itemUtils";
 import type { Item, SelectableItemProperty } from "../types";
 import {
-  ButtonRow,
   EmptyState,
   Field,
-  FieldGrid,
-  GridTable,
-  GridTableRow,
   NumericInput,
-  PanelBody,
   SelectInput,
-  TextInput,
 } from "./ui";
 
 type ItemMetadataDraft = {
@@ -51,7 +45,7 @@ type ItemEditorProps = {
 
 export function ItemEditor({
   item,
-  itemIndex,
+  itemIndex: _itemIndex,
   canEdit,
   busy,
   allowRemove,
@@ -66,11 +60,13 @@ export function ItemEditor({
   onPropertyDraftChange,
   onPropertyAdd,
   onPropertyRemove,
-  onPropertyUpdate,
+  onPropertyUpdate: _onPropertyUpdate,
   onRemove,
   onClone,
   onWikiOpen,
 }: ItemEditorProps) {
+  const [showAddForm, setShowAddForm] = useState(false);
+
   const editableAvailableItemProperties = useMemo(
     () => editableItemProperties(availableItemProperties),
     [availableItemProperties],
@@ -83,145 +79,164 @@ export function ItemEditor({
     [itemPropertiesDraft],
   );
 
-  return (
-    <>
-      <div className="panel-heading">
-        <h2>{item ? itemLabel(item, itemIndex ?? 0) : "Item Detail"}</h2>
+  if (!item) {
+    return (
+      <div className="item-editor-inline">
+        <EmptyState>Select an item to edit metadata and properties.</EmptyState>
       </div>
-      <PanelBody className="item-editor-body">
-        {item ? (
-          <div className="item-editor-grid">
-            <section className="item-overview-column">
-              <h3>Overview</h3>
-              <FieldGrid>
-                <Field label="Resref"><TextInput value={item.resref ?? ""} disabled /></Field>
-                <Field label="Category"><TextInput value={item.category.label} disabled /></Field>
-                {canEditStackSize ? (
-                  <Field label="Stack Size">
-                    <NumericInput
-                      value={metadataDraft.stack_size}
-                      min={1}
-                      max={99}
-                      onChange={(event) => onMetadataChange({ stack_size: event.target.value })}
-                      disabled={!canEdit || busy}
-                    />
-                  </Field>
-                ) : null}
-                <Field label="Wiki">
-                  {item.wiki_url ? (
-                    <a
-                      className="field-link"
-                      href={item.wiki_url}
-                      onClick={(event) => {
-                        event.preventDefault();
-                        onWikiOpen(item.wiki_url!);
-                      }}
-                    >
-                      Open item page
-                    </a>
-                  ) : (
-                    <TextInput value="No wiki link" disabled />
-                  )}
-                </Field>
-                {canEditMaterial ? (
-                  <Field label="Material">
-                    <SelectInput
-                      value={metadataDraft.material}
-                      onChange={(event) => onMetadataChange({ material: event.target.value })}
-                      disabled={!canEdit || busy}
-                    >
-                      {item.material_options.map((option) => (
-                        <option key={`material-${option.code}`} value={option.code}>
-                          {`Tier ${option.tier} - ${option.name}`}
-                        </option>
-                      ))}
-                    </SelectInput>
-                  </Field>
-                ) : null}
-                <Field label="Item Level">
-                  <NumericInput
-                    value={metadataDraft.item_level}
-                    min={0}
-                    onChange={(event) => onMetadataChange({ item_level: event.target.value })}
-                    disabled={!canEdit || busy}
-                  />
-                </Field>
-              </FieldGrid>
-              {allowRemove ? (
-                <ButtonRow>
-                  {canCloneBackpackItem ? (
-                    <button onClick={onClone} disabled={!canEdit || busy}>Clone Item</button>
-                  ) : null}
-                  <button onClick={onRemove} disabled={!canEdit || busy}>Remove Item</button>
-                </ButtonRow>
-              ) : null}
-            </section>
-            <section className="properties-section">
-              <div className="panel-heading"><h3>Properties</h3></div>
-              <GridTable
-                className="property-table"
-                bodyClassName="property-list"
-                header={(
-                  <GridTableRow className="property-row property-header">
-                    <span>Property</span>
-                    <span>Power</span>
-                    <span>Action</span>
-                  </GridTableRow>
-                )}
-                body={visibleItemPropertiesDraft.map(({ property, propertyIndex }) => (
-                  <GridTableRow key={`${property.id}-${propertyIndex}`} className="property-row">
-                    <SelectInput
-                      value={property.id}
-                      onChange={(event) => onPropertyUpdate("id", propertyIndex, event.target.value)}
-                      disabled={!canEdit || busy}
-                    >
-                      {editableAvailableItemProperties.map((option) => (
-                        <option key={`existing-property-${propertyIndex}-${option.id}`} value={option.id}>
-                          {option.name ?? `Property ${option.id}`}
-                        </option>
-                      ))}
-                    </SelectInput>
-                    <NumericInput
-                      value={property.power}
-                      min={0}
-                      allowDecimal
-                      onChange={(event) => onPropertyUpdate("power", propertyIndex, event.target.value)}
-                      disabled={!canEdit || busy}
-                    />
-                    <button onClick={() => onPropertyRemove(propertyIndex)} disabled={!canEdit || busy}>
-                      Remove
-                    </button>
-                  </GridTableRow>
-                ))}
-                footer={(
-                  <GridTableRow className="property-row add-property">
-                    <SelectInput
-                      value={propertyDraft.property_id}
-                      onChange={(event) => onPropertyDraftChange({ property_id: event.target.value })}
-                      disabled={!canEdit || busy}
-                    >
-                      {editableAvailableItemProperties.map((property) => (
-                        <option key={`property-${property.id}`} value={property.id}>
-                          {property.name ?? `Property ${property.id}`}
-                        </option>
-                      ))}
-                    </SelectInput>
-                    <NumericInput
-                      placeholder="Power"
-                      value={propertyDraft.power}
-                      min={0}
-                      allowDecimal
-                      onChange={(event) => onPropertyDraftChange({ power: event.target.value })}
-                      disabled={!canEdit || busy}
-                    />
-                    <button onClick={onPropertyAdd} disabled={!canEdit || busy}>Add</button>
-                  </GridTableRow>
-                )}
-              />
-            </section>
+    );
+  }
+
+  return (
+    <div className="item-editor-inline">
+      {/* Header */}
+      <div className="item-editor-header">
+        <div className="item-editor-header-left">
+          <div className="item-sub">
+            {item.resref ? <span>{item.resref}</span> : null}
+            {item.resref && item.wiki_url ? <span>•</span> : null}
+            {item.wiki_url ? (
+              <a
+                href={item.wiki_url}
+                onClick={(event) => {
+                  event.preventDefault();
+                  onWikiOpen(item.wiki_url!);
+                }}
+              >
+                open wiki page →
+              </a>
+            ) : null}
           </div>
-        ) : <EmptyState>Select an item to edit metadata and properties.</EmptyState>}
-      </PanelBody>
-    </>
+        </div>
+        {allowRemove ? (
+          <div className="item-editor-header-actions">
+            {canCloneBackpackItem ? (
+              <button onClick={onClone} disabled={!canEdit || busy}>Clone</button>
+            ) : null}
+            <button className="danger" onClick={onRemove} disabled={!canEdit || busy}>Remove</button>
+          </div>
+        ) : null}
+      </div>
+
+      {/* Fields row */}
+      <div className="item-fields-row">
+        {canEditMaterial ? (
+          <Field label="Material">
+            <SelectInput
+              value={metadataDraft.material}
+              onChange={(event) => onMetadataChange({ material: event.target.value })}
+              disabled={!canEdit || busy}
+            >
+              {item.material_options.map((option) => (
+                <option key={`material-${option.code}`} value={option.code}>
+                  {`Tier ${option.tier} - ${option.name}`}
+                </option>
+              ))}
+            </SelectInput>
+          </Field>
+        ) : null}
+        <Field label="Item Level">
+          <NumericInput
+            value={metadataDraft.item_level}
+            min={0}
+            onChange={(event) => onMetadataChange({ item_level: event.target.value })}
+            disabled={!canEdit || busy}
+          />
+        </Field>
+        {item.item_cost != null ? (
+          <Field label="Cost">
+            <NumericInput
+              value={item.item_cost.toString()}
+              min={0}
+              onChange={() => undefined}
+              disabled
+            />
+          </Field>
+        ) : null}
+        {canEditStackSize ? (
+          <Field label="Stack Size">
+            <NumericInput
+              value={metadataDraft.stack_size}
+              min={1}
+              max={99}
+              onChange={(event) => onMetadataChange({ stack_size: event.target.value })}
+              disabled={!canEdit || busy}
+            />
+          </Field>
+        ) : null}
+      </div>
+
+      {/* Properties section */}
+      <div className="prop-chips-section">
+        <span className="prop-chips-label">
+          Properties ({visibleItemPropertiesDraft.length})
+        </span>
+        <div className="prop-chips">
+          {visibleItemPropertiesDraft.map(({ property, propertyIndex }) => {
+            const match = editableAvailableItemProperties.find((p) => p.id === property.id);
+            if (!match) return null;
+            const displayName = match.name ?? `Property ${property.id}`;
+            return (
+              <div key={`${property.id}-${propertyIndex}`} className="prop-chip">
+                <span className="prop-chip-name">{displayName}</span>
+                {property.power ? (
+                  <span className="prop-chip-power">+{property.power}</span>
+                ) : null}
+                <button
+                  className="prop-chip-remove"
+                  onClick={() => onPropertyRemove(propertyIndex)}
+                  disabled={!canEdit || busy}
+                  aria-label={`Remove ${displayName}`}
+                >
+                  ×
+                </button>
+              </div>
+            );
+          })}
+
+          {showAddForm ? (
+            <div className="prop-add-form">
+              <SelectInput
+                value={propertyDraft.property_id}
+                onChange={(event) => onPropertyDraftChange({ property_id: event.target.value })}
+                disabled={!canEdit || busy}
+              >
+                {editableAvailableItemProperties.map((property) => (
+                  <option key={`property-${property.id}`} value={property.id}>
+                    {property.name ?? `Property ${property.id}`}
+                  </option>
+                ))}
+              </SelectInput>
+              <NumericInput
+                placeholder="Power"
+                value={propertyDraft.power}
+                min={0}
+                allowDecimal
+                onChange={(event) => onPropertyDraftChange({ power: event.target.value })}
+                disabled={!canEdit || busy}
+              />
+              <button
+                onClick={() => {
+                  onPropertyAdd();
+                  setShowAddForm(false);
+                }}
+                disabled={!canEdit || busy}
+              >
+                Add
+              </button>
+              <button onClick={() => setShowAddForm(false)}>Cancel</button>
+            </div>
+          ) : (
+            <button
+              className="add-prop-btn"
+              onClick={() => setShowAddForm(true)}
+              disabled={!canEdit || busy}
+            >
+              + add property
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
   );
 }

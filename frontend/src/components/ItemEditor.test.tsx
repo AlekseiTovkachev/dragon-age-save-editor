@@ -50,18 +50,24 @@ function renderEditor(overrides = {}) {
 }
 
 describe("ItemEditor", () => {
-  it("edits metadata and property drafts", () => {
+  it("edits metadata draft", () => {
     const props = renderEditor();
 
     const stackInput = screen.getByDisplayValue("3");
     fireEvent.change(stackInput, { target: { value: "5" } });
     expect(props.onMetadataChange).toHaveBeenCalledWith({ stack_size: "5" });
+  });
+
+  it("edits property draft after opening add form", () => {
+    const props = renderEditor();
+
+    fireEvent.click(screen.getByRole("button", { name: "+ add property" }));
 
     fireEvent.change(screen.getByPlaceholderText("Power"), { target: { value: "2" } });
     expect(props.onPropertyDraftChange).toHaveBeenCalledWith({ power: "2" });
   });
 
-  it("rejects invalid numeric metadata and property input", () => {
+  it("rejects invalid numeric metadata input", () => {
     const props = renderEditor();
 
     const stackInput = screen.getByDisplayValue("3");
@@ -69,11 +75,18 @@ describe("ItemEditor", () => {
     fireEvent.change(stackInput, { target: { value: "-1" } });
     fireEvent.change(stackInput, { target: { value: "100" } });
 
+    expect(props.onMetadataChange).not.toHaveBeenCalled();
+  });
+
+  it("rejects invalid property power input after opening add form", () => {
+    const props = renderEditor();
+
+    fireEvent.click(screen.getByRole("button", { name: "+ add property" }));
+
     const powerInput = screen.getByPlaceholderText("Power");
     fireEvent.change(powerInput, { target: { value: "x" } });
     fireEvent.change(powerInput, { target: { value: "-2" } });
 
-    expect(props.onMetadataChange).not.toHaveBeenCalled();
     expect(props.onPropertyDraftChange).not.toHaveBeenCalled();
   });
 
@@ -83,12 +96,46 @@ describe("ItemEditor", () => {
     expect(screen.queryByRole("button", { name: "Apply" })).not.toBeInTheDocument();
   });
 
-  it("renders overview and properties columns", () => {
+  it("renders item name and chip-style properties", () => {
     renderEditor();
 
-    expect(screen.getByRole("heading", { name: "Overview" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Properties" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "open wiki page →" })).toBeInTheDocument();
+    expect(screen.getByText("Properties (1)")).toBeInTheDocument();
     expect(screen.queryByDisplayValue("Sword")).not.toBeInTheDocument();
     expect(screen.queryByDisplayValue("Yes")).not.toBeInTheDocument();
+  });
+
+  it("renders property chips for existing properties", () => {
+    renderEditor();
+
+    expect(screen.getByText("Damage")).toBeInTheDocument();
+  });
+
+  it("calls onPropertyRemove when chip remove is clicked", () => {
+    const props = renderEditor();
+
+    fireEvent.click(screen.getByRole("button", { name: "Remove Damage" }));
+    expect(props.onPropertyRemove).toHaveBeenCalledWith(0);
+  });
+
+  it("shows add form when + add property is clicked and hides on cancel", () => {
+    renderEditor();
+
+    expect(screen.queryByPlaceholderText("Power")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "+ add property" }));
+    expect(screen.getByPlaceholderText("Power")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
+    expect(screen.queryByPlaceholderText("Power")).not.toBeInTheDocument();
+  });
+
+  it("calls onPropertyAdd and closes form when Add is clicked", () => {
+    const props = renderEditor();
+
+    fireEvent.click(screen.getByRole("button", { name: "+ add property" }));
+    fireEvent.click(screen.getByRole("button", { name: "Add" }));
+
+    expect(props.onPropertyAdd).toHaveBeenCalledOnce();
+    expect(screen.queryByPlaceholderText("Power")).not.toBeInTheDocument();
   });
 });

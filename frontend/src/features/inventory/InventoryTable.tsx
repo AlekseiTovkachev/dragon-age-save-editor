@@ -11,6 +11,7 @@ type InventoryTableProps = {
   selectedIndex: number | null;
   onSelect: (index: number) => void;
   renderInlineEditor: () => ReactNode;
+  hideMaterial?: boolean;
 };
 
 const collator = new Intl.Collator(undefined, { numeric: true, sensitivity: "base" });
@@ -70,7 +71,7 @@ function SortHeader({ label, column, sortKey, sortDirection, onSort }: SortHeade
   );
 }
 
-export function InventoryTable({ items, selectedIndex, onSelect, renderInlineEditor }: InventoryTableProps) {
+export function InventoryTable({ items, selectedIndex, onSelect, renderInlineEditor, hideMaterial }: InventoryTableProps) {
   const [sortKey, setSortKey] = useState<SortKey>("index");
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
@@ -103,7 +104,7 @@ export function InventoryTable({ items, selectedIndex, onSelect, renderInlineEdi
 
   return (
     <div className="inventory-table-shell">
-      <table className="inventory-table">
+      <table className={["inventory-table", hideMaterial ? "no-material" : ""].filter(Boolean).join(" ")}>
         <thead>
           <tr>
             <th scope="col" aria-sort={ariaSort("name")}>
@@ -133,15 +134,17 @@ export function InventoryTable({ items, selectedIndex, onSelect, renderInlineEdi
                 onSort={handleSort}
               />
             </th>
-            <th scope="col" aria-sort={ariaSort("material")}>
-              <SortHeader
-                label="Material"
-                column="material"
-                sortKey={sortKey}
-                sortDirection={sortDirection}
-                onSort={handleSort}
-              />
-            </th>
+            {!hideMaterial ? (
+              <th scope="col" aria-sort={ariaSort("material")}>
+                <SortHeader
+                  label="Material"
+                  column="material"
+                  sortKey={sortKey}
+                  sortDirection={sortDirection}
+                  onSort={handleSort}
+                />
+              </th>
+            ) : null}
             <th scope="col" aria-sort={ariaSort("level")}>
               <SortHeader
                 label="Level"
@@ -173,10 +176,11 @@ export function InventoryTable({ items, selectedIndex, onSelect, renderInlineEdi
                   expanded={expanded}
                   selected={entry.index === selectedIndex}
                   onToggle={handleToggle}
+                  hideMaterial={hideMaterial}
                 />
                 {expanded ? (
                   <tr key={`editor-${entry.index}`} className="inventory-inline-row inv-expand">
-                    <td className="inv-expand" colSpan={6}>
+                    <td className="inv-expand" colSpan={hideMaterial ? 5 : 6}>
                       {renderInlineEditor()}
                     </td>
                   </tr>
