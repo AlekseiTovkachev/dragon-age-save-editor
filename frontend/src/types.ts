@@ -3,6 +3,7 @@ export type CommandErrorCode =
   | "missing_field"
   | "type_mismatch"
   | "missing_stat_row"
+  | "no_stat_row_template"
   | "unsupported_numeric_value"
   | "numeric_range"
   | "lookup_failed"
@@ -282,6 +283,7 @@ export type SaveCommand =
       property_index: number;
       property_id: number;
     }
+  | { command: "apply_batch"; commands: SaveCommand[] }
   | { command: "save_as"; output_path: string };
 
 export type SaveCommandResult =

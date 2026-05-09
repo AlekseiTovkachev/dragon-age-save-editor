@@ -1,0 +1,121 @@
+:root {
+  color: var(--ink);
+  background: var(--bg);
+  font-family: var(--font-body);
+  line-height: 1.4;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg);
+  overflow: hidden;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  min-height: 2.35rem;
+  cursor: pointer;
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  background: linear-gradient(180deg, #2a2118 0%, #140e0b 100%);
+  color: var(--text);
+  padding: 0.55rem 0.9rem;
+  font-weight: 700;
+  transition: border-color 120ms ease, background 120ms ease, color 120ms ease, box-shadow 120ms ease;
+}
+
+button:hover:not(:disabled),
+button:focus-visible:not(:disabled) {
+  border-color: var(--line-bright);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.28);
+}
+
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+a:focus-visible {
+  outline: 3px solid rgba(198, 161, 93, 0.2);
+  outline-offset: 2px;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.button-primary {
+  border-color: var(--accent);
+  background: linear-gradient(180deg, var(--accent-strong) 0%, #6e121d 100%);
+  color: #fff4dd;
+}
+
+.button-primary:hover:not(:disabled),
+.button-primary:focus-visible:not(:disabled) {
+  border-color: #e45a62;
+  background: linear-gradient(180deg, #b52f3a 0%, #7f1722 100%);
+}
+
+.button-secondary {
+  border-color: var(--line-bright);
+  background: linear-gradient(180deg, #342a1d 0%, #17100c 100%);
+}
+
+input,
+textarea,
+select {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  background: var(--surface-field);
+  color: var(--text);
+  color-scheme: dark;
+  padding: 0.6rem 0.7rem;
+}
+
+select option {
+  background: var(--surface-field);
+  color: var(--text);
+}
+
+select option:checked,
+select option:hover {
+  background: var(--surface-muted);
+  color: #fff4dd;
+}
+
+input:disabled,
+textarea:disabled,
+select:disabled {
+  color: var(--muted);
+  background: #18120d;
+}
+
+textarea {
+  min-height: 220px;
+  resize: vertical;
+}
+
+a {
+  color: var(--accent);
+}
+
+#root {
+  min-height: 100vh;
+  overflow: hidden;
+}

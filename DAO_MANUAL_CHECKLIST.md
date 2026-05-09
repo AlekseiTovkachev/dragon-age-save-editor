@@ -1,5 +1,7 @@
 # DAO Manual Real-Game Checklist
 
+This older DAO-only checklist is kept for detailed real-game notes. For the current cross-game checklist that matches the latest tab layout, use `docs/manual-testing.md`.
+
 Use this checklist against a copied Dragon Age: Origins save first. Do not edit the only copy of a save you care about.
 
 Tester:

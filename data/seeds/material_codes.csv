@@ -1,0 +1,56 @@
+code,tier,name,game,family,target
+1,1,Iron,dao,metal,armor
+2,2,Grey Iron,dao,metal,armor
+3,6,Silverite,dao,metal,armor
+4,4,Veridium,dao,metal,armor
+5,5,Red Steel,dao,metal,armor
+6,7,Dragonbone,dao,metal,armor
+7,6,Sylvanwood,dao,wood,weapon
+8,3,Steel,dao,metal,armor
+9,2,Ash,dao,wood,weapon
+10,7,Dragonthorn,dao,wood,weapon
+11,3,Yew,dao,wood,weapon
+13,5,Ironbark,dao,wood,weapon
+15,4,Whitewood,dao,wood,weapon
+17,6,Inscribed,dao,leather,armor
+28,2,Cured,dao,leather,armor
+29,3,Leather,dao,leather,armor
+30,4,Hardened,dao,leather,armor
+31,5,Reinforced,dao,leather,armor
+32,7,Drakeskin,dao,leather,armor
+33,1,Elm,dao,wood,shield
+34,2,Ash,dao,wood,shield
+35,3,Yew,dao,wood,shield
+36,4,Whitewood,dao,wood,shield
+37,5,Ironbark,dao,wood,shield
+38,6,Sylvanwood,dao,wood,shield
+39,7,Dragonthorn,dao,wood,shield
+40,1,Iron,dao,metal,weapon
+41,2,Grey Iron,dao,metal,weapon
+42,4,Veridium,dao,metal,weapon
+43,3,Steel,dao,metal,weapon
+44,5,Red Steel,dao,metal,weapon
+45,6,Silverite,dao,metal,weapon
+46,7,Dragonbone,dao,metal,weapon
+47,1,Iron,dao,metal,shield
+48,2,Grey Iron,dao,metal,shield
+49,3,Steel,dao,metal,shield
+50,5,Red Steel,dao,metal,shield
+51,6,Silverite,dao,metal,shield
+52,7,Dragonbone,dao,metal,shield
+60,1,Rough,dao,leather,armor
+79,1,Elm,dao,wood,shield
+81,4,Veridium,dao,metal,shield
+10000,0,Starmetal,dao,metal,weapon
+20010,8,White Steel,dao,metal,armor
+20011,9,Volcanic Aurum,dao,metal,armor
+20020,8,Vhenadahl,dao,wood,weapon
+20021,9,Ancestral Heartwood,dao,wood,weapon
+20030,8,Dragonwing,dao,leather,armor
+20031,9,High Dragon Hide,dao,leather,armor
+20040,8,Vhenadahl,dao,wood,shield
+20041,9,Ancestral Heartwood,dao,wood,shield
+20050,8,White Steel,dao,metal,weapon
+20051,9,Volcanic Aurum,dao,metal,weapon
+20060,8,White Steel,dao,metal,shield
+20061,9,Volcanic Aurum,dao,metal,shield

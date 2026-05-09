@@ -1,0 +1,309 @@
+.app {
+  min-height: 100vh;
+  height: 100vh;
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr);
+  overflow: hidden;
+}
+
+.app-sidebar {
+  background: linear-gradient(180deg, #14100c, #0a0807);
+  border-right: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  max-height: 100vh;
+  position: sticky;
+  top: 0;
+}
+
+.app-main {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+
+.app-main .content {
+  flex: 1;
+  padding: 1.1rem 1.5rem 2rem;
+  min-height: 0;
+  overflow: auto;
+}
+
+.id-card {
+  margin: 0.85rem;
+  padding: 0.65rem;
+  background: linear-gradient(180deg, rgba(199, 154, 72, 0.08), rgba(255, 255, 255, 0.01));
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r);
+  position: relative;
+}
+
+.id-card::before {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  border: 1px solid rgba(199, 154, 72, 0.15);
+  border-radius: calc(var(--r) - 2px);
+  pointer-events: none;
+}
+
+.id-card .shot {
+  aspect-ratio: 16 / 9;
+  border-radius: var(--r-sm);
+  background:
+    radial-gradient(ellipse at 30% 30%, rgba(230, 194, 119, 0.25), transparent 55%),
+    radial-gradient(circle at 70% 80%, rgba(139, 29, 29, 0.35), transparent 60%),
+    linear-gradient(135deg, #2a1f15 0%, #0e0c0a 80%);
+  border: 1px solid var(--line-strong);
+  margin-bottom: 0.55rem;
+  position: relative;
+  overflow: hidden;
+  cursor: zoom-in;
+}
+
+.id-card .shot img,
+.shot-popover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.id-card .shot::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.06) 0 2px, transparent 2px 4px);
+  pointer-events: none;
+}
+
+.id-card .shot-label {
+  position: absolute;
+  right: 8px;
+  bottom: 6px;
+  z-index: 1;
+  max-width: calc(100% - 16px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.12em;
+  color: rgba(243, 234, 214, 0.72);
+  text-shadow: 0 0 6px #000;
+  text-transform: uppercase;
+}
+
+.id-card h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 1.05rem;
+  color: var(--gold-2);
+  letter-spacing: 0.04em;
+}
+
+.id-card .meta {
+  margin-top: 0.15rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--ink-3);
+}
+
+.id-card .row-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  overflow: hidden;
+}
+
+.id-card .row-status .chip {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 1;
+}
+
+.shot-popover {
+  display: none;
+  position: absolute;
+  left: calc(100% + 0.5rem);
+  top: 0;
+  z-index: 30;
+  width: 380px;
+  padding: 0.6rem;
+  background: var(--bg-1);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+}
+
+.shot-popover .popover-shot {
+  aspect-ratio: 16 / 9;
+  border-radius: var(--r-sm);
+  background:
+    radial-gradient(ellipse at 30% 30%, rgba(230, 194, 119, 0.25), transparent 55%),
+    radial-gradient(circle at 70% 80%, rgba(139, 29, 29, 0.35), transparent 60%),
+    linear-gradient(135deg, #2a1f15 0%, #0e0c0a 80%);
+  border: 1px solid var(--line-strong);
+  margin-bottom: 0.5rem;
+  overflow: hidden;
+}
+
+.id-card:hover .shot-popover,
+.id-card:focus-within .shot-popover,
+.id-card:focus .shot-popover {
+  display: block;
+}
+
+.nav-section {
+  padding: 0.7rem 1.1rem 0.3rem;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.18em;
+  color: var(--ink-4);
+  text-transform: uppercase;
+}
+
+.nav-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  padding: 0 0.5rem;
+}
+
+.nav-item {
+  appearance: none;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.6rem;
+  width: 100%;
+  min-height: 0;
+  padding: 0.55rem 0.65rem;
+  border: 1px solid transparent;
+  border-radius: var(--r-sm);
+  background: transparent;
+  color: var(--ink-2);
+  font-family: var(--font-display);
+  font-size: 0.92rem;
+  font-weight: 400;
+  letter-spacing: 0.05em;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.nav-item:hover:not(:disabled),
+.nav-item:focus-visible:not(:disabled) {
+  background: var(--bg-2);
+  color: var(--ink);
+  box-shadow: none;
+}
+
+.nav-item.is-active {
+  background: rgba(199, 154, 72, 0.1);
+  border-color: rgba(199, 154, 72, 0.35);
+  color: var(--gold-2);
+  box-shadow: inset 0 0 0 1px rgba(199, 154, 72, 0.05);
+}
+
+.nav-item .icn {
+  width: 18px;
+  height: 18px;
+  display: grid;
+  place-items: center;
+  color: var(--ink-3);
+  flex: 0 0 auto;
+}
+
+.nav-item.is-active .icn {
+  color: var(--gold-2);
+}
+
+.nav-item .count {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--ink-4);
+}
+
+.nav-item.is-active .count {
+  color: var(--gold);
+}
+
+.nav-item.danger:hover:not(:disabled),
+.nav-item.danger:focus-visible:not(:disabled) {
+  background: rgba(139, 29, 29, 0.18);
+  border-color: rgba(179, 48, 42, 0.5);
+  color: #f0c5c0;
+}
+
+.nav-item.danger .icn {
+  color: var(--blood-2);
+}
+
+.nav-spacer {
+  flex: 1;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.15rem 0.45rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--ink-2);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.chip.blood {
+  background: rgba(139, 29, 29, 0.15);
+  border-color: rgba(179, 48, 42, 0.4);
+  color: #e89a92;
+}
+
+.chip.gold {
+  background: rgba(199, 154, 72, 0.1);
+  border-color: rgba(199, 154, 72, 0.4);
+  color: var(--gold-2);
+}
+
+.dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--gold);
+}
+
+.mono {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+}
+
+.muted {
+  color: var(--ink-3);
+}
+
+@media (max-width: 900px) {
+  .app {
+    grid-template-columns: 220px minmax(0, 1fr);
+  }
+
+  .shot-popover {
+    width: 300px;
+  }
+}

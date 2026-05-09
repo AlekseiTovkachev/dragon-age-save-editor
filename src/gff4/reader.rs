@@ -412,7 +412,7 @@ impl Reader {
             if struct_index >= self.header.structs.len() {
                 return Err(io::Error::new(
                     io::ErrorKind::InvalidData,
-                    format!("generic references invalid struct index {}", struct_index),
+                    format!("generic references invalid struct index {struct_index}"),
                 ));
             }
 
@@ -463,7 +463,7 @@ impl Reader {
             if struct_index >= self.header.structs.len() {
                 return Err(io::Error::new(
                     io::ErrorKind::InvalidData,
-                    format!("generic references invalid struct index {}", struct_index),
+                    format!("generic references invalid struct index {struct_index}"),
                 ));
             }
 
@@ -660,6 +660,13 @@ impl Reader {
             .ok_or_else(|| io::Error::new(io::ErrorKind::UnexpectedEof, "out of bounds read"))
     }
 
+    fn slice_len(&self, start: usize, len: usize) -> io::Result<&[u8]> {
+        let end = start
+            .checked_add(len)
+            .ok_or_else(|| io::Error::new(io::ErrorKind::InvalidData, "read offset overflow"))?;
+        self.slice(start, end)
+    }
+
     fn read_u8(&self, offset: usize) -> io::Result<u8> {
         Ok(*self
             .bytes
@@ -672,7 +679,7 @@ impl Reader {
     }
 
     fn read_u16(&self, offset: usize) -> io::Result<u16> {
-        let b = self.slice(offset, offset + 2)?;
+        let b = self.slice_len(offset, 2)?;
         Ok(if self.big_endian {
             u16::from_be_bytes([b[0], b[1]])
         } else {
@@ -685,7 +692,7 @@ impl Reader {
     }
 
     fn read_u32(&self, offset: usize) -> io::Result<u32> {
-        let b = self.slice(offset, offset + 4)?;
+        let b = self.slice_len(offset, 4)?;
         Ok(if self.big_endian {
             u32::from_be_bytes([b[0], b[1], b[2], b[3]])
         } else {
@@ -698,7 +705,7 @@ impl Reader {
     }
 
     fn read_u64(&self, offset: usize) -> io::Result<u64> {
-        let b = self.slice(offset, offset + 8)?;
+        let b = self.slice_len(offset, 8)?;
         Ok(if self.big_endian {
             u64::from_be_bytes([b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7]])
         } else {
@@ -716,5 +723,50 @@ impl Reader {
 
     fn read_f64(&self, offset: usize) -> io::Result<f64> {
         Ok(f64::from_bits(self.read_u64(offset)?))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::Reader;
+    use crate::gff4::header::Header;
+    use crate::gff4::schema::ResolvedHeader;
+    use std::io;
+
+    fn empty_reader(bytes: Vec<u8>) -> Reader {
+        Reader {
+            bytes,
+            header: ResolvedHeader {
+                version: *b"V1.1",
+                platform: *b"PC  ",
+                file_type: *b"GFF ",
+                file_version: *b"V1.0",
+                string_count: 0,
+                string_offset: 0,
+                data_offset: 0,
+                structs: Vec::new(),
+            },
+            big_endian: false,
+            use_cstring: false,
+            string_cache: Vec::new(),
+            _raw_header: Header {
+                version: *b"V1.1",
+                platform: *b"PC  ",
+                file_type: *b"GFF ",
+                file_version: *b"V1.0",
+                string_count: 0,
+                string_offset: 0,
+                data_offset: 0,
+                structs: Vec::new(),
+            },
+        }
+    }
+
+    #[test]
+    fn numeric_reads_report_offset_overflow_instead_of_panicking() {
+        let reader = empty_reader(Vec::new());
+        let err = reader.read_u32(usize::MAX).unwrap_err();
+        assert_eq!(err.kind(), io::ErrorKind::InvalidData);
+        assert!(err.to_string().contains("read offset overflow"));
     }
 }

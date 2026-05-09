@@ -1,0 +1,311 @@
+.plot-flags-panel .panel-heading {
+  align-items: flex-start;
+}
+
+.plot-flags-panel .panel-heading h2 {
+  margin: 0.12rem 0 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 1.8rem;
+  color: var(--ink);
+}
+
+.plot-flags-stack {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.plot-modified-count {
+  padding-top: 0.45rem;
+  white-space: nowrap;
+}
+
+.dao-banner {
+  margin: 0;
+  padding: 0.68rem 0.85rem;
+  background: linear-gradient(90deg, rgba(90, 119, 148, 0.18), rgba(90, 119, 148, 0.04));
+  border: 1px solid rgba(90, 119, 148, 0.35);
+  border-radius: var(--r);
+  color: #c4d4e3;
+  font-size: 0.84rem;
+  line-height: 1.45;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.dao-banner .icon {
+  width: 1.35rem;
+  height: 1.35rem;
+  border: 1px solid rgba(90, 119, 148, 0.55);
+  border-radius: 50%;
+  color: #8fb0cb;
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 auto;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.dao-banner strong {
+  color: #d8e4f0;
+}
+
+.dao-banner span:last-child {
+  color: var(--ink-2);
+}
+
+.plot-toolbar {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  flex-wrap: wrap;
+  padding-bottom: 0.1rem;
+}
+
+.search-input {
+  min-height: 2.2rem;
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  background: var(--surface-field);
+  color: var(--ink);
+  padding: 0.5rem 0.7rem;
+  font: inherit;
+  outline: none;
+}
+
+.search-input:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 2px rgba(199, 154, 72, 0.16);
+}
+
+.search-input::placeholder {
+  color: var(--ink-4);
+}
+
+.plot-search {
+  width: min(320px, 100%);
+}
+
+.plot-chip-row {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  flex-wrap: wrap;
+}
+
+.cat-chip {
+  appearance: none;
+  min-height: 2rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--ink-2);
+  padding: 0.32rem 0.65rem;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  cursor: pointer;
+}
+
+.cat-chip:hover,
+.cat-chip:focus-visible {
+  border-color: var(--line-strong);
+  color: var(--ink);
+  background: var(--bg-2);
+}
+
+.cat-chip.is-active {
+  border-color: rgba(199, 154, 72, 0.48);
+  background: rgba(199, 154, 72, 0.12);
+  color: var(--gold-2);
+}
+
+.plot-section-header {
+  margin: 0.5rem 0 0.25rem;
+  padding: 0.3rem 0;
+  border-bottom: 1px solid var(--line);
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 400;
+  color: var(--gold-2);
+  letter-spacing: 0.05em;
+  grid-column: 1 / -1;
+}
+
+.plot-section-header:first-child {
+  margin-top: 0;
+}
+
+.plot-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.85rem;
+}
+
+.plot-card {
+  background: var(--bg-1);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  padding: 0.85rem 0.95rem;
+  display: grid;
+  gap: 0.55rem;
+  min-width: 0;
+}
+
+.plot-card.is-modified {
+  border-color: rgba(199, 154, 72, 0.45);
+  box-shadow: inset 0 0 0 1px rgba(199, 154, 72, 0.06);
+}
+
+.plot-card .question {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.7rem;
+}
+
+.plot-card .question-text {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 400;
+  color: var(--ink);
+  margin: 0;
+}
+
+.plot-card .tag-line {
+  margin-top: 0.2rem;
+  color: var(--ink-3);
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+}
+
+.plot-card .question-id {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  color: var(--ink-4);
+  white-space: nowrap;
+  margin-top: 0.2rem;
+}
+
+.plot-options {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.plot-boolean-options {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.plot-opt {
+  appearance: none;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  min-height: 2.4rem;
+  padding: 0.5rem 0.7rem;
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  background: var(--bg);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.88rem;
+  color: var(--ink-2);
+  text-align: left;
+}
+
+.plot-opt:hover:not(:disabled),
+.plot-opt:focus-visible:not(:disabled) {
+  background: var(--bg-2);
+  border-color: var(--line-strong);
+  color: var(--ink);
+}
+
+.plot-opt.is-active {
+  border-color: var(--gold);
+  background: linear-gradient(180deg, rgba(199, 154, 72, 0.1), rgba(199, 154, 72, 0.04));
+  color: var(--gold-2);
+}
+
+.plot-opt:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.plot-opt .marker {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1.5px solid var(--ink-3);
+  flex: 0 0 auto;
+}
+
+.plot-opt.is-active .marker {
+  border-color: var(--gold);
+  background: var(--gold);
+  box-shadow: inset 0 0 0 3px var(--bg-1);
+}
+
+.plot-opt .opt-text {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.plot-card .footer-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.8rem;
+  padding-top: 0.3rem;
+  border-top: 1px dashed var(--line);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--ink-4);
+}
+
+.plot-card .modified-pip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--gold-2);
+}
+
+.plot-empty {
+  padding: 1rem;
+  border: 1px dashed var(--line);
+  border-radius: var(--r);
+  color: var(--ink-3);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+}
+
+@media (max-width: 1280px) {
+  .plot-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .plot-flags-panel .panel-heading {
+    display: grid;
+    gap: 0.4rem;
+  }
+
+  .plot-search {
+    width: 100%;
+  }
+
+  .plot-boolean-options {
+    grid-template-columns: 1fr;
+  }
+
+  .plot-card .question {
+    display: grid;
+  }
+
+  .plot-card .question-id {
+    white-space: normal;
+  }
+}

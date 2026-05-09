@@ -1,0 +1,4 @@
+interface:
+  display_name: "Tauri Desktop"
+  short_description: "Change desktop commands, capabilities, icons, window config, and platform behavior safely."
+  default_prompt: "Use Tauri desktop before changing the desktop shell, capabilities, icons, or native behavior."

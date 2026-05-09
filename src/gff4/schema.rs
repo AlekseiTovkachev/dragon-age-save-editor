@@ -110,7 +110,7 @@ fn resolve_field(field: &RawFieldDef, struct_count: usize) -> io::Result<FieldDe
         if idx >= struct_count {
             return Err(io::Error::new(
                 io::ErrorKind::InvalidData,
-                format!("struct field references invalid struct index {}", idx),
+                format!("struct field references invalid struct index {idx}"),
             ));
         }
         BaseType::Struct(idx)

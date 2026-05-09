@@ -1,0 +1,415 @@
+id,game,label,name_str_id,ip_type,effect,int0,int1,float0,float1,condition_script,vfx,scaling_vector,base_cost,is_negative,proc_chance,base_duration,projectile_crust,ability_id
+0,da2,invalid,,,,,,,,,,,,,,,,
+1000,da2,(passive):Attribute - strength,,,,,,,,,,,,,,,,
+1001,da2,(passive):Attribute - dexterity,,,,,,,,,,,,,,,,
+1002,da2,(passive):Attribute - magic,,,,,,,,,,,,,,,,
+1003,da2,(passive):Attribute - cunning,,,,,,,,,,,,,,,,
+1004,da2,(passive):Attribute - willpower,,,,,,,,,,,,,,,,
+1005,da2,(passive):Attribute - constitution,,,,,,,,,,,,,,,,
+1006,da2,(passive):Attribute - all,,,,,,,,,,,,,,,,
+1100,da2,(passive):Property - health,,,,,,,,,,,,,,,,
+1101,da2,(passive):Property - mana,,,,,,,,,,,,,,,,
+1102,da2,(passive):Property - attack,,,,,,,,,,,,,,,,
+1103,da2,(passive):Property - defense,,,,,,,,,,,,,,,,
+1104,da2,(passive):Property - stamina,,,,,,,,,,,,,,,,
+1105,da2,(passive):Property - critical chance,,,,,,,,,,,,,,,,
+1106,da2,(passive):Property - damage factor - critical,,,,,,,,,,,,,,,,
+1107,da2,(passive):Property - armor(metal),,,,,,,,,,,,,,,,
+1108,da2,(passive):Property - armor(leather),,,,,,,,,,,,,,,,
+1109,da2,(passive):Property - armor(cloth),,,,,,,,,,,,,,,,
+1110,da2,(passive):Property - health regen,,,,,,,,,,,,,,,,
+1111,da2,(passive):Property - mana regen,,,,,,,,,,,,,,,,
+1113,da2,(passive):Property - damage factor - physical,,,,,,,,,,,,,,,,
+1114,da2,(passive):Property - damage factor - fire,,,,,,,,,,,,,,,,
+1115,da2,(passive):Property - damage factor - cold,,,,,,,,,,,,,,,,
+1116,da2,(passive):Property - damage factor - electrical,,,,,,,,,,,,,,,,
+1117,da2,(passive):Property - damage factor - nature,,,,,,,,,,,,,,,,
+1118,da2,(passive):Property - damage factor - spirit,,,,,,,,,,,,,,,,
+1119,da2,(passive):Property - healing done,,,,,,,,,,,,,,,,
+1120,da2,(passive):Property - healing taken,,,,,,,,,,,,,,,,
+1121,da2,(passive):Property - stamina regen,,,,,,,,,,,,,,,,
+1122,da2,(passive):Property - bloodmage cost,,,,,,,,,,,,,,,,
+1123,da2,(passive):Property - attack speed,,,,,,,,,,,,,,,,
+1200,da2,(Passive): Resistance - Elemental - Fire,,,,,,,,,,,,,,,,
+1201,da2,(Passive): Resistance - Elemental - Cold,,,,,,,,,,,,,,,,
+1202,da2,(Passive): Resistance - Elemental - Electricity,,,,,,,,,,,,,,,,
+1203,da2,(Passive): Resistance - Elemental - Nature,,,,,,,,,,,,,,,,
+1204,da2,(Passive): Resistance - Elemental - Spirit,,,,,,,,,,,,,,,,
+1205,da2,(Passive): Resistance - Damage,,,,,,,,,,,,,,,,
+1210,da2,(Passive): Resistance - Magic,,,,,,,,,,,,,,,,
+1211,da2,(Passive): Resistance - Force,,,,,,,,,,,,,,,,
+2000,da2,(On-Hit): Damage - Physical,,,,,,,,,,,,,,,,
+2001,da2,(On-Hit): Damage - Physical (AOE),,,,,,,,,,,,,,,,
+2002,da2,(On-Hit): Damage - Fire,,,,,,,,,,,,,,,,
+2003,da2,(On-Hit): Damage - Fire (AOE),,,,,,,,,,,,,,,,
+2004,da2,(On-Hit): Damage - Cold,,,,,,,,,,,,,,,,
+2005,da2,(On-Hit): Damage - Cold (AOE),,,,,,,,,,,,,,,,
+2006,da2,(On-Hit): Damage - Electricity,,,,,,,,,,,,,,,,
+2007,da2,(On-Hit): Damage - Electricity (AOE),,,,,,,,,,,,,,,,
+2008,da2,(On-Hit): Damage - Nature,,,,,,,,,,,,,,,,
+2009,da2,(On-Hit): Damage - Nature (AOE),,,,,,,,,,,,,,,,
+2010,da2,(On-Hit): Damage - Spirit,,,,,,,,,,,,,,,,
+2011,da2,(On-Hit): Damage - Spirit (AOE),,,,,,,,,,,,,,,,
+2100,da2,(On-Hit): Chance to Knockback,,,,,,,,,,,,,,,,
+2101,da2,(On-Hit): Chance to Stun,,,,,,,,,,,,,,,,
+2102,da2,(On-Hit): Chance to Reduce Speed,,,,,,,,,,,,,,,,
+2201,da2,(On-Hit): Chance to Charm,,,,,,,,,,,,,,,,
+2202,da2,(On-Hit): Chance to inflict Walking Bomb,,,,,,,,,,,,,,,,
+2204,da2,(On-Hit): Life Leach,,,,,,,,,,,,,,,,
+2205,da2,(On-Hit): Energy Leach,,,,,,,,,,,,,,,,
+2206,da2,(On-Hit): Dispel,,,,,,,,,,,,,,,,
+2300,da2,(On-Hit-[Internal]): Poison - Debilitating Poison,,,,,,,,,,,,,,,,
+2301,da2,(On-Hit-[Internal]): Poison - Crow Venom,,,,,,,,,,,,,,,,
+2302,da2,(On-Hit-[Internal]): Poison - Deathroot Toxin,,,,,,,,,,,,,,,,
+2303,da2,(On-Hit-[Internal]): Poison - Arcane Poison,,,,,,,,,,,,,,,,
+2304,da2,(On-Hit-[Internal]): Poison - Fel-Poison,,,,,,,,,,,,,,,,
+2400,da2,(On-Hit): Bonus Damage to Humans,,,,,,,,,,,,,,,,
+2401,da2,(On-Hit): Bonus Damage to Qunari,,,,,,,,,,,,,,,,
+2402,da2,(On-Hit): Bonus Damage to Demons/Undead,,,,,,,,,,,,,,,,
+2450,da2,[(On-Hit)-[Internal]): Bonus Damage to Darkspawn,,,,,,,,,,,,,,,,
+3000,da2,(Restriction): Style - Two-Handed Weapon Style,,,,,,,,,,,,,,,,
+3001,da2,(Restriction): Style - Dual Wield Style,,,,,,,,,,,,,,,,
+3002,da2,(Restriction): Style - Staff,,,,,,,,,,,,,,,,
+3003,da2,(Restriction): Style - Weapon and Shield Style,,,,,,,,,,,,,,,,
+3004,da2,(Restriction): Style - Archery Style,,,,,,,,,,,,,,,,
+3100,da2,(Restriction): Race - Human,,,,,,,,,,,,,,,,
+3101,da2,(Restriction): Race - Dwarf,,,,,,,,,,,,,,,,
+3102,da2,(Restriction): Race - Elf,,,,,,,,,,,,,,,,
+3103,da2,(Restriction): Race - Qunari,,,,,,,,,,,,,,,,
+3200,da2,(Restriction): Attribute - Strength [Primary],,,,,,,,,,,,,,,,
+3201,da2,(Restriction): Attribute - Dexterity [Primary],,,,,,,,,,,,,,,,
+3202,da2,(Restriction): Attribute - Magic [Primary],,,,,,,,,,,,,,,,
+3203,da2,(Restriction): Attribute - Cunning [Primary],,,,,,,,,,,,,,,,
+3204,da2,(Restriction): Attribute - Willpower [Primary],,,,,,,,,,,,,,,,
+3205,da2,(Restriction): Attribute - Constitution [Primary],,,,,,,,,,,,,,,,
+3210,da2,(Restriction): Attribute - Strength [Secondary],,,,,,,,,,,,,,,,
+3211,da2,(Restriction): Attribute - Dexterity [Secondary],,,,,,,,,,,,,,,,
+3212,da2,(Restriction): Attribute - Magic [Secondary],,,,,,,,,,,,,,,,
+3213,da2,(Restriction): Attribute - Cunning [Secondary],,,,,,,,,,,,,,,,
+3214,da2,(Restriction): Attribute - Willpower [Secondary],,,,,,,,,,,,,,,,
+3215,da2,(Restriction): Attribute - Constitution [Secondary],,,,,,,,,,,,,,,,
+3300,da2,(Restriction): Player,,,,,,,,,,,,,,,,
+3400,da2,(Restriction): Follower - Anders,,,,,,,,,,,,,,,,
+3401,da2,(Restriction): Follower - Aveline,,,,,,,,,,,,,,,,
+3402,da2,(Restriction): Follower - Bethany,,,,,,,,,,,,,,,,
+3403,da2,(Restriction): Follower - Carver,,,,,,,,,,,,,,,,
+3404,da2,(Restriction): Follower - Fenris,,,,,,,,,,,,,,,,
+3405,da2,(Restriction): Follower - Isabella,,,,,,,,,,,,,,,,
+3406,da2,(Restriction): Follower - Merril,,,,,,,,,,,,,,,,
+3407,da2,(Restriction): Follower - Varric,,,,,,,,,,,,,,,,
+3408,da2,(Restriction): Follower - Sebastian,,,,,,,,,,,,,,,,
+3500,da2,(Restriction): Class - Warrior,,,,,,,,,,,,,,,,
+3501,da2,(Restriction): Class - Rogue,,,,,,,,,,,,,,,,
+3502,da2,(Restriction): Class - Mage,,,,,,,,,,,,,,,,
+3510,da2,(Restriction): Class - Warrior or Rogue,,,,,,,,,,,,,,,,
+3600,da2,(Restriction): Spec - Spirithealer,,,,,,,,,,,,,,,,
+3601,da2,(Restriction): Spec - Bloodmage,,,,,,,,,,,,,,,,
+3602,da2,(Restriction): Spec - Forcemage,,,,,,,,,,,,,,,,
+3604,da2,(Restriction): Spec - Shadow,,,,,,,,,,,,,,,,
+3605,da2,(Restriction): Spec - Duelist,,,,,,,,,,,,,,,,
+3606,da2,(Restriction): Spec - Assassin,,,,,,,,,,,,,,,,
+3608,da2,(Restriction): Spec - Templar,,,,,,,,,,,,,,,,
+3609,da2,(Restriction): Spec - Reaver,,,,,,,,,,,,,,,,
+3610,da2,(Restriction): Spec - Berserker,,,,,,,,,,,,,,,,
+3700,da2,(Restriction): Level,,,,,,,,,,,,,,,,
+3701,da2,(Restriction): Level [-2],,,,,,,,,,,,,,,,
+3702,da2,(Restriction): Level [-4],,,,,,,,,,,,,,,,
+3703,da2,(Restriction): Level [-6],,,,,,,,,,,,,,,,
+3704,da2,(Restriction): Level [-8],,,,,,,,,,,,,,,,
+3705,da2,(Restriction): Level [-10],,,,,,,,,,,,,,,,
+3800,da2,(Restriction): Status - Full Health,,,,,,,,,,,,,,,,
+3801,da2,(Restriction): Status - Not Full Health,,,,,,,,,,,,,,,,
+3802,da2,(Restriction): Status - Full Mana/Stamina,,,,,,,,,,,,,,,,
+3803,da2,(Restriction): Status - Not Full Mana/Stamina,,,,,,,,,,,,,,,,
+3804,da2,(Restriction): Status - Injured,,,,,,,,,,,,,,,,
+3805,da2,(Restriction): Status - Not Injured,,,,,,,,,,,,,,,,
+3806,da2,(Restriction): Status - Combat,,,,,,,,,,,,,,,,
+3807,da2,(Restriction): Status - Not Combat,,,,,,,,,,,,,,,,
+3850,da2,(Restriction): Status - Not Full Health OR Not Full Mana/Stamina,,,,,,,,,,,,,,,,
+3851,da2,(Restriction): Status - Not Full Health OR Injured,,,,,,,,,,,,,,,,
+5000,da2,(Base Item): Weapon - Warrior - One-Handed,,,,,,,,,,,,,,,,
+5100,da2,(Base Item): Weapon - Warrior - Two-Handed,,,,,,,,,,,,,,,,
+5200,da2,(Base Item): Weapon - Rogue - Dual Wield,,,,,,,,,,,,,,,,
+5300,da2,(Base Item): Weapon - Rogue - Bow,,,,,,,,,,,,,,,,
+5400,da2,(Base Item): Weapon - Mage - Staff,,,,,,,,,,,,,,,,
+5500,da2,(Base Item): Armor - Heavy,,,,,,,,,,,,,,,,
+5501,da2,(Base Item): Armor - Medium,,,,,,,,,,,,,,,,
+5502,da2,(Base Item): Armor - Light,,,,,,,,,,,,,,,,
+5600,da2,(Base Item): Accessory - Amulet,,,,,,,,,,,,,,,,
+5610,da2,(Base Item): Accessory - Ring,,,,,,,,,,,,,,,,
+5620,da2,(Base Item): Accessory - Belt,,,,,,,,,,,,,,,,
+6001,da2,(Heraldry): Amell Family,,,,,,,,,,,,,,,,
+6002,da2,(Heraldry): Antivan Crows,,,,,,,,,,,,,,,,
+6004,da2,(Heraldry): Chantry,,,,,,,,,,,,,,,,
+6005,da2,(Heraldry): Dalish Elves,,,,,,,,,,,,,,,,
+6006,da2,(Heraldry): Dwarven Carta,,,,,,,,,,,,,,,,
+6008,da2,(Heraldry): Ferelden,,,,,,,,,,,,,,,,
+6009,da2,(Heraldry): Grey Wardens,,,,,,,,,,,,,,,,
+6010,da2,(Heraldry): Harimann Family,,,,,,,,,,,,,,,,
+6011,da2,(Heraldry): Kirkwall,,,,,,,,,,,,,,,,
+6013,da2,(Heraldry): Merchants Guild,,,,,,,,,,,,,,,,
+6014,da2,(Heraldry): Orlais,,,,,,,,,,,,,,,,
+6015,da2,(Heraldry): Qunari,,,,,,,,,,,,,,,,
+6016,da2,(Heraldry): Red Icon Mercenaries,,,,,,,,,,,,,,,,
+6017,da2,(Heraldry): Resolutionists,,,,,,,,,,,,,,,,
+6018,da2,(Heraldry): Starkhaven,,,,,,,,,,,,,,,,
+6019,da2,(Heraldry): Templars,,,,,,,,,,,,,,,,
+6020,da2,(Heraldry): Tevinter Slavers,,,,,,,,,,,,,,,,
+6021,da2,(Heraldry): The Coterie,,,,,,,,,,,,,,,,
+6022,da2,(Heraldry): The Winters,,,,,,,,,,,,,,,,
+7000,da2,(Treasure): Rank 01 (Worthless Junk),,,,,,,,,,,,,,,,
+7001,da2,(Treasure): Rank 02 (Broken Weapons),,,,,,,,,,,,,,,,
+7002,da2,(Treasure): Rank 03 (Cheap Gems),,,,,,,,,,,,,,,,
+7003,da2,(Treasure): Rank 04 (Statuettes),,,,,,,,,,,,,,,,
+7004,da2,(Treasure): Rank 05 (Health Potions),,,,,,,,,,,,,,,,
+7005,da2,(Treasure): Rank 06 (Standard Gems),,,,,,,,,,,,,,,,
+7006,da2,(Treasure): Rank 07 (Bag of Coins),,,,,,,,,,,,,,,,
+7007,da2,(Treasure): Rank 08 (Expensive Gems),,,,,,,,,,,,,,,,
+7008,da2,(Treasure): Rank 09 (Unique Items),,,,,,,,,,,,,,,,
+7009,da2,(Treasure): Rank 10 (Priceless Gems),,,,,,,,,,,,,,,,
+7999,da2,(Treasure): Worthless (forced 1cp),,,,,,,,,,,,,,,,
+8000,da2,(Rune): Rune Slot,,,,,,,,,,,,,,,,
+9000,da2,(Special): Armor - Immunity - Critical Hits,,,,,,,,,,,,,,,,
+9001,da2,(Special): Armor - Immunity - Flanking,,,,,,,,,,,,,,,,
+9002,da2,(Special): Armor - Immunity - Stun,,,,,,,,,,,,,,,,
+9003,da2,(Special): Armor - Immunity - Knockback,,,,,,,,,,,,,,,,
+9100,da2,(Special): Weapon - Increase chance of Deathblow,,,,,,,,,,,,,,,,
+9101,da2,(Special): Weapon - Increased Gore,,,,,,,,,,,,,,,,
+9102,da2,(Special): Armor - Increase player XP,,,,,,,,,,,,,,,,
+9103,da2,(Special): Weapon - Increase Theat,,,,,,,,,,,,,,,,
+9104,da2,(Special): Armor - Decrease Theat,,,,,,,,,,,,,,,,
+9105,da2,(Special): Weapon - Attacks Ignore Displacement,,,,,,,,,,,,,,,,
+9106,da2,(Special): Armor - Trap Evasion,,,,,,,,,,,,,,,,
+9107,da2,(Special): Armor - Improved Disarm,,,,,,,,,,,,,,,,
+9108,da2,(Special): Armor - Improved Lockpicking,,,,,,,,,,,,,,,,
+9109,da2,(Special): Armor - Spiked Shield,,,,,,,,,,,,,,,,
+9110,da2,(Special): Armor - Escape,,,,,,,,,,,,,,,,
+9111,da2,(Special): Armor - Lucky,,,,,,,,,,,,,,,,
+9112,da2,(Special): Celestial,,,,,,,,,,,,,,,,
+9113,da2,(Special): Weapon - Attacks Ignore Armor,,,,,,,,,,,,,,,,
+9114,da2,(Special): Accessory - Increased Gold drop,,,,,,,,,,,,,,,,
+9115,da2,(Special): Evolving,,,,,,,,,,,,,,,,
+9200,da2,(Special-[Internal]): Rune of Devastation,,,,,,,,,,,,,,,,
+9201,da2,(Special-[Internal]): Rune of Valiance,,,,,,,,,,,,,,,,
+9202,da2,(Special-[Internal]): Primeval Lyrium Rune,,,,,,,,,,,,,,,,
+10000,da2,(Damage Type): Physical,,,,,,,,,,,,,,,,
+10001,da2,(Damage Type): Fire,,,,,,,,,,,,,,,,
+10002,da2,(Damage Type): Cold,,,,,,,,,,,,,,,,
+10004,da2,(Damage Type): Electricity,,,,,,,,,,,,,,,,
+10005,da2,(Damage Type): Nature,,,,,,,,,,,,,,,,
+10006,da2,(Damage Type): Spirit,,,,,,,,,,,,,,,,
+11100,da2,(On-Hit-[Internal]): Warrior - Offensive Stun,,,,,,,,,,,,,,,,
+11101,da2,(On-Hit-[Internal]): Warrior - Offensive Damage,,,,,,,,,,,,,,,,
+11102,da2,(On-Hit-[Internal]): Mage - Elemental Weapons - Physical,,,,,,,,,,,,,,,,
+11103,da2,(On-Hit-[Internal]): Mage - Elemental Weapons - Fire,,,,,,,,,,,,,,,,
+11104,da2,(On-Hit-[Internal]): Mage - Elemental Weapons - Cold,,,,,,,,,,,,,,,,
+11105,da2,(On-Hit-[Internal]): Mage - Elemental Weapons - Electricity,,,,,,,,,,,,,,,,
+11106,da2,(On-Hit-[Internal]): Mage - Elemental Weapons - Nature,,,,,,,,,,,,,,,,
+11107,da2,(On-Hit-[Internal]): Mage - Elemental Weapons - Spirit,,,,,,,,,,,,,,,,
+12000,da2,(Passive-[Internal]): Upgrade - Anders 01 - Spirit Essence - Magic Resistance,,,,,,,,,,,,,,,,
+12001,da2,(Passive-[Internal]): Upgrade - Anders 02 - Armor Struts - Armor,,,,,,,,,,,,,,,,
+12002,da2,(Passive-[Internal]): Upgrade - Anders 03 - Underground Sigil --- Rune,,,,,,,,,,,,,,,,
+12003,da2,(Passive-[Internal]): Upgrade - Anders 04 - Lyrium Weave - Attack,,,,,,,,,,,,,,,,
+12010,da2,(Passive-[Internal]): Upgrade - Aveline 01 - Underpadding - Attack,,,,,,,,,,,,,,,,
+12011,da2,(Passive-[Internal]): Upgrade - Aveline 02 - Flex-Chain --- Rune,,,,,,,,,,,,,,,,
+12012,da2,(Passive-[Internal]): Upgrade - Aveline 03 - Impact Plating - Armor,,,,,,,,,,,,,,,,
+12013,da2,(Passive-[Internal]): Upgrade - Aveline 04 - Deflecting Joints - Defense,,,,,,,,,,,,,,,,
+12020,da2,(Passive-[Internal]): Upgrade - Bethany 01 - Protective Sigil --- Magic Resist,,,,,,,,,,,,,,,,
+12030,da2,(Passive-[Internal]): Upgrade - Carver 01 - Girded Plating --- Armor,,,,,,,,,,,,,,,,
+12040,da2,(Passive-[Internal]): Upgrade - Fenris 01 - Reinforced Straps --- Attack,,,,,,,,,,,,,,,,
+12041,da2,(Passive-[Internal]): Upgrade - Fenris 02 - Enchanted Resin --- Rune,,,,,,,,,,,,,,,,
+12042,da2,(Passive-[Internal]): Upgrade - Fenris 03 - Lyrium Scales --- Rune,,,,,,,,,,,,,,,,
+12043,da2,(Passive-[Internal]): Upgrade - Fenris 04 - Tevinter Spirit Runes --- Rune,,,,,,,,,,,,,,,,
+12050,da2,(Passive-[Internal]): Upgrade - Isabela 01 - Lambswool Insoles - Critical Strike Chance,,,,,,,,,,,,,,,,
+12051,da2,(Passive-[Internal]): Upgrade - Isabela 02 - Rigid Boning --- Defense,,,,,,,,,,,,,,,,
+12052,da2,(Passive-[Internal]): Upgrade - Isabela 03 - Boiled Leather Plates --- Rune,,,,,,,,,,,,,,,,
+12053,da2,(Passive-[Internal]): Upgrade - Isabela 04 - Supportive Corselet --- Rune,,,,,,,,,,,,,,,,
+12060,da2,(Passive-[Internal]): Upgrade - Merril 01 - Carved Ironwood Buttons- Health,,,,,,,,,,,,,,,,
+12061,da2,(Passive-[Internal]): Upgrade - Merril 02 - Samite Lining --- Rune,,,,,,,,,,,,,,,,
+12062,da2,(Passive-[Internal]): Upgrade - Merril 03 - Silver-threaded Dalish Embroidery - Health Regen,,,,,,,,,,,,,,,,
+12063,da2,(Passive-[Internal]): Upgrade - Merril 04 - Halla Horn Buckles --- Rune,,,,,,,,,,,,,,,,
+12070,da2,(Passive-[Internal]): Upgrade - Varric 01 - Coat Lining --- Attack,,,,,,,,,,,,,,,,
+12071,da2,(Passive-[Internal]): Upgrade - Varric 02 - Inscribed Leather Harness --- Rune,,,,,,,,,,,,,,,,
+12072,da2,(Passive-[Internal]): Upgrade - Varric 03 - Silverite-reinforced Buckles --- Rune,,,,,,,,,,,,,,,,
+12073,da2,(Passive-[Internal]): Upgrade - Varric 04 - Drakeskin Leg Straps --- Rune,,,,,,,,,,,,,,,,
+12080,da2,(Passive-[Internal]): Upgrade - Sebastian 01 - Reinforced Bracers -- Increased Attack,,,,,,,,,,,,,,,,
+12081,da2,(Passive-[Internal]): Upgrade - Sebastian 02 - Mail Undertunic --- Crit Strike %,,,,,,,,,,,,,,,,
+12082,da2,(Passive-[Internal]): Upgrade - Sebastian 03 - Enhanced Articulation --- Rune,,,,,,,,,,,,,,,,
+12083,da2,(Passive-[Internal]): Upgrade - Sebastian 04 - Protection of the Faith --- Rune,,,,,,,,,,,,,,,,
+100000,da2,(Item Set): Default,,,,,,,,,,,,,,,,
+1,dao,Test Item Property,0,1,0,0,0,0.0,0.0,,0,,0,0,1.0,0.0,0,0
+7,dao,Test Flaming,0,1,10000,0,0,0.0,0.0,,1067,,0,0,1.0,0.0,0,0
+1000,dao,Increase Strength,380410,1,1012,1,0,1.0,0.0,,0,Float0,5000,0,1.0,0.0,0,0
+1001,dao,Increase Dexterity,380411,1,1012,2,0,1.0,0.0,,0,Float0,5000,0,1.0,0.0,0,0
+1002,dao,Increase Willpower,380412,1,1012,3,0,1.0,0.0,,0,Float0,5000,0,1.0,0.0,0,0
+1003,dao,Increase Magic,380413,1,1012,4,0,1.0,0.0,,0,Float0,5000,0,1.0,0.0,0,0
+1004,dao,Increase Cunning,380414,1,1012,5,0,1.0,0.0,,0,Float0,5000,0,1.0,0.0,0,0
+1005,dao,Increase Constitution,380415,1,1012,6,0,1.0,0.0,,0,Float0,5000,0,1.0,0.0,0,0
+1006,dao,Increase All Attributes,380416,1,1012,-1000,0,1.0,0.0,,0,Float0,30000,0,1.0,0.0,0,0
+1100,dao,Increase Combat Health Regen,380417,1,1012,28,0,0.25,0.0,,0,Float0,5000,0,1.0,0.0,0,0
+1101,dao,Increase Exploration Health Regen,380418,1,1012,14,0,1.0,0.0,,0,Float0,2000,0,1.0,0.0,0,0
+1108,dao,Increase Defense (3 per power),380419,1,1012,10,0,3.0,0.0,,0,Float0,3000,0,1.0,0.0,0,0
+1109,dao,Increase Armor,380420,1,1012,11,0,1.0,0.0,,0,Float0,2000,0,1.0,0.0,0,0
+1200,dao,Increase Damage,380421,1,1012,39,0,1.0,0.0,,0,Float0,2500,0,1.0,0.0,0,0
+1201,dao,Faster Aim (0.1s per power),380422,1,1012,24,0,-0.1000000015,0.0,,0,Float0,1500,0,1.0,0.0,0,0
+1202,dao,Increase Ranged Crit Chance,380423,1,1012,23,0,1.0,0.0,,0,Float0,2000,0,1.0,0.0,0,0
+1203,dao,Increase Melee Crit Chance,380424,1,1012,21,0,1.0,0.0,,0,Float0,2000,0,1.0,0.0,0,0
+1410,dao,Increase Fire Resistance,380425,1,1012,42,0,1.0,0.0,,0,Float0,500,0,1.0,0.0,0,0
+1411,dao,Increase Fire Resistance (5 per power),380426,1,1012,42,0,5.0,0.0,,0,Float0,2500,0,1.0,0.0,0,0
+1420,dao,Increase Cold Resistance,380427,1,1012,43,0,1.0,0.0,,0,Float0,500,0,1.0,0.0,0,0
+1421,dao,Increase Cold Resistance (5 per power),380428,1,1012,43,0,5.0,0.0,,0,Float0,2500,0,1.0,0.0,0,0
+1430,dao,Increase Electricity Resistance,380429,1,1012,44,0,1.0,0.0,,0,Float0,500,0,1.0,0.0,0,0
+1431,dao,Increase Electricity Resistance (5 per power),380430,1,1012,44,0,5.0,0.0,,0,Float0,2500,0,1.0,0.0,0,0
+1440,dao,Increase Nature Resistance,380431,1,1012,45,0,1.0,0.0,,0,Float0,500,0,1.0,0.0,0,0
+1441,dao,Increase Nature Resistance (5 per power),380432,1,1012,45,0,5.0,0.0,,0,Float0,2500,0,1.0,0.0,0,0
+1450,dao,Increase Spirit Resistance,380433,1,1012,46,0,1.0,0.0,,0,Float0,600,0,1.0,0.0,0,0
+1451,dao,Increase Spirit Resistance (5 per power),380434,1,1012,46,0,5.0,0.0,,0,Float0,3000,0,1.0,0.0,0,0
+1500,dao,Improves backstabs,380435,1,1031,3002,0,0.0,0.0,,0,,20000,0,1.0,0.0,0,0
+1501,dao,Weakens nearby darkspawn,380436,1,0,0,0,0.0,0.0,,0,,22000,0,1.0,0.0,0,0
+1502,dao,Generates cleansing aura,380437,1,0,0,0,0.0,0.0,,0,,21000,0,1.0,0.0,0,0
+1503,dao,Generates aura of flame,380438,1,0,0,0,0.0,0.0,,0,,23000,0,1.0,0.0,0,0
+1504,dao,Increase Armor Penetration,380439,1,1012,53,0,0.5,1.0,,0,Float0,2500,0,1.0,0.0,0,0
+1505,dao,+<powervalue/>% Chance to ignite target,380440,1,0,0,0,0.0,5.0,,0,Float1,2000,0,1.0,0.0,0,0
+1506,dao,Messy kills,380441,1,0,0,0,0.0,0.0,,0,,800,0,1.0,0.0,0,0
+1507,dao,+<powervalue/> Damage,380442,1,1012,39,0,1.0,0.0,,0,Float0,2500,0,1.0,0.0,0,0
+1508,dao,Lucky,380443,1,1064,1,0,1.0,0.0,,0,Float0,10000,0,1.0,0.0,0,0
+1509,dao,Increase Combat Mana Regen,380444,1,1012,30,0,0.25,0.0,,0,Float0,5000,0,1.0,0.0,0,0
+1510,dao,Chance to Ignore Hostile Magic (2% per power),380445,1,1012,52,0,2.0,0.0,,0,Float0,2500,0,1.0,0.0,0,0
+1511,dao,+<powervalue/> damage vs. darkspawn,380446,2,0,0,0,2.0,0.0,,0,Float0,3000,0,1.0,0.0,0,0
+1512,dao,+<powervalue/> damage vs. dragons,380447,2,0,0,0,2.0,0.0,,0,Float0,4000,0,1.0,0.0,0,0
+1513,dao,+<powervalue/> damage vs. spirits,380448,2,0,0,0,2.0,0.0,,0,Float0,2000,0,1.0,0.0,0,0
+1514,dao,Increased damage vs. Fade creatures,380449,2,0,0,0,2.0,0.0,,0,,2000,0,1.0,0.0,0,0
+1515,dao,Increase Random Attribute,380450,1,1015,-2000,1,0.0,0.0,,0,Int1,7000,0,1.0,0.0,0,0
+1516,dao,Increase Spellpower,380451,1,1012,13,0,1.0,0.0,,0,Float0,2000,0,1.0,0.0,0,0
+1517,dao,(NOT IMPL) Inc hostility and int,380452,1,0,0,0,1.0,0.0,,0,Float0,1000,0,1.0,0.0,0,0
+1519,dao,Reduces hostility,380453,1,1012,40,0,5.0,0.0,,0,Float0,3000,0,1.0,0.0,0,0
+3000,dao,"Flaming (INTERNAL, DO NOT USE)",380493,2,1013,2,0,2.0,0.0,,1067,Float0,0,0,1.0,0.0,0,0
+3001,dao,"Iced (INTERNAL, DO NOT USE)",380494,2,1013,3,0,1.0,0.0,,1068,Float0,0,0,1.0,0.0,0,0
+3002,dao,Electrified (INTERNAL DO NOT USE),380495,2,1013,4,0,1.5,0.0,,1069,Float0,0,0,1.0,0.0,0,0
+3003,dao,"Flame Coating (INTERNAL, DO NOT USE)",380496,2,1013,2,0,2.0,0.0,,91056,Float0,0,0,1.0,0.0,0,0
+3004,dao,"Freezing Coating (INTERNAL, DO NOT USE)",380497,2,1013,3,0,2.0,0.0,,91057,Float0,0,0,1.0,0.0,0,0
+3005,dao,Shock Coating,380498,2,1013,4,0,3.0,0.0,,91058,Float0,0,0,1.0,0.0,0,0
+3006,dao,Acidic Coating,380499,2,1013,5,0,2.0,0.0,,91055,Float0,0,0,1.0,0.0,0,0
+3007,dao,Soulrot Coating,380500,2,1013,8,0,2.0,0.0,,91059,Float0,0,0,1.0,0.0,0,0
+3008,dao,Poison - Venom,380501,2,1013,5,0,1.0,0.0,,91060,Float0,0,0,1.0,10.0,5031,200235
+3009,dao,Poison - Deathroot Extract,380502,2,1013,5,0,1.0,0.0,,91061,Float0,0,0,1.0,2.0,5031,200236
+3010,dao,Poison - Crow Poison,380503,2,1013,5,0,3.0,0.0,,91063,Float0,0,0,1.0,5.0,5031,0
+3011,dao,Poison - Soldier's Bane,380504,2,0,0,0,0.0,0.0,,91065,Float0,0,0,1.0,0.0,5031,0
+3012,dao,Poison - Magebane,380505,2,0,0,0,0.0,0.0,,91066,Float0,0,0,1.0,0.0,5031,0
+3013,dao,Poison - Demonic Poison,380506,2,1013,8,0,5.0,0.0,,91068,Float0,0,0,1.0,0.0,5031,0
+3014,dao,Poison - Quiet Death,380507,2,1013,5,0,1.0,0.0,,91074,Float0,0,0,1.0,0.0,5031,0
+4000,dao,+<powervalue/> Nature damage,380508,2,1013,5,0,1.0,0.0,,0,Float0,2000,0,1.0,0.0,0,0
+4001,dao,+<powervalue/> Fire damage,380509,2,1013,2,0,1.0,0.0,,1067,Float0,2000,0,1.0,0.0,0,0
+4002,dao,Chance of +<powervalue/> fire damage,380510,2,1013,2,0,2.5,0.0,,1067,Float0,5000,0,0.009999999776,0.0,0,0
+4005,dao,Massive damage to darkspawn,380511,2,0,0,0,0.0,0.0,,0,,5000,0,1.0,0.0,0,0
+4006,dao,Mage Slayer - Interrupts spellcasting,380512,2,0,0,0,0.0,0.0,,0,,5000,0,1.0,0.0,0,0
+4008,dao,Increases hostility,380514,2,0,0,0,0.0,0.0,,0,,1000,0,1.0,0.0,0,0
+4009,dao,Chance to knock target back,380515,2,1057,0,0,0.0,0.0,,0,,5000,0,0.1000000015,0.0,0,0
+4010,dao,Explosive,380516,2,1013,2,0,10.0,0.0,0,0,Float0,2000,0,0.05000000075,0.0,0,0
+5000,dao,Increase Healing Spells (5% per power),380454,1,1012,51,0,5.0,0.0,,0,Float0,5000,0,1.0,0.0,0,0
+6000,dao,Required: Elf or dwarf,380527,3,0,0,0,0.0,0.0,ip_restrict_human,0,,0,0,1.0,0.0,0,0
+6001,dao,Required: Human or dwarf,380528,3,0,0,0,0.0,0.0,ip_restrict_elf,0,,0,0,1.0,0.0,0,0
+6002,dao,Required: Human or elf,380529,3,0,0,0,0.0,0.0,ip_restrict_dwarf,0,,0,0,1.0,0.0,0,0
+6005,dao,Required: Human,380530,3,0,0,0,0.0,0.0,ip_restrict_ohuman,0,,0,0,1.0,0.0,0,0
+6006,dao,Required: Elf,380531,3,0,0,0,0.0,0.0,ip_restrict_oelf,0,,0,0,1.0,0.0,0,0
+6007,dao,Required: Dwarf,380532,3,0,0,0,0.0,0.0,ip_restrict_odwarf,0,,0,0,1.0,0.0,0,0
+6010,dao,Required: Mage,380533,3,0,0,0,0.0,0.0,ip_restrict_omage,0,,0,0,1.0,0.0,0,0
+6011,dao,Required: Warrior,380534,3,0,0,0,0.0,0.0,ip_restrict_owar,0,,0,0,1.0,0.0,0,0
+6012,dao,Required: Rogue,380535,3,0,0,0,0.0,0.0,ip_restrict_orog,0,,0,0,1.0,0.0,0,0
+6015,dao,Required: Warrior or Rogue,380536,3,0,0,0,0.0,0.0,ip_restrict_mage,0,,0,0,1.0,0.0,0,0
+6016,dao,Required: Mage or Rogue,380537,3,0,0,0,0.0,0.0,ip_restrict_war,0,,0,0,1.0,0.0,0,0
+6017,dao,Required: Warrior or Mage,380538,3,0,0,0,0.0,0.0,ip_restrict_rog,0,,0,0,1.0,0.0,0,0
+6020,dao,Required: Templar,380539,3,0,0,0,0.0,0.0,ip_restrict_temp,0,,0,0,1.0,0.0,0,0
+6021,dao,Required: Spirit Healer,380540,3,0,0,0,0.0,0.0,ip_restrict_sph,0,,0,0,1.0,0.0,0,0
+6022,dao,Required: Berserker,380541,3,0,0,0,0.0,0.0,ip_restrict_ber,0,,0,0,1.0,0.0,0,0
+6023,dao,Required: Assassin,380542,3,0,0,0,0.0,0.0,ip_restrict_ass,0,,0,0,1.0,0.0,0,0
+6024,dao,Required: Bard,380543,3,0,0,0,0.0,0.0,ip_restrict_bard,0,,0,0,1.0,0.0,0,0
+6025,dao,Required: Shapeshifter,380544,3,0,0,0,0.0,0.0,ip_restrict_shif,0,,0,0,1.0,0.0,0,0
+6026,dao,Required: Champion,380545,3,0,0,0,0.0,0.0,ip_restrict_cham,0,,0,0,1.0,0.0,0,0
+6027,dao,Restriction: Mabari hound,380546,3,0,0,0,0.0,0.0,ip_restrict_dog,0,,0,0,1.0,0.0,0,0
+6028,dao,Restriction: Wynne,380547,3,0,0,0,0.0,0.0,ip_restrict_wynn,0,,0,0,1.0,0.0,0,0
+6029,dao,Restriction: Morrigan,380548,3,0,0,0,0.0,0.0,ip_restrict_morr,0,,0,0,1.0,0.0,0,0
+6030,dao,Restriction: Alistair,380549,3,0,0,0,0.0,0.0,ip_restrict_alist,0,,0,0,1.0,0.0,0,0
+6031,dao,Restriction: Grey Warden,380550,3,0,0,0,0.0,0.0,ip_restrict_ward,0,,0,0,1.0,0.0,0,0
+6032,dao,Required: Duelist,380551,3,0,0,0,0.0,0.0,ip_restrict_duel,0,,0,0,1.0,0.0,0,0
+6033,dao,Required: Reaver,380552,3,0,0,0,0.0,0.0,ip_restrict_reav,0,,0,0,1.0,0.0,0,0
+6034,dao,Required: Ranger,380553,3,0,0,0,0.0,0.0,ip_restrict_rang,0,,0,0,1.0,0.0,0,0
+6040,dao,Required: All Templar talents,380554,3,0,0,0,0.0,0.0,ip_restrict_mtemp,0,,0,0,1.0,0.0,0,0
+6041,dao,Required: All Berserker talents,380555,3,0,0,0,0.0,0.0,ip_restrict_mbers,0,,0,0,1.0,0.0,0,0
+6051,dao,Required: Poison-Making,380556,3,0,0,0,0.0,0.0,ip_restrict_skpoison,0,,0,0,1.0,0.0,0,0
+6052,dao,Required: Trap-Making,380557,3,0,0,0,0.0,0.0,ip_restrict_sktraps,0,,0,0,1.0,0.0,0,0
+6053,dao,Required: Herbalism,380558,3,0,0,0,0.0,0.0,ip_restrict_skherb,0,,0,0,1.0,0.0,0,0
+6055,dao,Required: Stealth,380559,3,0,0,0,0.0,0.0,ip_restrict_tstealth,0,,0,0,1.0,0.0,0,0
+6056,dao,Required: Any archery talent,380560,3,0,0,0,0.0,0.0,ip_restrict_tarch,0,,0,0,1.0,0.0,0,0
+6060,dao,Improves Blood Magic,380455,1,1067,0,0,0.0,0.0,,0,,10000,0,1.0,0.0,0,0
+6062,dao,Increase Chance to Dodge Attacks (5% per power),380456,1,1012,16,0,5.0,0.0,,0,Float0,5000,0,1.0,0.0,0,0
+6063,dao,Required: Blood Mage,380561,3,0,0,0,0.0,0.0,ip_restrict_bloodm,0,,0,0,1.0,0.0,0,0
+6064,dao,Required: Arcane Warrior,380562,3,0,0,0,0.0,0.0,ip_restrict_arcanew,0,,0,0,1.0,0.0,0,0
+6065,dao,Weakens and bloodies targets,380517,2,0,0,0,0.0,0.0,,0,,4000,0,0.25,0.0,0,0
+6066,dao,Increase Exploraton Mana Regen,380457,1,1012,29,0,1.0,0.0,,0,Float0,2000,0,1.0,0.0,0,0
+6067,dao,[NOT IMPELMENTED] Dual-weapon fatigue,380458,1,0,0,0,0.5,0.0,,0,Float0,3000,0,1.0,0.0,0,0
+6068,dao,[NOT IMPLEMENTED] Archery fatigue,380459,1,0,0,0,0.5,0.0,,0,Float0,2000,0,1.0,0.0,0,0
+6069,dao,[NOT IMPLEMENTED] Weapon-and-shield fatigue,380460,1,0,0,0,0.5,0.0,,0,Float0,2500,0,1.0,0.0,0,0
+6070,dao,[NOT IMPLEMENTED] Two-handed-weapon fatigue,380461,1,0,0,0,0.5,0.0,,0,Float0,4000,0,1.0,0.0,0,0
+6071,dao,[NOT IMPLEMENTED] Damage from spirits,380462,1,0,0,0,2.0,0.0,,0,Float0,2000,0,1.0,0.0,0,0
+6072,dao,Improves trap detection,380463,1,1066,0,0,0.0,0.0,,0,,5000,0,1.0,0.0,0,0
+6073,dao,Increase Exploration Stamina Regen,380464,1,1012,29,0,1.0,0.0,,0,Float0,2000,0,1.0,0.0,0,0
+6074,dao,Increase Combat Stamina Regen (0.25 per power),380465,1,1012,30,0,0.25,0.0,,0,Float0,5000,0,1.0,0.0,0,0
+6076,dao,Increases XP bonus from codex,380466,1,1065,1,25,0.0,0.0,,0,,3000,0,1.0,0.0,0,0
+6081,dao,Increases monetary gain,380468,1,1065,2,0,0.05000000075,0.0,,0,Float0,5000,0,1.0,0.0,0,0
+6083,dao,+<powervalue/> Electricity damage,380518,2,1013,4,0,1.0,0.0,,1069,Float0,2000,0,1.0,0.0,0,0
+6085,dao,Telekinetic,380519,1,1012,53,0,1.0,0.0,,5030,Float0,0,0,1.0,0.0,0,0
+6086,dao,Righteous Strike,380520,2,1013,8,0,2.0,0.0,,1106,Float0,0,0,1.0,0.0,0,0
+6087,dao,Decrease Constitution,380469,1,1012,6,0,-1.0,0.0,,0,Float0,0,1,1.0,0.0,0,0
+6088,dao,Decrease Cunning,380470,1,1012,5,0,-1.0,0.0,,0,Float0,0,1,1.0,0.0,0,0
+6089,dao,Decrease Dexterity,380471,1,1012,2,0,-1.0,0.0,,0,Float0,0,1,1.0,0.0,0,0
+6090,dao,Decrease Strength,380472,1,1012,1,0,-1.0,0.0,,0,Float0,0,1,1.0,0.0,0,0
+6091,dao,Decrease Willpower,380473,1,1012,3,0,-1.0,0.0,,0,Float0,0,1,1.0,0.0,0,0
+6092,dao,Decrease Magic,380474,1,1012,4,0,-1.0,0.0,,0,Float0,0,1,1.0,0.0,0,0
+6093,dao,[NI] Decrease All attributes,380475,1,1015,-1000,1,0.0,0.0,,0,Int1,0,0,1.0,0.0,0,0
+6094,dao,Decrease Electricity resistance (5 per power),380476,1,1012,44,0,-5.0,0.0,,0,Float0,0,1,1.0,0.0,0,0
+6095,dao,Decrease Cold resistance (5 per power),380477,1,1012,43,0,-5.0,0.0,,0,Float0,0,1,1.0,0.0,0,0
+6096,dao,Decrease Fire resistance (5 per power),380478,1,1012,42,0,-5.0,0.0,,0,Float0,0,1,1.0,0.0,0,0
+6097,dao,Decrease Nature resistance (5 per power),380479,1,1012,45,0,-5.0,0.0,,0,Float0,0,1,1.0,0.0,0,0
+6098,dao,Decrease Spirit resistance (5 per power),380480,1,1012,46,0,-5.0,0.0,,0,Float0,0,1,1.0,0.0,0,0
+6099,dao,Increase Attack (2 per power),380481,1,1012,9,0,2.0,0.0,,0,Float0,3000,0,1.0,0.0,0,0
+6100,dao,[NI] Increase Backstab damage (2 per power),380482,1,0,0,0,2.0,0.0,,0,Float0,3525,0,1.0,0.0,0,0
+6101,dao,Decrease Attack (5 per power),380483,1,1012,9,0,-5.0,0.0,,0,Float0,0,1,1.0,0.0,0,0
+6102,dao,Decrease Armor (3 per power),380484,1,1012,11,0,-3.0,0.0,,0,Float0,0,1,1.0,0.0,0,0
+6103,dao,Increase Natural armor,380485,1,1012,11,0,1.0,0.0,,0,Float0,4000,0,1.0,0.0,0,0
+6104,dao,Increase Stamina (25 per power),380486,1,1012,8,0,25.0,0.0,,0,Float0,2500,0,1.0,0.0,0,0
+6105,dao,Decrease Damage,380487,1,1012,39,0,-1.0,0.0,,0,Float0,0,1,1.0,0.0,0,0
+6106,dao,Morrigan's protection,380488,1,1012,11,0,2.0,0.0,,0,Float0,0,0,1.0,0.0,0,0
+6107,dao,+<powervalue/> damage vs. beasts,380489,2,0,0,0,2.0,0.0,,0,Float0,2000,0,1.0,0.0,0,0
+6109,dao,+<powervalue/> Cold damage,380521,2,1013,3,0,1.0,0.0,,1068,Float0,2000,0,1.0,0.0,0,0
+6110,dao,Chance of +<powervalue/> cold damage,380522,2,1013,3,0,2.5,0.0,,1068,Float0,5000,0,0.1000000015,0.0,0,0
+6111,dao,Chance of +<powervalue/> electricity damage,380523,2,1013,4,0,2.5,0.0,,1069,Float0,5000,0,0.1000000015,0.0,0,0
+6112,dao,Increase Defense against Missiles (2 per power),380491,1,1012,22,0,2.0,0.0,,0,Float0,2000,0,1.0,0.0,0,0
+6113,dao,Chance of paralysis,380524,2,8,0,0,0.0,0.0,,0,,6000,0,0.05000000075,3.0,0,0
+6114,dao,Chance to reduce movement speed,380525,2,0,0,0,0.0,0.0,,0,,4000,0,0.1000000015,3.0,0,0
+6115,dao,Increases incoming damage (0.1 per power),380492,1,1012,12,0,0.1000000015,0.0,,0,Float0,0,1,1.0,0.0,0,0
+6116,dao,Flag: Is Healing Potion,382892,4,0,0,0,0.0,0.0,,0,Float0,0,0,1.0,0.0,0,0
+6117,dao,Flag: Is Mana Potion,382893,4,0,0,0,0.0,0.0,,0,Float0,0,0,1.0,0.0,0,0
+10000,dao,No attribute requirements,380563,4,0,0,0,0.0,0.0,,0,,0,0,0.0,0.0,0,0
+10001,dao,Chance to stun,380526,2,1027,0,0,0.0,0.0,,0,,4000,0,0.05000000075,1.0,0,0
+10002,dao,Vicious,380566,2,0,0,0,0.0,0.0,,0,,4000,0,0.1000000015,5.0,0,0
+10003,dao,Chance for +<powervalue/> Nature damage,0,2,1013,5,0,2.0,0.0,,0,,5000,0,0.200000003,0.0,0,0
+10004,dao,+<powervalue/> Cold damage (no crust),380521,2,1013,3,0,1.0,0.0,,0,Float0,2000,0,1.0,0.0,0,0
+10005,dao,Restriction: Sten,394300,3,0,0,0,0.0,0.0,ip_restrict_sten,0,,0,0,1.0,0.0,0,0
+10006,dao,Increase Crit Damage (+5% per power),396406,1,1012,54,0,5.0,0.0,,0,Float0,2500,0,1.0,0.0,0,0
+10007,dao,Increases all Fire Damage (+2.5% per power),396564,1,1012,55,0,2.5,0.0,,0,Float0,2500,0,1.0,0.0,0,0
+10008,dao,Increases all Sprit Damage (+2.5% per power),396567,1,1012,56,0,2.5,0.0,,0,Float0,2500,0,1.0,0.0,0,0
+10009,dao,Increases all Cold Damage (+2.5% per power),396566,1,1012,57,0,2.5,0.0,,0,Float0,2500,0,1.0,0.0,0,0
+10010,dao,Increases all Nature Damage (+2.5% per power),396568,1,1012,58,0,2.5,0.0,,0,Float0,2500,0,1.0,0.0,0,0
+10011,dao,Increases all Lightning Damage (+2.5% per power),396565,1,1012,59,0,2.5,0.0,,0,Float0,2500,0,1.0,0.0,0,0
+10012,dao,Restriction: Oghren,396569,3,0,0,0,0.0,0.0,ip_restrict_oghren,0,,0,0,1.0,0.0,0,0
+10013,dao,Restrict: Leliana,396570,3,0,0,0,0.0,0.0,ip_restrict_leliana,0,,0,0,1.0,0.0,0,0
+10014,dao,Restrict: Loghain,396571,3,0,0,0,0.0,0.0,ip_restrict_loghain,0,,0,0,1.0,0.0,0,0
+10015,dao,Restrict: Zevran,396572,3,0,0,0,0.0,0.0,ip_restrict_zevran,0,,0,0,1.0,0.0,0,0
+10016,dao,Increase Mental Resistance,396575,1,1012,32,0,1.0,0.0,,0,Float0,350,0,1.0,0.0,0,0
+10017,dao,Increase Physical Resistance,396576,1,1012,33,0,1.0,0.0,,0,Float0,350,0,1.0,0.0,0,0
+10018,dao,Restrict: player,397261,3,0,0,0,0.0,0.0,ip_restrict_player,0,,0,0,1.0,0.0,0,0
+10019,dao,Spellshield,397796,1,1069,0,0,0.0,0.0,,90180,,0,0,1.0,0.0,0,0
+10020,dao,Restriction: Jory,0,3,0,0,0,0.0,0.0,ip_restrict_jory,0,,0,0,1.0,0.0,0,0
+10021,dao,Cold VFX,398979,1,0,0,0,0.0,0.0,,1068,,0,0,1.0,0.0,0,0
+10022,dao,+<powervalue/> spirit damage,404077,2,1013,8,0,2.0,0.0,,5040,Float0,0,0,1.0,0.0,0,0

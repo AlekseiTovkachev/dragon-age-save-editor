@@ -239,11 +239,13 @@ impl<'a> Writer<'a> {
                 Ok(())
             }
             (BaseType::Struct(_), false, Value::List(items)) => {
-                let struct_index = match base {
-                    BaseType::Struct(index) => *index,
-                    _ => unreachable!(),
+                let BaseType::Struct(struct_index) = base else {
+                    return Err(io::Error::new(
+                        io::ErrorKind::InvalidData,
+                        "inline struct list requires struct base type",
+                    ));
                 };
-                let elem_size = self.struct_def(struct_index)?.size as usize;
+                let elem_size = self.struct_def(*struct_index)?.size as usize;
                 let elem_offset = self.allocate(items.len() * elem_size, 1);
                 for (index, item) in items.iter().enumerate() {
                     let child = item

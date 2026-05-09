@@ -1,4 +1,5 @@
 use crate::gff4::fields::{field_id_by_name, field_name_by_id};
+use crate::gff4::numeric;
 use crate::gff4::schema::ValueType;
 
 #[derive(Debug, Clone, PartialEq)]
@@ -302,7 +303,84 @@ impl Value {
         }
     }
 
+    pub fn to_u32_compatible(&self) -> Option<u32> {
+        numeric::to_u32_compatible(self)
+    }
+
+    pub fn to_u16_compatible(&self) -> Option<u16> {
+        numeric::to_u16_compatible(self)
+    }
+
+    pub fn to_i32_compatible(&self) -> Option<i32> {
+        numeric::to_i32_compatible(self)
+    }
+
+    pub fn to_f32_compatible(&self) -> Option<f32> {
+        numeric::to_f32_compatible(self)
+    }
+
+    pub fn to_da2_property_power(&self) -> Option<f32> {
+        numeric::to_da2_property_power(self)
+    }
+
     pub fn is_null(&self) -> bool {
         matches!(self, Value::Null)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::Value;
+
+    #[test]
+    fn compatible_unsigned_numbers_accept_non_negative_values() {
+        assert_eq!(Value::UInt8(7).to_u32_compatible(), Some(7));
+        assert_eq!(Value::Int16(8).to_u32_compatible(), Some(8));
+        assert_eq!(Value::Float32(9.8).to_u32_compatible(), Some(9));
+    }
+
+    #[test]
+    fn compatible_unsigned_numbers_reject_negative_and_non_finite_values() {
+        assert_eq!(Value::Int32(-1).to_u32_compatible(), None);
+        assert_eq!(Value::Float32(f32::NAN).to_u32_compatible(), None);
+        assert_eq!(Value::Float64(f64::INFINITY).to_u32_compatible(), None);
+    }
+
+    #[test]
+    fn compatible_narrow_unsigned_rejects_overflow() {
+        assert_eq!(
+            Value::UInt32(u16::MAX as u32).to_u16_compatible(),
+            Some(u16::MAX)
+        );
+        assert_eq!(Value::UInt32(u16::MAX as u32 + 1).to_u16_compatible(), None);
+    }
+
+    #[test]
+    fn compatible_signed_numbers_accept_integral_and_finite_float_values() {
+        assert_eq!(Value::UInt16(12).to_i32_compatible(), Some(12));
+        assert_eq!(Value::Int8(-12).to_i32_compatible(), Some(-12));
+        assert_eq!(Value::Float64(-12.9).to_i32_compatible(), Some(-12));
+        assert_eq!(Value::UInt32(i32::MAX as u32 + 1).to_i32_compatible(), None);
+    }
+
+    #[test]
+    fn compatible_float_numbers_accept_numeric_shapes() {
+        assert_eq!(Value::UInt32(12).to_f32_compatible(), Some(12.0));
+        assert_eq!(Value::Int32(-12).to_f32_compatible(), Some(-12.0));
+        assert_eq!(Value::Float64(12.5).to_f32_compatible(), Some(12.5));
+    }
+
+    #[test]
+    fn da2_property_power_decodes_integer_float_bits() {
+        assert_eq!(
+            Value::UInt32(1.25f32.to_bits()).to_da2_property_power(),
+            Some(1.25)
+        );
+        assert_eq!(
+            Value::Int32(i32::from_ne_bytes(1.25f32.to_bits().to_ne_bytes()))
+                .to_da2_property_power(),
+            Some(1.25)
+        );
+        assert_eq!(Value::Float32(1.25).to_da2_property_power(), Some(1.25));
     }
 }

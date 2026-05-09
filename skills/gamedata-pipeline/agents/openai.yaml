@@ -1,0 +1,4 @@
+interface:
+  display_name: "Gamedata Pipeline"
+  short_description: "Edit seed data, generated SQLite gamedata, and verifier rules safely."
+  default_prompt: "Use the gamedata pipeline before changing item, ability, material, property, recipe, or verifier data."

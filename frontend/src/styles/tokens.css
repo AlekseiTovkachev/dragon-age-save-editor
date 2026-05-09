@@ -1,0 +1,47 @@
+:root {
+  --ink: #f3ead6;
+  --ink-2: #c9bfa3;
+  --ink-3: #807663;
+  --ink-4: #4d4537;
+
+  --bg: #0e0c0a;
+  --bg-1: #15110d;
+  --bg-2: #1c1814;
+  --bg-3: #25201a;
+
+  --surface: var(--bg-1);
+  --surface-2: var(--bg-2);
+  --surface-strong: #211812;
+  --surface-muted: #2b2118;
+  --surface-field: #120d0a;
+
+  --text: var(--ink);
+  --muted: var(--ink-2);
+  --faint: var(--ink-3);
+
+  --line: #3a3127;
+  --line-strong: #594a37;
+  --line-bright: #8c7146;
+
+  --blood: #8b1d1d;
+  --blood-2: #b3302a;
+  --accent: var(--blood);
+  --accent-strong: var(--blood-2);
+  --accent-soft: #351119;
+  --gold: #c79a48;
+  --gold-2: #e6c277;
+  --gold-soft: #302515;
+  --rune: #5a7794;
+  --moss: #6a7a3f;
+
+  --shadow: 0 1px 0 rgba(255, 255, 255, 0.02), 0 8px 24px rgba(0, 0, 0, 0.5);
+
+  --r-sm: 4px;
+  --r: 6px;
+  --r-lg: 10px;
+
+  --font-display: "IM Fell English SC", "IM Fell English", Georgia, serif;
+  --font-body: "Inter", system-ui, -apple-system, sans-serif;
+  --font-ui: var(--font-body);
+  --font-mono: "JetBrains Mono", "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
