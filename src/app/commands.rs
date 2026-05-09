@@ -6,11 +6,13 @@ use crate::edit::{
 };
 use crate::validate::validate_gff;
 use serde::{Deserialize, Serialize};
+use std::collections::BTreeMap;
 
 use super::catalogs::{DA2_PLOT_BOOLEAN_FLAGS, DA2_PLOT_INTEGER_FLAGS, available_crafting_recipes};
 use super::document::SaveDocument;
 use super::dto::*;
 use super::errors::{CommandError, CommandErrorCode};
+use super::plot_flag_rules::apply_implications;
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(tag = "command", rename_all = "snake_case")]
@@ -439,19 +441,38 @@ impl SaveDocument {
                 })
             }
             SaveCommand::PatchPlotFlags { booleans, integers } => {
+                // 1. Get current state
+                let current = &self.editor()?.save().plot_flags;
+                let mut merged_bools: BTreeMap<u16, bool> = current.booleans.clone();
+                let mut merged_ints: BTreeMap<u16, i32> = current.integers.clone();
+
+                // 2. Apply incoming changes
+                for dto in &booleans {
+                    merged_bools.insert(dto.id, dto.value);
+                }
+                for dto in &integers {
+                    merged_ints.insert(dto.id, dto.value);
+                }
+
+                // 3. Apply implications
+                apply_implications(&mut merged_bools, &mut merged_ints);
+
+                // 4. Patch with the expanded set
+                let bool_patches: Vec<PlotBooleanPatch> = merged_bools
+                    .iter()
+                    .map(|(&id, &value)| PlotBooleanPatch { id, value })
+                    .collect();
+                let int_patches: Vec<PlotIntegerPatch> = merged_ints
+                    .iter()
+                    .map(|(&id, &value)| PlotIntegerPatch { id, value })
+                    .collect();
+
                 self.editor_mut()?
-                    .patch_plot_flags(
-                        &booleans
-                            .into_iter()
-                            .map(PlotBooleanPatch::from)
-                            .collect::<Vec<_>>(),
-                        &integers
-                            .into_iter()
-                            .map(PlotIntegerPatch::from)
-                            .collect::<Vec<_>>(),
-                    )
+                    .patch_plot_flags(&bool_patches, &int_patches)
                     .map_err(CommandError::from)?;
                 self.dirty = true;
+
+                // 5. Return updated flags
                 let plot_flags = &self.editor()?.save().plot_flags;
                 Ok(SaveCommandResult::PlotFlags {
                     booleans: plot_flags
