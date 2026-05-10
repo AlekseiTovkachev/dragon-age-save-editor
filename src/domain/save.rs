@@ -10,7 +10,7 @@ use crate::domain::stats::{
 use crate::gff4::fields::{
     ITEM_COST, ITEM_STACKSIZE, OBJECT_ID, SAVEGAME_BACKPACK, SAVEGAME_CAMPAIGN,
     SAVEGAME_CRAFTING_RECIPE_LIST, SAVEGAME_CREATURE_STATS, SAVEGAME_EQUIPMENT_ITEMS,
-    SAVEGAME_ITEM_MATERIALTYPE, SAVEGAME_MONEY, SAVEGAME_OBJECT_NAME, SAVEGAME_OBJECT_PLOT,
+    SAVEGAME_ITEM_MATERIALTYPE, SAVEGAME_MONEY, SAVEGAME_OBJECT_NAME, SAVEGAME_OBJECT_RANK,
     SAVEGAME_PARTYLIST, SAVEGAME_PARTYPOOLMEMBERS, SAVEGAME_SKILLLIST, SAVEGAME_SPELLLIST,
     SAVEGAME_STATLIST, SAVEGAME_TALENTLIST, TEMPLATERESREF, field_id_by_name,
 };
@@ -524,7 +524,7 @@ fn extract_item(
         equipment_slot: optional_u32_by_name(source, SAVEGAME_EQUIPMENTSET_SLOT_NAME),
         item_cost: optional_u32(source, ITEM_COST),
         item_stacksize: optional_u32(source, ITEM_STACKSIZE),
-        item_level: optional_u8(source, SAVEGAME_OBJECT_PLOT),
+        item_level: optional_u8(source, SAVEGAME_OBJECT_RANK),
         material,
         material_profile,
         material_info,

@@ -10,7 +10,7 @@ use crate::domain::item::Item;
 use crate::domain::save::{WORLD_VAULT_ID_LABEL, WORLD_VAULT_VALUE_LABEL};
 use crate::edit::targets::RawSaveTargets;
 use crate::gff4::fields::{
-    ITEM_COST, ITEM_STACKSIZE, OBJECT_ID, SAVEGAME_ITEM_MATERIALTYPE, SAVEGAME_OBJECT_PLOT,
+    ITEM_COST, ITEM_STACKSIZE, OBJECT_ID, SAVEGAME_ITEM_MATERIALTYPE, SAVEGAME_OBJECT_RANK,
     SAVEGAME_PARTYLIST, SAVEGAME_SKILLLIST, SAVEGAME_SPELLLIST, SAVEGAME_TALENTLIST,
     SAVEGAME_WORLDDATABASE,
 };
@@ -420,12 +420,9 @@ pub(super) fn apply_item_metadata_patch_to_struct(
         set_numeric_value(value, material, "item.SAVEGAME_ITEM_MATERIALTYPE")?;
     }
     if let Some(item_level) = patch.item_level {
-        let value = item
-            .get_mut(SAVEGAME_OBJECT_PLOT)
-            .ok_or_else(|| EditError::MissingField {
-                path: "item.SAVEGAME_OBJECT_PLOT".to_string(),
-            })?;
-        set_numeric_value(value, item_level as u32, "item.SAVEGAME_OBJECT_PLOT")?;
+        if let Some(value) = item.get_mut(SAVEGAME_OBJECT_RANK) {
+            set_numeric_value(value, item_level as u32, "item.SAVEGAME_OBJECT_RANK")?;
+        }
     }
     Ok(())
 }
