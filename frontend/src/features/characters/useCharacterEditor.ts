@@ -343,6 +343,7 @@ export function useCharacterEditor({ summary, run, refreshSummary }: UseCharacte
     setCharacterKey,
     character,
     selectedCharacterTarget,
+    isDa2,
     statsDraft,
     setStatsDraft,
     levelDraft,

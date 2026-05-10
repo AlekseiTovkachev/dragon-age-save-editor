@@ -11,6 +11,7 @@ function characterState(): CharacterPanelState {
     characters: [{ target: "main_character", name: "Hero" }],
     characterKey: "main",
     character: character(),
+    isDa2: false,
     levelDraft: "1",
     experienceDraft: "10",
     approvalDraft: "0",

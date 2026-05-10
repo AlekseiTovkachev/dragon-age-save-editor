@@ -220,6 +220,7 @@ export function useSaveEditorApp() {
       characters: characterEditor.characters,
       characterKey: characterEditor.characterKey,
       character: characterEditor.character,
+      isDa2: characterEditor.isDa2,
       levelDraft: characterEditor.levelDraft,
       experienceDraft: characterEditor.experienceDraft,
       approvalDraft: characterEditor.approvalDraft,
