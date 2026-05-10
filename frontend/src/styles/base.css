@@ -5,6 +5,28 @@
   line-height: 1.4;
 }
 
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--line);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--line-strong);
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
 * {
   box-sizing: border-box;
 }

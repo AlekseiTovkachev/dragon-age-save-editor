@@ -1,6 +1,97 @@
-.app {
-  min-height: 100vh;
+/* ─── Custom titlebar ──────────────────────────────────────────────────────── */
+
+:root {
+  --titlebar-h: 30px;
+}
+
+.app-frame {
+  display: flex;
+  flex-direction: column;
   height: 100vh;
+  overflow: hidden;
+}
+
+.titlebar {
+  height: var(--titlebar-h);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  background: #0a0807;
+  border-bottom: 1px solid var(--line);
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.titlebar-title {
+  flex: 1;
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: 0.7rem;
+  color: var(--ink-4);
+  letter-spacing: 0.08em;
+  padding: 0 8px;
+}
+
+/* macOS traffic lights */
+.titlebar-mac {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0 14px;
+}
+
+.titlebar-mac .titlebar-btn {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: none;
+  padding: 0;
+  min-height: 0;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.mac-close   { background: #ff5f57; }
+.mac-minimize { background: #febc2e; }
+.mac-zoom    { background: #28c840; }
+
+/* Windows controls */
+.titlebar-win {
+  display: flex;
+  align-items: stretch;
+  height: var(--titlebar-h);
+}
+
+.titlebar-win .titlebar-btn {
+  width: 46px;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  color: var(--ink-3);
+  min-height: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.titlebar-win .titlebar-btn:hover {
+  background: var(--bg-3);
+  color: var(--ink);
+  border-color: transparent;
+  box-shadow: none;
+}
+
+.titlebar-win .win-close:hover {
+  background: #c42b1c;
+  color: #fff;
+}
+
+/* ─── App layout ───────────────────────────────────────────────────────────── */
+
+.app {
+  flex: 1;
+  min-height: 0;
   display: grid;
   grid-template-columns: 280px minmax(0, 1fr);
   overflow: hidden;
@@ -11,10 +102,8 @@
   border-right: 1px solid var(--line);
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
-  max-height: 100vh;
-  position: sticky;
-  top: 0;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .app-main {
@@ -300,7 +389,7 @@
 
 @media (max-width: 900px) {
   .app {
-    grid-template-columns: 220px minmax(0, 1fr);
+    grid-template-columns: 200px minmax(0, 1fr);
   }
 
   .shot-popover {
