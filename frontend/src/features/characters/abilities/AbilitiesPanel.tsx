@@ -106,11 +106,14 @@ function abilityTrees(kind: AbilityListKind, state: CharacterPanelState, actions
     byId.set(ability.id, ability);
   }
 
-  return groupedAbilities(kind, Array.from(byId.values()), visibleAvailable).map((group) => ({
-    id: `${kind}-${group.label}`,
-    label: group.label,
-    abilities: group.abilities,
-  }));
+  const isCompanion = state.characterKey !== "main";
+  return groupedAbilities(kind, Array.from(byId.values()), visibleAvailable)
+    .map((group) => ({
+      id: `${kind}-${group.label}`,
+      label: group.label,
+      abilities: group.abilities,
+    }))
+    .filter((tree) => !(isCompanion && tree.label.startsWith("Other ")));
 }
 
 function filterTrees(trees: AbilityTree[], search: string) {

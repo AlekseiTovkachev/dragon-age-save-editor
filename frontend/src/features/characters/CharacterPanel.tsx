@@ -27,6 +27,7 @@ export type CharacterPanelState = {
   characters: CharacterSummary[];
   characterKey: string;
   character: Character | null;
+  isDa2: boolean;
   levelDraft: string;
   experienceDraft: string;
   approvalDraft: string;
@@ -74,7 +75,6 @@ export function CharacterPanel({
       <PartyRail
         characters={state.characters}
         activeKey={state.characterKey}
-        activeLevel={state.character?.level}
         activeDirty={characterDirty}
         onSelect={actions.setCharacterKey}
       />
@@ -216,12 +216,12 @@ function CharacterOverview({
           <h3 className="card-title">Point Pools</h3>
         </div>
         <div className="grid-pools">
-          {[ 
+          {([
             ["attribute_points", "Attribute Points"],
             ["skill_points", "Skill Points"],
             ["talent_points", "Talent Points"],
             ["specialization_points", "Specialization Points"],
-          ].map(([key, label]) => (
+          ] as [string, string][]).filter(([key]) => !(state.isDa2 && key === "skill_points")).map(([key, label]) => (
             <Field key={key} label={label} className="num">
               <NumericInput
                 className={

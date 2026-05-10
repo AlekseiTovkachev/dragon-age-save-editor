@@ -1,4 +1,5 @@
 import { useMemo, useState, type ReactNode } from "react";
+import { ChevronDown, ChevronRight } from "lucide-react";
 import { EmptyState, Panel, PanelBody } from "../../components/ui";
 import type { PlotBooleanFlag, PlotIntegerFlag, SaveSummary } from "../../types";
 import { validatePlotFlags, type PlotWarning } from "./plotFlagValidation";
@@ -724,6 +725,30 @@ type ViewProps = {
   actions: PlotFlagsPanelActions;
 };
 
+function PlotSectionCard({ title, children }: { title: string; children: ReactNode }) {
+  const [expanded, setExpanded] = useState(true);
+  return (
+    <section className="plot-section-card" aria-labelledby={`plot-section-${title}`}>
+      <button
+        className="plot-section-head"
+        type="button"
+        onClick={() => setExpanded((v) => !v)}
+        aria-expanded={expanded}
+      >
+        <h2 id={`plot-section-${title}`} className="plot-section-title">{title}</h2>
+        {expanded
+          ? <ChevronDown size={14} aria-hidden="true" />
+          : <ChevronRight size={14} aria-hidden="true" />}
+      </button>
+      {expanded ? (
+        <div className="plot-section-items">
+          {children}
+        </div>
+      ) : null}
+    </section>
+  );
+}
+
 function SectionedView({ state, boolFlagMap, intFlagMap, disabled, actions }: ViewProps) {
   const nodes: ReactNode[] = [];
 
@@ -783,18 +808,17 @@ function SectionedView({ state, boolFlagMap, intFlagMap, disabled, actions }: Vi
     if (sectionItems.length === 0) continue;
 
     nodes.push(
-      <h2 key={`section-${section.title}`} className="plot-section-header">
-        {section.title}
-      </h2>,
+      <PlotSectionCard key={`section-${section.title}`} title={section.title}>
+        {sectionItems}
+      </PlotSectionCard>,
     );
-    nodes.push(...sectionItems);
   }
 
   if (nodes.length === 0) {
     return <div className="plot-empty">No plot flags available.</div>;
   }
 
-  return <div className="plot-grid">{nodes}</div>;
+  return <div className="plot-sections-stack">{nodes}</div>;
 }
 
 // ─── Flat filtered view ───────────────────────────────────────────────────────
