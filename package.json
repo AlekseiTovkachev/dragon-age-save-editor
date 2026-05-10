@@ -18,7 +18,8 @@
     "data:build": "node tools/python.mjs tools/gamedata/build_gamedata.py",
     "data:verify": "node tools/python.mjs tools/gamedata/verify_gamedata.py",
     "preview": "vite preview",
-    "tauri": "tauri"
+    "tauri": "tauri",
+    "ingame-test": "cargo build --bin apply_edit -q && node tools/ingame-test.mjs"
   },
   "dependencies": {
     "@tauri-apps/api": "^2.0.0",
