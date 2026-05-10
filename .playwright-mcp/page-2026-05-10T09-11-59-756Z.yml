@@ -1,0 +1,43 @@
+- generic [ref=e3]:
+  - generic [ref=e4]:
+    - generic [ref=e5]: Dragon Age Save Editor
+    - generic [ref=e6]:
+      - button "Minimize" [ref=e7] [cursor=pointer]:
+        - img [ref=e8]
+      - button "Maximize/Restore" [ref=e10] [cursor=pointer]:
+        - img [ref=e11]
+      - button "Close" [ref=e13] [cursor=pointer]:
+        - img [ref=e14]
+  - generic [ref=e16]:
+    - complementary "Save editor navigation" [ref=e17]:
+      - generic [ref=e18]:
+        - generic "No save screenshot" [ref=e19]:
+          - generic [ref=e20]: Dragon Age Save
+        - heading "No save loaded" [level=2] [ref=e21]
+        - generic [ref=e22]: Open a save to begin editing.
+      - generic [ref=e23]: Edit
+      - navigation "Editor sections" [ref=e24]:
+        - button "Characters 0" [ref=e25] [cursor=pointer]:
+          - img [ref=e27]
+          - text: Characters
+          - generic [ref=e31]: "0"
+        - button "Inventory 0" [ref=e32] [cursor=pointer]:
+          - img [ref=e34]
+          - text: Inventory
+          - generic [ref=e38]: "0"
+        - button "Recipes 0" [ref=e39] [cursor=pointer]:
+          - img [ref=e41]
+          - text: Recipes
+          - generic [ref=e44]: "0"
+      - generic [ref=e46]: Save
+      - generic [ref=e47]:
+        - button "Open Save..." [ref=e48] [cursor=pointer]:
+          - img [ref=e50]
+          - text: Open Save...
+        - button "Save As..." [disabled] [ref=e52]:
+          - img [ref=e54]
+          - text: Save As...
+    - main [ref=e58]:
+      - generic [ref=e60]:
+        - heading "No save open" [level=2] [ref=e61]
+        - paragraph [ref=e62]: Use Open Save to start a single-document editing session.

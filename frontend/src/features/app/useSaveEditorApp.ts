@@ -159,13 +159,14 @@ export function useSaveEditorApp() {
         clearDocumentState();
         throw new Error("Failed to open save: validation reported an invalid save structure.");
       }
+      resetFeatureState();
       setSummary(opened);
       await refreshDocumentAssets();
       await hydrateDocument(opened.preferred_game);
       setSection("characters");
       setCharacterTab("overview");
     });
-  }, [clearDocumentState, hydrateDocument, refreshDocumentAssets, run]);
+  }, [clearDocumentState, hydrateDocument, refreshDocumentAssets, resetFeatureState, run]);
 
   const handleSaveAs = useCallback(async () => {
     if (!summary || !summary.dirty) {
@@ -310,7 +311,7 @@ export function useSaveEditorApp() {
     characters: characterPanel.state.characters.length,
     inventory: summary?.backpack_count || 0,
     recipes: craftingPanel.state.craftingRecipeDrafts.length,
-    plot_flags: plotFlagsPanel.state.groupedPlotIntegers.reduce((total, group) => total + group.flags.length, 0),
+    plot_flags: plotFlagsEditor.modifiedCount,
   } satisfies Record<Section, number>;
 
   return {

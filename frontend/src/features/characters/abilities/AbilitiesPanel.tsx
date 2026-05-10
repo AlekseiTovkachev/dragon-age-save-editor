@@ -57,7 +57,7 @@ export function AbilitiesPanel({ state, actions, canEdit, busy }: AbilitiesPanel
         <KindTabs
           kinds={state.visibleAbilityKinds}
           activeKind={activeKind}
-          counts={abilityCounts(state.abilityDrafts)}
+          counts={abilityCounts(state.abilityDrafts, actions.visibleTreeAbilities)}
           onSelect={(kind) => {
             setActiveKindDraft(kind);
             setSelectedTreeIdDraft("");
@@ -85,6 +85,7 @@ export function AbilitiesPanel({ state, actions, canEdit, busy }: AbilitiesPanel
         />
         <RankLadder
           kind={activeKind}
+          isDa2={state.isDa2}
           tree={selectedTree}
           ownedIds={ownedIds}
           canEdit={canEdit}
@@ -134,11 +135,18 @@ function filterTrees(trees: AbilityTree[], search: string) {
   });
 }
 
-function abilityCounts(abilityDrafts: Record<AbilityListKind, Ability[]>): Record<AbilityListKind, number> {
+function abilityCounts(
+  abilityDrafts: Record<AbilityListKind, Ability[]>,
+  visibleTreeFn: (list: AbilityListKind) => Ability[],
+): Record<AbilityListKind, number> {
+  // Count owned abilities that pass through the full visible-tree filter (DB-known check included).
+  const ownedSkills = new Set(abilityDrafts.skills.map((a) => a.id));
+  const ownedTalents = new Set(abilityDrafts.talents.map((a) => a.id));
+  const ownedSpells = new Set(abilityDrafts.spells.map((a) => a.id));
   return {
-    skills: abilityDrafts.skills.length,
-    talents: abilityDrafts.talents.length,
-    spells: abilityDrafts.spells.length,
+    skills: visibleTreeFn("skills").filter((a) => ownedSkills.has(a.id)).length,
+    talents: visibleTreeFn("talents").filter((a) => ownedTalents.has(a.id)).length,
+    spells: visibleTreeFn("spells").filter((a) => ownedSpells.has(a.id)).length,
   };
 }
 

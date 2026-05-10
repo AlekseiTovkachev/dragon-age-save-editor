@@ -4,6 +4,7 @@ import type { AbilityTree } from "./TreeList";
 
 type RankLadderProps = {
   kind: AbilityListKind;
+  isDa2: boolean;
   tree: AbilityTree | null;
   ownedIds: Set<number>;
   canEdit: boolean;
@@ -15,6 +16,7 @@ type RankLadderProps = {
 
 export function RankLadder({
   kind,
+  isDa2,
   tree,
   ownedIds,
   canEdit,
@@ -31,11 +33,13 @@ export function RankLadder({
     );
   }
 
+  const showRanksSuffix = kind === "skills" || !isDa2;
+  const panelLabel = showRanksSuffix ? `${tree.label} ranks` : tree.label;
   return (
-    <div className="ranks-panel" aria-label={`${tree.label} ranks`}>
+    <div className="ranks-panel" aria-label={panelLabel}>
       <div className="card-head">
-        <h3 className="card-title">{tree.label} ranks</h3>
-        <span className="helptext">Locked ranks are required by another ability.</span>
+        <h3 className="card-title">{panelLabel}</h3>
+        <span className="helptext">Locked abilities are required by another ability.</span>
       </div>
       {tree.abilities.map((ability, index) => {
         const owned = ownedIds.has(ability.id);

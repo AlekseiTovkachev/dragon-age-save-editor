@@ -4047,6 +4047,9 @@ pub const SAVEGAME_ITEM_MATERIALTYPE: u32 = 16230;
 /// Item Stealable | True if the item is Stealable
 pub const SAVEGAME_ITEM_STEALABLE: u32 = 16231;
 
+/// Item Level | DA2 item scaling level (field observed in DA2 saves; absent in DAO)
+pub const SAVEGAME_ITEM_LEVEL: u32 = 16238;
+
 /// Object Plot | If the object marked as a plot object.
 pub const SAVEGAME_OBJECT_PLOT: u32 = 16250;
 

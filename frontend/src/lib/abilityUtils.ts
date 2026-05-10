@@ -21,6 +21,9 @@ function isWeaponTalent(ability: Ability): boolean {
 }
 
 function abilityGroupLabel(list: AbilityListKind, ability: Ability, knownAbilities: Ability[]): string {
+  if (ability.ability_type === "Class") {
+    return "Class Unlocks";
+  }
   if (list === "spells") {
     return ability.tree ? `${ability.tree} Spells` : "Other Spells";
   }
@@ -66,7 +69,7 @@ export function groupedAbilities(
 }
 
 export function isUselessDa2Talent(ability: Ability): boolean {
-  return ability.id < 100000 && ability.id !== 700000;
+  return (ability.id < 100000 && ability.id !== 700000) || ability.id === 300000;
 }
 
 export function visibleAbilities(isDa2: boolean, list: AbilityListKind, abilities: Ability[]): Ability[] {
@@ -104,6 +107,18 @@ export function allKnownAbilities(
   const byId = new Map<number, Ability>();
   for (const ability of visibleAbilities(isDa2, list, [...availableAbilities[list], ...abilityDrafts[list]])) {
     byId.set(ability.id, ability);
+  }
+  if (isDa2 && list === "talents") {
+    // Drop game-internal ability IDs (e.g. 311002, 312002) that appear in TALENTLIST
+    // but have no DB entry in any list. These are companion-specific passive triggers
+    // that should never be displayed.
+    const dbIds = new Set<number>();
+    for (const abilities of Object.values(availableAbilities)) {
+      for (const a of abilities) dbIds.add(a.id);
+    }
+    for (const id of byId.keys()) {
+      if (!dbIds.has(id)) byId.delete(id);
+    }
   }
   return Array.from(byId.values());
 }

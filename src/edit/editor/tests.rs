@@ -1153,3 +1153,4 @@ fn clear_backpack_item_properties(editor: &mut SaveEditor, index: usize) {
         .unwrap()
         .clear();
 }
+

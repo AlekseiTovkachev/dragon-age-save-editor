@@ -175,6 +175,16 @@ export function usePlotFlagsEditor({ run, refreshSummary }: UsePlotFlagsEditorOp
     [plotBooleanDrafts, plotIntegerDrafts],
   );
 
+  const modifiedCount = useMemo(() => {
+    const boolModified = Object.keys(plotBooleanDrafts).filter(
+      (k) => plotBooleanDrafts[Number(k)] !== plotBooleanValues[Number(k)],
+    ).length;
+    const intModified = Object.keys(plotIntegerDrafts).filter(
+      (k) => plotIntegerDrafts[Number(k)] !== plotIntegerValues[Number(k)],
+    ).length;
+    return boolModified + intModified;
+  }, [plotBooleanDrafts, plotBooleanValues, plotIntegerDrafts, plotIntegerValues]);
+
   return {
     plotBooleanValues,
     plotBooleanDrafts,
@@ -193,5 +203,6 @@ export function usePlotFlagsEditor({ run, refreshSummary }: UsePlotFlagsEditorOp
     resetToCommittedDrafts,
     clear,
     hasPlotWarnings,
+    modifiedCount,
   };
 }

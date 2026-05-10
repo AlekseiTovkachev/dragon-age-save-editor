@@ -10,7 +10,7 @@ use crate::domain::stats::{
 use crate::gff4::fields::{
     ITEM_COST, ITEM_STACKSIZE, OBJECT_ID, SAVEGAME_BACKPACK, SAVEGAME_CAMPAIGN,
     SAVEGAME_CRAFTING_RECIPE_LIST, SAVEGAME_CREATURE_STATS, SAVEGAME_EQUIPMENT_ITEMS,
-    SAVEGAME_ITEM_MATERIALTYPE, SAVEGAME_MONEY, SAVEGAME_OBJECT_NAME, SAVEGAME_OBJECT_RANK,
+    SAVEGAME_ITEM_LEVEL, SAVEGAME_ITEM_MATERIALTYPE, SAVEGAME_MONEY, SAVEGAME_OBJECT_NAME,
     SAVEGAME_PARTYLIST, SAVEGAME_PARTYPOOLMEMBERS, SAVEGAME_SKILLLIST, SAVEGAME_SPELLLIST,
     SAVEGAME_STATLIST, SAVEGAME_TALENTLIST, TEMPLATERESREF, field_id_by_name,
 };
@@ -524,7 +524,7 @@ fn extract_item(
         equipment_slot: optional_u32_by_name(source, SAVEGAME_EQUIPMENTSET_SLOT_NAME),
         item_cost: optional_u32(source, ITEM_COST),
         item_stacksize: optional_u32(source, ITEM_STACKSIZE),
-        item_level: optional_u8(source, SAVEGAME_OBJECT_RANK),
+        item_level: optional_i32(source, SAVEGAME_ITEM_LEVEL).and_then(|v| u8::try_from(v).ok()),
         material,
         material_profile,
         material_info,
@@ -669,13 +669,6 @@ fn optional_u32_by_name(source: &GffStruct, name: &str) -> Option<u32> {
 fn optional_i32(source: &GffStruct, label: u32) -> Option<i32> {
     source.get(label).and_then(|value| match value {
         Value::Int32(v) => Some(*v),
-        _ => None,
-    })
-}
-
-fn optional_u8(source: &GffStruct, label: u32) -> Option<u8> {
-    source.get(label).and_then(|value| match value {
-        Value::UInt8(v) => Some(*v),
         _ => None,
     })
 }

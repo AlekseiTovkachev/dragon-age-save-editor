@@ -159,11 +159,18 @@ impl SqliteGameData {
             .collect();
 
         let ability_type = ability_type.map(|value| value.trim().to_string());
+        let kind = if ability_type.as_deref() == Some("Class")
+            && name.as_deref().is_some_and(|n| n.contains("Mage"))
+        {
+            AbilityKind::Spell
+        } else {
+            AbilityKind::from_db_type(ability_type.as_deref())
+        };
         AbilityRef {
             id: parsed_id,
             name,
             tree,
-            kind: AbilityKind::from_db_type(ability_type.as_deref()),
+            kind,
             ability_type,
             core_ids,
         }
@@ -940,6 +947,21 @@ mod tests {
             assert_eq!(ability.tree.as_deref(), Some("Mage Specialization"));
             assert_eq!(ability.kind, AbilityKind::Spell);
         }
+    }
+
+    #[test]
+    fn da2_mage_class_unlock_is_classified_as_spell() {
+        let lookup = SqliteGameData::open(DEFAULT_GAME_DATA_PATH).unwrap();
+        let ability = lookup.ability(300000, Some(GameId::Da2)).unwrap().unwrap();
+        assert_eq!(ability.name.as_deref(), Some("Mage Class"));
+        assert_eq!(ability.ability_type.as_deref(), Some("Class"));
+        assert_eq!(ability.kind, AbilityKind::Spell);
+
+        // Warrior and Rogue class unlocks remain Talents
+        let warrior = lookup.ability(100000, Some(GameId::Da2)).unwrap().unwrap();
+        assert_eq!(warrior.kind, AbilityKind::Talent);
+        let rogue = lookup.ability(200000, Some(GameId::Da2)).unwrap().unwrap();
+        assert_eq!(rogue.kind, AbilityKind::Talent);
     }
 
     #[test]
