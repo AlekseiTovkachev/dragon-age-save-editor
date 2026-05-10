@@ -19,7 +19,8 @@
     "data:verify": "node tools/python.mjs tools/gamedata/verify_gamedata.py",
     "preview": "vite preview",
     "tauri": "tauri",
-    "ingame-test": "cargo build --bin apply_edit -q && node tools/ingame-test.mjs"
+    "ingame-server": "node tools/ingame-server.mjs",
+    "ingame-test": "cargo build --bin apply_edit -q && playwright test --config playwright.ingame.config.ts"
   },
   "dependencies": {
     "@tauri-apps/api": "^2.0.0",
