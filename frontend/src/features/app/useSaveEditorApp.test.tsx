@@ -278,6 +278,7 @@ describe("useSaveEditorApp", () => {
     await act(async () => {
       await result.current.commitDrafts();
     });
+    expect(result.current.characterPanel.state.levelDraft).toBe("7");
     act(() => {
       result.current.characterPanel.actions.setLevelDraft("8");
       result.current.resetToCommittedDrafts();
@@ -336,12 +337,81 @@ describe("useSaveEditorApp", () => {
       await result.current.commitDrafts();
     });
 
-    expect(mocks.executeCommand).toHaveBeenCalledWith({ command: "set_money", money: 999 });
     expect(mocks.executeCommand).toHaveBeenCalledWith({
       command: "apply_batch",
-      commands: [{ command: "set_backpack_item_stack_size", index: 0, stack_size: 42 }],
+      commands: [
+        { command: "set_money", money: 999 },
+        { command: "set_backpack_item_stack_size", index: 0, stack_size: 42 },
+      ],
     });
     expect(result.current.inventoryPanel.state.moneyDraft).toBe("999");
+  });
+
+  it("applies cross-panel drafts in one merged batch", async () => {
+    mocks.open.mockResolvedValue("C:/save.das");
+    mocks.openDocument.mockResolvedValue(summary({ money: 100 }));
+    const { result } = renderHook(() => useSaveEditorApp());
+
+    await act(async () => {
+      await result.current.handleOpen();
+    });
+    await waitFor(() => expect(result.current.characterPanel.state.levelDraft).toBe("1"));
+    act(() => {
+      result.current.setSection("inventory");
+    });
+    await waitFor(() => expect(result.current.inventoryPanel.state.itemIndex).toBe(0));
+    mocks.executeCommand.mockClear();
+
+    act(() => {
+      result.current.characterPanel.actions.setLevelDraft("7");
+      result.current.inventoryPanel.actions.setMoneyDraft("999");
+      result.current.inventoryPanel.actions.setItemMetadataDraft((current) => ({ ...current, stack_size: "42" }));
+    });
+    await act(async () => {
+      await result.current.commitDrafts();
+    });
+
+    const applyBatchCalls = mocks.executeCommand.mock.calls
+      .map(([command]) => command)
+      .filter((command) => command.command === "apply_batch");
+    expect(applyBatchCalls[0]).toEqual({
+      command: "apply_batch",
+      commands: [
+        { command: "set_level", target: "main_character", level: 7 },
+        { command: "set_money", money: 999 },
+        { command: "set_backpack_item_stack_size", index: 0, stack_size: 42 },
+      ],
+    });
+  });
+
+  it("resets drafts across panels in one action", async () => {
+    mocks.open.mockResolvedValue("C:/save.das");
+    mocks.openDocument.mockResolvedValue(summary({ money: 100 }));
+    const { result } = renderHook(() => useSaveEditorApp());
+
+    await act(async () => {
+      await result.current.handleOpen();
+    });
+    await waitFor(() => expect(result.current.characterPanel.state.levelDraft).toBe("1"));
+    act(() => {
+      result.current.setSection("inventory");
+    });
+    await waitFor(() => expect(result.current.inventoryPanel.state.itemIndex).toBe(0));
+
+    act(() => {
+      result.current.characterPanel.actions.setLevelDraft("9");
+      result.current.inventoryPanel.actions.setMoneyDraft("999");
+      result.current.inventoryPanel.actions.setItemMetadataDraft((current) => ({ ...current, stack_size: "42" }));
+      result.current.craftingPanel.actions.handleToggle(2, true);
+    });
+    act(() => {
+      result.current.resetToCommittedDrafts();
+    });
+
+    expect(result.current.characterPanel.state.levelDraft).toBe("1");
+    expect(result.current.inventoryPanel.state.moneyDraft).toBe("100");
+    expect(result.current.inventoryPanel.state.itemMetadataDraft.stack_size).toBe("3");
+    expect(result.current.craftingPanel.state.craftingRecipeDrafts).toEqual([1]);
   });
 
   it("loads equipment items for the active character equipment tab", async () => {

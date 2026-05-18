@@ -49,7 +49,9 @@ type PendingBackpackClone = {
   item: Item;
 };
 
-export type InventoryCloneSpec = Pick<PendingBackpackClone, "tempIndex" | "sourceIndex">;
+export type InventoryCloneSpec = Pick<PendingBackpackClone, "tempIndex" | "sourceIndex"> & {
+  batch: SaveCommand[];
+};
 
 type InventoryCommandPlan = {
   clones?: InventoryCloneSpec[];
@@ -378,7 +380,16 @@ export function useInventoryEditor({
     }
 
     return {
-      clones: clonedBackpackItems.map(({ tempIndex, sourceIndex }) => ({ tempIndex, sourceIndex })),
+      clones: clonedBackpackItems.map(({ tempIndex, sourceIndex, item }) => {
+        const draft = itemDrafts.current[`${containerKey}:${tempIndex}`];
+        return {
+          tempIndex,
+          sourceIndex,
+          batch: draft
+            ? planInventoryDraftCommands({ container, entries: [{ index: tempIndex, item, draft }] })
+            : [],
+        };
+      }),
       removes: [...removedBackpackIndexes].sort((a, b) => b - a),
       batch,
     };
@@ -487,6 +498,17 @@ export function useInventoryEditor({
       clonedBackpackItems: [],
     });
   }, [draftCheckpoint, moneyDraft, storeCurrentItemDraft]);
+
+  const markDraftsCommitted = useCallback((clearBackpackStructureDrafts = false) => {
+    setRemovedBackpackIndexes([]);
+    setClonedBackpackItems([]);
+    nextTemporaryBackpackIndex.current = -1;
+    if (clearBackpackStructureDrafts) {
+      itemDrafts.current = withoutDraftsForContainer(itemDrafts.current, containerKey);
+      currentItemDraftKey.current = null;
+    }
+    checkpointDrafts();
+  }, [checkpointDrafts, containerKey]);
 
   const commitDrafts = useCallback(async () => {
     if (!await commitMoneyDraft()) {
@@ -601,6 +623,7 @@ export function useInventoryEditor({
     handleBackpackClone,
     handleWikiOpen,
     planCommands,
+    markDraftsCommitted,
     commitDrafts,
     resetToCommittedDrafts,
     clear,

@@ -198,13 +198,30 @@ export function useCharacterEditor({ summary, run, refreshSummary }: UseCharacte
     }
   }, []);
 
-  const loadCharacter = useCallback(async (target: CharacterTarget) => {
+  const fetchCharacter = useCallback(async (target: CharacterTarget, select: boolean) => {
     const response = expectResult(await executeCommand({ command: "get_character", target }), "character");
     const key = targetKey(target);
-    setCharacterKey(key);
+    if (select) {
+      setCharacterKey(key);
+    }
     setLoadedCharacters((prev) => ({ ...prev, [key]: response.character }));
     seedDraftForCharacter(key, response.character);
   }, [seedDraftForCharacter]);
+
+  const loadCharacter = useCallback(async (target: CharacterTarget) => {
+    await fetchCharacter(target, true);
+  }, [fetchCharacter]);
+
+  const refreshLoadedCharacters = useCallback(async () => {
+    const targetsByKey = new Map(characters.map((entry) => [targetKey(entry.target), entry.target]));
+    targetsByKey.set("main", MAIN_TARGET);
+    for (const key of Object.keys(loadedCharacters)) {
+      const target = targetsByKey.get(key);
+      if (target) {
+        await fetchCharacter(target, false);
+      }
+    }
+  }, [characters, fetchCharacter, loadedCharacters]);
 
   useEffect(() => {
     if (summary) {
@@ -290,6 +307,10 @@ export function useCharacterEditor({ summary, run, refreshSummary }: UseCharacte
   const checkpointDrafts = useCallback(() => {
     draftCheckpoint.checkpoint(draftsRef.current);
   }, [draftCheckpoint]);
+
+  const markDraftsCommitted = useCallback(() => {
+    checkpointDrafts();
+  }, [checkpointDrafts]);
 
   const commitDrafts = useCallback(async () => {
     if (!await commitCharacterFields()) {
@@ -403,6 +424,7 @@ export function useCharacterEditor({ summary, run, refreshSummary }: UseCharacte
     refreshCharacters,
     refreshAvailableAbilities,
     loadCharacter,
+    refreshLoadedCharacters,
     commitCharacterFields,
     commitAbilityDrafts,
     abilityIsLocked: (list: AbilityListKind, abilityId: number) => abilityIsLocked(list, abilityId, abilityDrafts),
@@ -414,6 +436,7 @@ export function useCharacterEditor({ summary, run, refreshSummary }: UseCharacte
       visibleTreeAbilities(isDa2, list, availableAbilities, abilityDrafts),
     handleVisibleAbilityAdd,
     planCommands,
+    markDraftsCommitted,
     commitDrafts,
     resetToCommittedDrafts,
     clear,

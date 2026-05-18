@@ -9,6 +9,7 @@ import { useCharacterEditor } from "../characters/useCharacterEditor";
 import { useCraftingEditor } from "../crafting/useCraftingEditor";
 import { useInventoryEditor } from "../inventory/useInventoryEditor";
 import { usePlotFlagsEditor } from "../plotFlags/usePlotFlagsEditor";
+import { useDraftStore } from "./useDraftStore";
 
 export function useSaveEditorApp() {
   const [section, setSection] = useState<Section>("characters");
@@ -39,8 +40,6 @@ export function useSaveEditorApp() {
     refreshAvailableAbilities,
     refreshCharacters,
     clear: clearCharacters,
-    commitDrafts: commitCharacterDrafts,
-    resetToCommittedDrafts: resetCharacterDraftsToCommitted,
   } = characterEditor;
 
   const selectedInventoryContainer = useMemo<InventoryContainer>(() => {
@@ -63,25 +62,29 @@ export function useSaveEditorApp() {
     refreshAvailableItemProperties,
     refreshItems,
     clear: clearInventory,
-    commitDrafts: commitInventoryDrafts,
-    resetToCommittedDrafts: resetInventoryDraftsToCommitted,
   } = inventoryEditor;
   const craftingEditor = useCraftingEditor({ run, refreshSummary });
   const {
     refreshAvailableCraftingRecipes,
     refreshCraftingRecipes,
     clear: clearCrafting,
-    commitDrafts: commitCraftingDrafts,
-    resetToCommittedDrafts: resetCraftingDraftsToCommitted,
   } = craftingEditor;
   const plotFlagsEditor = usePlotFlagsEditor({ run, refreshSummary });
   const {
     refreshAvailablePlotFlags,
     refreshPlotFlags,
     clear: clearPlotFlags,
-    commitDrafts: commitPlotFlagDrafts,
-    resetToCommittedDrafts: resetPlotFlagDraftsToCommitted,
   } = plotFlagsEditor;
+
+  const draftStore = useDraftStore({
+    preferredGame: summary?.preferred_game,
+    run,
+    refreshSummary,
+    characterEditor,
+    inventoryEditor,
+    craftingEditor,
+    plotFlagsEditor,
+  });
 
   const resetFeatureState = useCallback(() => {
     clearCharacters();
@@ -185,33 +188,6 @@ export function useSaveEditorApp() {
       setSummary(response.summary);
     });
   }, [run, summary]);
-
-  const commitDrafts = useCallback(async () => {
-    if (!await commitCharacterDrafts()) {
-      return;
-    }
-    if (!await commitInventoryDrafts()) {
-      return;
-    }
-    if (!await commitCraftingDrafts()) {
-      return;
-    }
-    if (summary?.preferred_game === "da2") {
-      await commitPlotFlagDrafts();
-    }
-  }, [commitCharacterDrafts, commitCraftingDrafts, commitInventoryDrafts, commitPlotFlagDrafts, summary?.preferred_game]);
-
-  const resetToCommittedDrafts = useCallback(() => {
-    resetCharacterDraftsToCommitted();
-    resetInventoryDraftsToCommitted();
-    resetCraftingDraftsToCommitted();
-    resetPlotFlagDraftsToCommitted();
-  }, [
-    resetCharacterDraftsToCommitted,
-    resetCraftingDraftsToCommitted,
-    resetInventoryDraftsToCommitted,
-    resetPlotFlagDraftsToCommitted,
-  ]);
 
   const visibleSections = useMemo(
     () => SECTIONS.filter((entry) => entry !== "plot_flags" || summary?.preferred_game === "da2"),
@@ -335,8 +311,8 @@ export function useSaveEditorApp() {
     refreshSummary,
     hydrateDocument,
     clearDocumentState,
-    commitDrafts,
-    resetToCommittedDrafts,
+    commitDrafts: draftStore.apply,
+    resetToCommittedDrafts: draftStore.reset,
     handleOpen,
     handleSaveAs,
   };

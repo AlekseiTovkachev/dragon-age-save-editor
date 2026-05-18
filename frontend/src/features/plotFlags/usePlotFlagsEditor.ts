@@ -138,6 +138,10 @@ export function usePlotFlagsEditor({ run, refreshSummary }: UsePlotFlagsEditorOp
     });
   }, [draftCheckpoint, plotBooleanDrafts, plotIntegerDrafts]);
 
+  const markDraftsCommitted = useCallback(() => {
+    checkpointDrafts();
+  }, [checkpointDrafts]);
+
   const commitDrafts = useCallback(async () => {
     if (!await commitPlotFlagDrafts()) {
       return false;
@@ -234,6 +238,7 @@ export function usePlotFlagsEditor({ run, refreshSummary }: UsePlotFlagsEditorOp
     commitPlotFlagDrafts,
     resetLoadedDrafts,
     planCommands,
+    markDraftsCommitted,
     commitDrafts,
     resetToCommittedDrafts,
     clear,

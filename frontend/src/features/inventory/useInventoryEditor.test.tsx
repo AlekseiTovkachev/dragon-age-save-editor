@@ -379,7 +379,7 @@ describe("useInventoryEditor", () => {
     });
 
     expect(result.current.planCommands()).toEqual({
-      clones: [{ tempIndex: -1, sourceIndex: 0 }],
+      clones: [{ tempIndex: -1, sourceIndex: 0, batch: [] }],
       removes: [1],
       batch: [],
     });

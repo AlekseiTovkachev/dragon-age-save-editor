@@ -92,6 +92,10 @@ export function useCraftingEditor({ run, refreshSummary }: UseCraftingEditorOpti
     draftCheckpoint.checkpoint(craftingRecipeDrafts);
   }, [craftingRecipeDrafts, draftCheckpoint]);
 
+  const markDraftsCommitted = useCallback(() => {
+    checkpointDrafts();
+  }, [checkpointDrafts]);
+
   const commitDrafts = useCallback(async () => {
     if (!await commitRecipeDrafts()) {
       return false;
@@ -144,6 +148,7 @@ export function useCraftingEditor({ run, refreshSummary }: UseCraftingEditorOpti
     commitRecipeDrafts,
     resetLoadedDrafts,
     planCommands,
+    markDraftsCommitted,
     commitDrafts,
     resetToCommittedDrafts,
     clear,
