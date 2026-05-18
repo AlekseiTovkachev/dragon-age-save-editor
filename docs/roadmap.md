@@ -2,9 +2,11 @@
 
 This is the current working roadmap. Historical completed refactors live in `docs/refactoring.md` and `docs/frontend-refactoring.md`.
 
+For the path to v1.0, see `docs/release-checklist.md`.
+
 ## Near-Term
 
-- Expand write/reload tests around item metadata, item property power encoding, and DA2 plot flags.
+- Expand write/reload tests around item metadata, item property power encoding, and DA2 plot flags. (Tracked in `docs/release-checklist.md` A1.)
 - Keep smoke tests aligned with main user workflows when UI flow changes.
 - Refresh manual QA checklist statuses after each substantial desktop UI pass.
 
