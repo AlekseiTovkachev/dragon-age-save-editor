@@ -137,6 +137,53 @@ describe("useCharacterEditor", () => {
     expect(result.current.levelDraft).toBe("8");
   });
 
+  it("preserves drafts across character switch", async () => {
+    const companionTarget = { companion: { index: 0 } } as const;
+    mocks.executeCommand.mockImplementation(async (command: { command: string; target?: unknown }) => {
+      if (command.command === "get_character") {
+        if (command.target === companionTarget) {
+          return {
+            result: "character",
+            target: companionTarget,
+            character: character({ name: "Morrigan", core_stats: { ...character().core_stats, strength: 8 } }),
+          };
+        }
+        return {
+          result: "character",
+          target: "main_character",
+          character: character({ core_stats: { ...character().core_stats, strength: 10 } }),
+        };
+      }
+      return { result: "character", target: "main_character", character: character() };
+    });
+    const refreshSummary = vi.fn(async () => undefined);
+    const { result } = renderHook(() =>
+      useCharacterEditor({ summary: null, run, refreshSummary }),
+    );
+
+    await act(async () => {
+      await result.current.loadCharacter("main_character");
+    });
+    await waitFor(() => expect(result.current.character?.name).toBe("Hero"));
+
+    act(() => {
+      result.current.setStatsDraft((current) => ({ ...current, strength: "21" }));
+    });
+
+    await act(async () => {
+      await result.current.loadCharacter(companionTarget);
+    });
+    await waitFor(() => expect(result.current.character?.name).toBe("Morrigan"));
+    expect(result.current.statsDraft.strength).toBe("8");
+
+    act(() => {
+      result.current.setCharacterKey("main");
+    });
+
+    await waitFor(() => expect(result.current.character?.name).toBe("Hero"));
+    expect(result.current.statsDraft.strength).toBe("21");
+  });
+
   it("skips ability replacement when ability drafts are unchanged", async () => {
     const loaded = character({
       skills: [ability(1)],

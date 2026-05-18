@@ -1,5 +1,6 @@
 /* eslint-disable react-hooks/set-state-in-effect -- Character form drafts intentionally mirror the loaded character snapshot. */
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { SetStateAction } from "react";
 import { executeCommand, expectResult } from "../../api";
 import { useDraftCheckpoint } from "../../hooks/useDraftCheckpoint";
 import {
@@ -38,38 +39,76 @@ const EMPTY_ABILITIES: Record<AbilityListKind, Ability[]> = {
   spells: [],
 };
 
-type CharacterDraftCheckpoint = CharacterDraft;
+const EMPTY_DRAFT: CharacterDraft = {
+  statsDraft: {},
+  levelDraft: "",
+  experienceDraft: "",
+  approvalDraft: "",
+  pointPoolsDraft: {},
+  abilityDrafts: EMPTY_ABILITIES,
+};
 
-const cloneCharacterCheckpoint = (checkpoint: CharacterDraftCheckpoint): CharacterDraftCheckpoint => ({
-  statsDraft: { ...checkpoint.statsDraft },
-  levelDraft: checkpoint.levelDraft,
-  experienceDraft: checkpoint.experienceDraft,
-  approvalDraft: checkpoint.approvalDraft,
-  pointPoolsDraft: { ...checkpoint.pointPoolsDraft },
+type CharacterDraftMap = Record<string, CharacterDraft>;
+type DraftSetter<T> = SetStateAction<T>;
+
+const cloneCharacterDraft = (draft: CharacterDraft): CharacterDraft => ({
+  statsDraft: { ...draft.statsDraft },
+  levelDraft: draft.levelDraft,
+  experienceDraft: draft.experienceDraft,
+  approvalDraft: draft.approvalDraft,
+  pointPoolsDraft: { ...draft.pointPoolsDraft },
   abilityDrafts: {
-    skills: cloneAbilities(checkpoint.abilityDrafts.skills),
-    talents: cloneAbilities(checkpoint.abilityDrafts.talents),
-    spells: cloneAbilities(checkpoint.abilityDrafts.spells),
+    skills: cloneAbilities(draft.abilityDrafts.skills),
+    talents: cloneAbilities(draft.abilityDrafts.talents),
+    spells: cloneAbilities(draft.abilityDrafts.spells),
+  },
+});
+
+const cloneCharacterDraftMap = (map: CharacterDraftMap): CharacterDraftMap =>
+  Object.fromEntries(Object.entries(map).map(([key, draft]) => [key, cloneCharacterDraft(draft)]));
+
+const draftFromCharacter = (source: Character): CharacterDraft => ({
+  statsDraft: {
+    strength: source.core_stats.strength.toString(),
+    dexterity: source.core_stats.dexterity.toString(),
+    willpower: source.core_stats.willpower.toString(),
+    magic: source.core_stats.magic.toString(),
+    cunning: source.core_stats.cunning.toString(),
+    constitution: source.core_stats.constitution.toString(),
+  },
+  levelDraft: source.level?.toString() ?? "",
+  experienceDraft: source.experience?.toString() ?? "",
+  approvalDraft: source.approval?.toString() ?? "",
+  pointPoolsDraft: {
+    attribute_points: source.point_pools.attribute_points?.toString() ?? "",
+    skill_points: source.point_pools.skill_points?.toString() ?? "",
+    talent_points: source.point_pools.talent_points?.toString() ?? "",
+    specialization_points: source.point_pools.specialization_points?.toString() ?? "",
+  },
+  abilityDrafts: {
+    skills: cloneAbilities(source.skills),
+    talents: cloneAbilities(source.talents),
+    spells: cloneAbilities(source.spells),
   },
 });
 
 export function useCharacterEditor({ summary, run, refreshSummary }: UseCharacterEditorOptions) {
   const [characters, setCharacters] = useState<CharacterSummary[]>([]);
   const [characterKey, setCharacterKey] = useState("main");
-  const [character, setCharacter] = useState<Character | null>(null);
-  const [statsDraft, setStatsDraft] = useState<Record<string, string>>({});
-  const [levelDraft, setLevelDraft] = useState("");
-  const [experienceDraft, setExperienceDraft] = useState("");
-  const [approvalDraft, setApprovalDraft] = useState("");
-  const [pointPoolsDraft, setPointPoolsDraft] = useState<Record<string, string>>({});
-  const [abilityDrafts, setAbilityDrafts] = useState<Record<AbilityListKind, Ability[]>>(EMPTY_ABILITIES);
+  const [loadedCharacters, setLoadedCharacters] = useState<Record<string, Character>>({});
+  const [drafts, setDrafts] = useState<CharacterDraftMap>({});
   const [availableAbilities, setAvailableAbilities] = useState<Record<AbilityListKind, Ability[]>>(EMPTY_ABILITIES);
   const [selectedAbilityToAdd, setSelectedAbilityToAdd] = useState<Record<AbilityListKind, string>>({
     skills: "",
     talents: "",
     spells: "",
   });
-  const draftCheckpoint = useDraftCheckpoint<CharacterDraftCheckpoint>({ clone: cloneCharacterCheckpoint });
+  const draftCheckpoint = useDraftCheckpoint<CharacterDraftMap>({ clone: cloneCharacterDraftMap });
+  const draftsRef = useRef(drafts);
+
+  useEffect(() => {
+    draftsRef.current = drafts;
+  }, [drafts]);
 
   const isDa2 = summary?.preferred_game === "da2";
   const selectedCharacterTarget = useMemo(
@@ -81,77 +120,67 @@ export function useCharacterEditor({ summary, run, refreshSummary }: UseCharacte
     [isDa2],
   );
 
-  const checkpointFromCharacter = useCallback((source: Character): CharacterDraftCheckpoint => ({
-    statsDraft: {
-      strength: source.core_stats.strength.toString(),
-      dexterity: source.core_stats.dexterity.toString(),
-      willpower: source.core_stats.willpower.toString(),
-      magic: source.core_stats.magic.toString(),
-      cunning: source.core_stats.cunning.toString(),
-      constitution: source.core_stats.constitution.toString(),
-    },
-    levelDraft: source.level?.toString() ?? "",
-    experienceDraft: source.experience?.toString() ?? "",
-    approvalDraft: source.approval?.toString() ?? "",
-    pointPoolsDraft: {
-      attribute_points: source.point_pools.attribute_points?.toString() ?? "",
-      skill_points: source.point_pools.skill_points?.toString() ?? "",
-      talent_points: source.point_pools.talent_points?.toString() ?? "",
-      specialization_points: source.point_pools.specialization_points?.toString() ?? "",
-    },
-    abilityDrafts: {
-      skills: cloneAbilities(source.skills),
-      talents: cloneAbilities(source.talents),
-      spells: cloneAbilities(source.spells),
-    },
-  }), []);
+  const character = loadedCharacters[characterKey] ?? null;
+  const currentDraft = drafts[characterKey] ?? EMPTY_DRAFT;
+  const statsDraft = currentDraft.statsDraft;
+  const levelDraft = currentDraft.levelDraft;
+  const experienceDraft = currentDraft.experienceDraft;
+  const approvalDraft = currentDraft.approvalDraft;
+  const pointPoolsDraft = currentDraft.pointPoolsDraft;
+  const abilityDrafts = currentDraft.abilityDrafts;
 
-  const applyCheckpoint = useCallback((checkpoint: CharacterDraftCheckpoint) => {
-    setStatsDraft({ ...checkpoint.statsDraft });
-    setLevelDraft(checkpoint.levelDraft);
-    setExperienceDraft(checkpoint.experienceDraft);
-    setApprovalDraft(checkpoint.approvalDraft);
-    setPointPoolsDraft({ ...checkpoint.pointPoolsDraft });
-    setAbilityDrafts({
-      skills: cloneAbilities(checkpoint.abilityDrafts.skills),
-      talents: cloneAbilities(checkpoint.abilityDrafts.talents),
-      spells: cloneAbilities(checkpoint.abilityDrafts.spells),
+  const updateCurrentDraft = useCallback(
+    (mutate: (current: CharacterDraft) => CharacterDraft) => {
+      setDrafts((prev) => {
+        const current = prev[characterKey] ? cloneCharacterDraft(prev[characterKey]) : cloneCharacterDraft(EMPTY_DRAFT);
+        return { ...prev, [characterKey]: mutate(current) };
+      });
+    },
+    [characterKey],
+  );
+
+  const applySetter = <T,>(setter: DraftSetter<T>, current: T): T =>
+    typeof setter === "function" ? (setter as (value: T) => T)(current) : setter;
+
+  const setStatsDraft = useCallback(
+    (setter: DraftSetter<Record<string, string>>) =>
+      updateCurrentDraft((draft) => ({ ...draft, statsDraft: applySetter(setter, draft.statsDraft) })),
+    [updateCurrentDraft],
+  );
+  const setLevelDraft = useCallback(
+    (setter: DraftSetter<string>) =>
+      updateCurrentDraft((draft) => ({ ...draft, levelDraft: applySetter(setter, draft.levelDraft) })),
+    [updateCurrentDraft],
+  );
+  const setExperienceDraft = useCallback(
+    (setter: DraftSetter<string>) =>
+      updateCurrentDraft((draft) => ({ ...draft, experienceDraft: applySetter(setter, draft.experienceDraft) })),
+    [updateCurrentDraft],
+  );
+  const setApprovalDraft = useCallback(
+    (setter: DraftSetter<string>) =>
+      updateCurrentDraft((draft) => ({ ...draft, approvalDraft: applySetter(setter, draft.approvalDraft) })),
+    [updateCurrentDraft],
+  );
+  const setPointPoolsDraft = useCallback(
+    (setter: DraftSetter<Record<string, string>>) =>
+      updateCurrentDraft((draft) => ({ ...draft, pointPoolsDraft: applySetter(setter, draft.pointPoolsDraft) })),
+    [updateCurrentDraft],
+  );
+  const setAbilityDrafts = useCallback(
+    (setter: DraftSetter<Record<AbilityListKind, Ability[]>>) =>
+      updateCurrentDraft((draft) => ({ ...draft, abilityDrafts: applySetter(setter, draft.abilityDrafts) })),
+    [updateCurrentDraft],
+  );
+
+  const seedDraftForCharacter = useCallback((key: string, source: Character) => {
+    setDrafts((prev) => {
+      if (prev[key]) {
+        return prev;
+      }
+      return { ...prev, [key]: draftFromCharacter(source) };
     });
   }, []);
-
-  const syncCharacterDrafts = useCallback((source: Character) => {
-    const checkpoint = checkpointFromCharacter(source);
-    draftCheckpoint.checkpoint(checkpoint);
-    applyCheckpoint(checkpoint);
-  }, [applyCheckpoint, checkpointFromCharacter, draftCheckpoint]);
-
-  const checkpointDrafts = useCallback(() => {
-    draftCheckpoint.checkpoint({
-      statsDraft: { ...statsDraft },
-      levelDraft,
-      experienceDraft,
-      approvalDraft,
-      pointPoolsDraft: { ...pointPoolsDraft },
-      abilityDrafts: {
-        skills: cloneAbilities(abilityDrafts.skills),
-        talents: cloneAbilities(abilityDrafts.talents),
-        spells: cloneAbilities(abilityDrafts.spells),
-      },
-    });
-  }, [abilityDrafts, approvalDraft, draftCheckpoint, experienceDraft, levelDraft, pointPoolsDraft, statsDraft]);
-
-  const resetToCommittedDrafts = useCallback(() => {
-    const checkpoint = draftCheckpoint.reset();
-    if (checkpoint) {
-      applyCheckpoint(checkpoint);
-    }
-  }, [applyCheckpoint, draftCheckpoint]);
-
-  const resetLoadedDrafts = useCallback(() => {
-    if (character) {
-      syncCharacterDrafts(character);
-    }
-  }, [character, syncCharacterDrafts]);
 
   const refreshCharacters = useCallback(async () => {
     const response = expectResult(await executeCommand({ command: "list_characters" }), "characters");
@@ -167,9 +196,11 @@ export function useCharacterEditor({ summary, run, refreshSummary }: UseCharacte
 
   const loadCharacter = useCallback(async (target: CharacterTarget) => {
     const response = expectResult(await executeCommand({ command: "get_character", target }), "character");
-    syncCharacterDrafts(response.character);
-    setCharacter(response.character);
-  }, [syncCharacterDrafts]);
+    const key = targetKey(target);
+    setCharacterKey(key);
+    setLoadedCharacters((prev) => ({ ...prev, [key]: response.character }));
+    seedDraftForCharacter(key, response.character);
+  }, [seedDraftForCharacter]);
 
   useEffect(() => {
     if (summary) {
@@ -196,15 +227,6 @@ export function useCharacterEditor({ summary, run, refreshSummary }: UseCharacte
     }
   }, []);
 
-  const currentDraft = useCallback((): CharacterDraft => ({
-    statsDraft,
-    levelDraft,
-    experienceDraft,
-    approvalDraft,
-    pointPoolsDraft,
-    abilityDrafts,
-  }), [abilityDrafts, approvalDraft, experienceDraft, levelDraft, pointPoolsDraft, statsDraft]);
-
   const commitPlannedDraftCommands = useCallback(async (includeAbilities: boolean) => {
     if (!character) {
       return false;
@@ -213,7 +235,7 @@ export function useCharacterEditor({ summary, run, refreshSummary }: UseCharacte
       const plannedCommands = planCharacterDraftCommands({
         target: selectedCharacterTarget,
         character,
-        draft: currentDraft(),
+        draft: currentDraft,
       }).filter((command) => includeAbilities || command.command !== "replace_ability_list");
 
       if (plannedCommands.length > 0) {
@@ -228,10 +250,6 @@ export function useCharacterEditor({ summary, run, refreshSummary }: UseCharacte
     return commitPlannedDraftCommands(false);
   }, [commitPlannedDraftCommands]);
 
-  const resetCharacterDraftToLoaded = useCallback(() => {
-    resetLoadedDrafts();
-  }, [resetLoadedDrafts]);
-
   const commitAbilityDrafts = useCallback(async () => {
     if (!character) {
       return false;
@@ -240,7 +258,7 @@ export function useCharacterEditor({ summary, run, refreshSummary }: UseCharacte
       const plannedCommands = planCharacterDraftCommands({
         target: selectedCharacterTarget,
         character,
-        draft: currentDraft(),
+        draft: currentDraft,
       }).filter((command) => command.command === "replace_ability_list");
 
       if (plannedCommands.length > 0) {
@@ -250,6 +268,10 @@ export function useCharacterEditor({ summary, run, refreshSummary }: UseCharacte
       await refreshSummary();
     });
   }, [character, currentDraft, loadCharacter, refreshSummary, run, selectedCharacterTarget]);
+
+  const checkpointDrafts = useCallback(() => {
+    draftCheckpoint.checkpoint(draftsRef.current);
+  }, [draftCheckpoint]);
 
   const commitDrafts = useCallback(async () => {
     if (!await commitCharacterFields()) {
@@ -262,9 +284,20 @@ export function useCharacterEditor({ summary, run, refreshSummary }: UseCharacte
     return true;
   }, [checkpointDrafts, commitAbilityDrafts, commitCharacterFields]);
 
-  const resetAbilityDrafts = useCallback(() => {
-    resetLoadedDrafts();
-  }, [resetLoadedDrafts]);
+  const resetToCommittedDrafts = useCallback(() => {
+    const checkpoint = draftCheckpoint.reset();
+    if (checkpoint) {
+      setDrafts(checkpoint);
+      return;
+    }
+    setDrafts(() => {
+      const next: CharacterDraftMap = {};
+      for (const [key, source] of Object.entries(loadedCharacters)) {
+        next[key] = draftFromCharacter(source);
+      }
+      return next;
+    });
+  }, [draftCheckpoint, loadedCharacters]);
 
   const handleAbilityRemove = useCallback((list: AbilityListKind, abilityId: number) => {
     if (abilityIsLocked(list, abilityId, abilityDrafts)) {
@@ -274,7 +307,7 @@ export function useCharacterEditor({ summary, run, refreshSummary }: UseCharacte
       ...current,
       [list]: current[list].filter((ability) => ability.id !== abilityId),
     }));
-  }, [abilityDrafts]);
+  }, [abilityDrafts, setAbilityDrafts]);
 
   const handleAbilityAdd = useCallback((list: AbilityListKind) => {
     const options = coreAbilityOptions(isDa2, list, availableAbilities, abilityDrafts);
@@ -292,7 +325,7 @@ export function useCharacterEditor({ summary, run, refreshSummary }: UseCharacte
         [list]: [...current[list], selected],
       };
     });
-  }, [abilityDrafts, availableAbilities, isDa2, selectedAbilityToAdd]);
+  }, [abilityDrafts, availableAbilities, isDa2, selectedAbilityToAdd, setAbilityDrafts]);
 
   const handleVisibleAbilityAdd = useCallback((list: AbilityListKind, abilityId: number) => {
     const known = allKnownAbilities(isDa2, list, availableAbilities, abilityDrafts);
@@ -315,18 +348,13 @@ export function useCharacterEditor({ summary, run, refreshSummary }: UseCharacte
         [list]: [...current[list], ...additions],
       };
     });
-  }, [abilityDrafts, availableAbilities, isDa2]);
+  }, [abilityDrafts, availableAbilities, isDa2, setAbilityDrafts]);
 
   const clear = useCallback(() => {
     setCharacters([]);
     setCharacterKey("main");
-    setCharacter(null);
-    setStatsDraft({});
-    setLevelDraft("");
-    setExperienceDraft("");
-    setApprovalDraft("");
-    setPointPoolsDraft({});
-    setAbilityDrafts(EMPTY_ABILITIES);
+    setLoadedCharacters({});
+    setDrafts({});
     setAvailableAbilities(EMPTY_ABILITIES);
     setSelectedAbilityToAdd({ skills: "", talents: "", spells: "" });
     draftCheckpoint.clear();
@@ -358,9 +386,7 @@ export function useCharacterEditor({ summary, run, refreshSummary }: UseCharacte
     refreshAvailableAbilities,
     loadCharacter,
     commitCharacterFields,
-    resetCharacterDraftToLoaded,
     commitAbilityDrafts,
-    resetAbilityDrafts,
     abilityIsLocked: (list: AbilityListKind, abilityId: number) => abilityIsLocked(list, abilityId, abilityDrafts),
     handleAbilityRemove,
     handleAbilityAdd,
