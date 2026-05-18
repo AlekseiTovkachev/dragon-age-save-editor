@@ -1036,6 +1036,44 @@ fn write_reload_item_property_id_edit() {
 }
 
 #[test]
+fn write_reload_da2_item_property_power_roundtrip() {
+    let lookup = SqliteGameData::open(DEFAULT_GAME_DATA_PATH).unwrap();
+    let input = da2_save_path();
+    let output = test_output_path("da2-item-property-power-edit.das");
+    let mut editor = SaveEditor::from_path_with_lookup(&input, Some(&lookup), None).unwrap();
+    let index = first_backpack_item_with_properties(&editor)
+        .expect("expected DA2 backpack item with existing properties");
+
+    editor
+        .set_item_property_power(InventoryContainer::Backpack, index, 0, -3.75)
+        .unwrap();
+
+    editor.write_to_path(&output).unwrap();
+    let reloaded = GffFile::from_path(&output).unwrap();
+    let save = SaveGame::from_gff_with_lookup(&reloaded, Some(&lookup), None).unwrap();
+    assert_eq!(save.backpack[index].properties[0].power, -3.75);
+}
+
+#[test]
+fn write_reload_da2_plot_flag_integer_cleared_to_zero() {
+    let input = da2_save_path();
+    let output = test_output_path("da2-plot-flag-clear-edit.das");
+    let mut editor = SaveEditor::from_path(&input).unwrap();
+
+    editor
+        .patch_plot_flags(&[], &[PlotIntegerPatch { id: 1000, value: 5 }])
+        .unwrap();
+    editor
+        .patch_plot_flags(&[], &[PlotIntegerPatch { id: 1000, value: 0 }])
+        .unwrap();
+    editor.write_to_path(&output).unwrap();
+
+    let reloaded = GffFile::from_path(&output).unwrap();
+    let save = SaveGame::from_gff(&reloaded).unwrap();
+    assert_eq!(save.plot_flags.integers.get(&1000).copied().unwrap_or(0), 0);
+}
+
+#[test]
 fn da2_added_item_property_uses_float_property_id_storage() {
     let lookup = SqliteGameData::open(DEFAULT_GAME_DATA_PATH).unwrap();
     let mut editor =

@@ -24,8 +24,8 @@ Source: `docs/roadmap.md` near-term list. Scope corrected: DAO/DaoAwakening item
 
 - [x] Write/reload test: DAO backpack metadata (item_cost, material). `src/edit/editor/tests.rs::write_reload_backpack_metadata_edit`.
 - [x] Write/reload test: DA2 backpack metadata (item_cost, material, item_level). `src/edit/editor/tests.rs::write_reload_da2_backpack_metadata_edit`.
-- [ ] Write/reload test: item property power encoding (covers DA2 float-bitcast roundtrip).
-- [ ] Write/reload test: DA2 plot flags. (`write_reload_da2_plot_flag_edit` exists — confirm it covers the encodings we care about or extend it.)
+- [x] Write/reload test: DA2 item property power float-bitcast roundtrip on an existing property. `src/edit/editor/tests.rs::write_reload_da2_item_property_power_roundtrip`.
+- [x] Write/reload test: DA2 plot flag integer cleared back to zero. `src/edit/editor/tests.rs::write_reload_da2_plot_flag_integer_cleared_to_zero`. (Existing `write_reload_da2_plot_flag_edit` covers the non-zero/boolean set/clear cases.)
 
 ### A2. Promote automatable smoke gaps into the test suite
 
@@ -45,18 +45,19 @@ Use the existing `ingame/` suite. Each spec drives the real UI, writes through t
 
 DA2 currently has zero `ingame/` coverage. Build the minimum DA2 set, chosen for differential risk surface (the things that aren't a re-skin of DAO).
 
-- [ ] **Helpers refactor.** `ingame/helpers.ts:5` hardcodes `DAO_SAVE`. Generalize so the suite reads whichever of `DAO_SAVE` / `DA2_SAVE` is set, errors clearly if neither, and exposes the active path to specs. Add a `prereq.da2Save()` mirroring `prereq.daoFamilySave()`. Update `ingame/README.md` to document the DA2 env var and prerequisites table.
-- [ ] **`ingame/da2-stats.spec.ts`** — set level + a core stat + money on the main character. Verify in-game. Baseline that the basics carry over to DA2.
+- [x] **Helpers refactor.** `ingame/helpers.ts` now reads either `DAO_SAVE` or `DA2_SAVE`, errors if neither or both are set, and exposes `SAVE_PATH` to specs. `prereq.da2Save()` mirrors `prereq.daoFamilySave()`. `ingame/README.md` updated.
+- [x] **`ingame/da2-stats.spec.ts`** — set level + a core stat + money on the main character. *Skeleton landed; needs a real DA2 save and a human in-game PASS to fully close.*
 - [ ] **`ingame/da2-properties.spec.ts`** — edit a property power on an equipped item. This is the float-bitcast verification — the highest-risk DA2-specific encoding path. Verify the displayed value in-game matches.
 - [ ] **`ingame/da2-plot-flags.spec.ts`** — set one boolean and one integer plot flag, save, verify the game reflects the change. The only in-game verification of the DA2-exclusive plot-flag editor.
 - [ ] **`ingame/da2-combo.spec.ts`** — multi-feature roundtrip combining stats + a property edit + a plot flag. Confirms the integrated save still loads.
 
 Acceptance: each new spec runs end-to-end against a real DA2 save with PASS recorded.
 
-### A4. Frontend cleanup found while planning
+### A4. Cleanup and known bugs found while planning
 
 - [ ] `frontend/src/components/ItemEditor.tsx:138` shows an "Item Level" input for every game. On DAO it's a no-op write — visibly editable, silently discarded. Either hide for DAO-family or wire it to a warning. *(Not strictly release-blocking, but a "user edits something and it doesn't stick" footgun.)*
 - [ ] Consider whether to remove the `item_cost` editor before v1.0. Founder flagged it as the least-useful editor in the app — keeping it widens the supported surface area.
+- [ ] **Bug — DA2 item-properties clear-then-add fails the writer.** Reproducer: load DA2 save, clear an item's `ITEM_PROPERTIES` and `ITEM_PROPERTY_POWERS` lists, call `add_item_property(...)` twice, then `write_to_path`. The writer rejects the new values with `type mismatch for Int32 field: expected Int32, found Float32`. The empty-list fallback in `append_property_id_value` / `append_property_power_value` (`src/edit/internal.rs:670+`) picks a kind that doesn't match the GFF4 schema declared on the existing struct. Real user path (delete all properties, then re-add). Needs a fix + a regression write/reload test exercising clear+add+write on DA2.
 
 ## Track B — Distribution (after Track A passes)
 

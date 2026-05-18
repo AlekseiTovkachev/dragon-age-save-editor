@@ -2,11 +2,19 @@ import { execFileSync } from "child_process";
 import { copyFileSync, existsSync, rmSync } from "fs";
 import { expect, type Page, type TestInfo } from "@playwright/test";
 
-if (!process.env.DAO_SAVE) {
-  throw new Error("Set DAO_SAVE env var to the path of your test save file");
+const DAO_SAVE_ENV = process.env.DAO_SAVE;
+const DA2_SAVE_ENV = process.env.DA2_SAVE;
+
+if (!DAO_SAVE_ENV && !DA2_SAVE_ENV) {
+  throw new Error("Set DAO_SAVE or DA2_SAVE env var to the path of your test save file");
+}
+if (DAO_SAVE_ENV && DA2_SAVE_ENV) {
+  throw new Error("Set only one of DAO_SAVE or DA2_SAVE; the suite mutates one save file at a time");
 }
 
-export const DAO_SAVE = process.env.DAO_SAVE;
+export const SAVE_PATH = (DAO_SAVE_ENV ?? DA2_SAVE_ENV) as string;
+// Back-compat alias for legacy DAO specs. Prefer SAVE_PATH in new code.
+export const DAO_SAVE = SAVE_PATH;
 const APPLY_EDIT = process.platform === "win32" ? "target/debug/apply_edit.exe" : "target/debug/apply_edit";
 
 type CharacterTarget = "main_character" | { companion: { index: number } };
@@ -94,12 +102,12 @@ function hasMaterialOption(item: Item, tier: number, name: string) {
   return item.material_options.some((option) => option.tier === tier && option.name.toLowerCase() === name.toLowerCase());
 }
 
-export function readSaveJson<T = unknown>(command: unknown, savePath: string = DAO_SAVE): T {
+export function readSaveJson<T = unknown>(command: unknown, savePath: string = SAVE_PATH): T {
   const stdout = execFileSync(APPLY_EDIT, [savePath, JSON.stringify(command)], { encoding: "utf8" });
   return JSON.parse(stdout) as T;
 }
 
-export function loadSaveSnapshot(savePath: string = DAO_SAVE): SaveSnapshot {
+export function loadSaveSnapshot(savePath: string = SAVE_PATH): SaveSnapshot {
   const summary = readSaveJson<{ summary: SaveSummary }>({ command: "get_summary" }, savePath).summary;
   const characters = readSaveJson<{ characters: CharacterSummary[] }>({ command: "list_characters" }, savePath).characters;
   const characterDetails = new Map<string, Character>();
@@ -117,7 +125,7 @@ export async function ensurePrerequisites(testInfo: TestInfo, prerequisites: InG
   }
   const snapshot = loadSaveSnapshot();
   const missing = prerequisites.filter((prerequisite) => !prerequisite.check(snapshot)).map((prerequisite) => prerequisite.label);
-  expect(missing, `DAO_SAVE does not fit this in-game test:\n${missing.map((item) => `- ${item}`).join("\n")}`).toEqual([]);
+  expect(missing, `Save at SAVE_PATH does not fit this in-game test:\n${missing.map((item) => `- ${item}`).join("\n")}`).toEqual([]);
   return snapshot;
 }
 
@@ -126,6 +134,12 @@ export const prereq = {
     return {
       label: "DAO-family save (preferred_game is dao or dao_awakening)",
       check: (snapshot) => ["dao", "dao_awakening"].includes(snapshot.summary.preferred_game),
+    };
+  },
+  da2Save(): InGamePrerequisite {
+    return {
+      label: "DA2 save (preferred_game is da2)",
+      check: (snapshot) => snapshot.summary.preferred_game === "da2",
     };
   },
   mainCharacter(): InGamePrerequisite {
@@ -216,29 +230,29 @@ export const prereq = {
 };
 
 export function backupSave() {
-  if (existsSync(DAO_SAVE + ".ingame-backup")) {
+  if (existsSync(SAVE_PATH + ".ingame-backup")) {
     console.warn("[ingame] Stale backup detected — restoring from previous crashed run");
-    copyFileSync(DAO_SAVE + ".ingame-backup", DAO_SAVE);
-    rmSync(DAO_SAVE + ".ingame-backup");
+    copyFileSync(SAVE_PATH + ".ingame-backup", SAVE_PATH);
+    rmSync(SAVE_PATH + ".ingame-backup");
   }
-  copyFileSync(DAO_SAVE, DAO_SAVE + ".ingame-backup");
+  copyFileSync(SAVE_PATH, SAVE_PATH + ".ingame-backup");
 }
 
 export function restoreSave() {
-  if (existsSync(DAO_SAVE + ".ingame-backup")) {
-    copyFileSync(DAO_SAVE + ".ingame-backup", DAO_SAVE);
-    rmSync(DAO_SAVE + ".ingame-backup");
+  if (existsSync(SAVE_PATH + ".ingame-backup")) {
+    copyFileSync(SAVE_PATH + ".ingame-backup", SAVE_PATH);
+    rmSync(SAVE_PATH + ".ingame-backup");
   }
-  if (existsSync(DAO_SAVE + ".ingame-working")) {
-    rmSync(DAO_SAVE + ".ingame-working");
+  if (existsSync(SAVE_PATH + ".ingame-working")) {
+    rmSync(SAVE_PATH + ".ingame-working");
   }
 }
 
-export async function openSave(page: Page, outputPath: string = DAO_SAVE) {
+export async function openSave(page: Page, outputPath: string = SAVE_PATH) {
   await page.addInitScript(({ savePath, outPath }) => {
     localStorage.setItem("ingameTestSave", savePath);
     localStorage.setItem("ingameTestSaveOutput", outPath);
-  }, { savePath: DAO_SAVE, outPath: outputPath });
+  }, { savePath: SAVE_PATH, outPath: outputPath });
   await page.goto("/");
   await page.getByRole("button", { name: /open save/i }).click();
   // Wait until handleOpen FULLY completes. "Reset Drafts" only renders once summary is set,
