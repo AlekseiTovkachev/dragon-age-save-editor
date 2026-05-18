@@ -85,16 +85,15 @@ export function useDraftStore({
       }
 
       if (removes.length > 0) {
-        await executeCommand({
-          command: "apply_batch",
-          commands: removes.map((index) => ({ command: "remove_backpack_item" as const, index })),
-        });
+        for (const index of removes) {
+          await executeCommand({ command: "remove_backpack_item", index });
+        }
       }
 
       if (batch.length > 0 || hasInventoryStructureChanges) {
         await refreshSummary();
         await characterEditor.refreshLoadedCharacters();
-        await inventoryEditor.refreshItems();
+        await inventoryEditor.refreshLoadedItems();
         await craftingEditor.refreshCraftingRecipes();
         if (preferredGame === "da2") {
           await plotFlagsEditor.refreshPlotFlags();

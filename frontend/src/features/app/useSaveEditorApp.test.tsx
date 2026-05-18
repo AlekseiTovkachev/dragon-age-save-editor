@@ -1,7 +1,7 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { character, indexedItem, recipe, summary } from "../../test/factories";
-import type { SaveCommandResult } from "../../types";
+import type { SaveCommand, SaveCommandResult } from "../../types";
 import { useSaveEditorApp } from "./useSaveEditorApp";
 
 const mocks = vi.hoisted(() => ({
@@ -30,9 +30,30 @@ vi.mock("@tauri-apps/plugin-dialog", () => ({
   save: mocks.save,
 }));
 
+function isBatchEditCommand(command: SaveCommand) {
+  return [
+    "set_money",
+    "patch_core_stats",
+    "patch_point_pools",
+    "set_level",
+    "set_experience",
+    "set_approval",
+    "replace_ability_list",
+    "replace_crafting_recipe_list",
+    "patch_plot_flags",
+    "patch_item_metadata",
+    "set_backpack_item_stack_size",
+    "add_item_property",
+    "remove_item_property",
+    "set_item_property_power",
+    "set_item_property_id",
+  ].includes(command.command);
+}
+
 function installCommandResponses() {
   let currentCharacter = character();
-  let currentItem = indexedItem().item;
+  let currentBackpackItem = indexedItem().item;
+  let currentEquipmentItem = indexedItem(0, { name: "Equipped Sword", stackable: false, item_stacksize: null }).item;
   mocks.executeCommand.mockImplementation(async (command: { command: string; [key: string]: unknown }) => {
     switch (command.command) {
       case "validate":
@@ -64,9 +85,9 @@ function installCommandResponses() {
       case "list_available_plot_flags":
         return { result: "available_plot_flags", booleans: [], integers: [] };
       case "list_backpack_items":
-        return { result: "items", items: [{ index: 0, item: currentItem }] };
+        return { result: "items", items: [{ index: 0, item: currentBackpackItem }] };
       case "list_equipment_items":
-        return { result: "items", items: [{ index: 0, item: currentItem }] };
+        return { result: "items", items: [{ index: 0, item: currentEquipmentItem }] };
       case "set_money":
         return { result: "summary", summary: summary({ money: command.money as number, dirty: true }) };
       case "patch_core_stats":
@@ -84,21 +105,38 @@ function installCommandResponses() {
       case "patch_plot_flags":
         return { result: "plot_flags", booleans: command.booleans, integers: command.integers };
       case "set_backpack_item_stack_size":
-        currentItem = { ...currentItem, item_stacksize: command.stack_size as number };
-        return { result: "item", container: "backpack", index: command.index, item: currentItem };
+        currentBackpackItem = { ...currentBackpackItem, item_stacksize: command.stack_size as number };
+        return { result: "item", container: "backpack", index: command.index, item: currentBackpackItem };
       case "patch_item_metadata":
-        currentItem = {
-          ...currentItem,
-          ...command.patch as Partial<typeof currentItem>,
+        if (command.container === "backpack") {
+          currentBackpackItem = {
+            ...currentBackpackItem,
+            ...command.patch as Partial<typeof currentBackpackItem>,
+          };
+          return { result: "item", container: "backpack", index: command.index, item: currentBackpackItem };
+        }
+        currentEquipmentItem = {
+          ...currentEquipmentItem,
+          ...command.patch as Partial<typeof currentEquipmentItem>,
         };
-        return { result: "item", container: "backpack", index: command.index, item: currentItem };
+        return { result: "item", container: command.container, index: command.index, item: currentEquipmentItem };
+      case "remove_backpack_item":
+        return { result: "summary", summary: summary({ dirty: true, backpack_count: 0 }) };
       case "add_item_property":
       case "remove_item_property":
       case "set_item_property_id":
       case "set_item_property_power":
-        return { result: "item", container: "backpack", index: command.index, item: currentItem };
+        return {
+          result: "item",
+          container: command.container,
+          index: command.index,
+          item: command.container === "backpack" ? currentBackpackItem : currentEquipmentItem,
+        };
       case "apply_batch":
         for (const nestedCommand of command.commands as Array<{ command: string; [key: string]: unknown }>) {
+          if (!isBatchEditCommand(nestedCommand as SaveCommand)) {
+            throw new Error(`Command ${nestedCommand.command} is not supported in apply_batch`);
+          }
           await mocks.executeCommand(nestedCommand);
         }
         return { result: "summary", summary: summary({ dirty: true }) };
@@ -503,6 +541,78 @@ describe("useSaveEditorApp", () => {
     expect(result.current.inventoryPanel.state.moneyDraft).toBe("100");
     expect(result.current.inventoryPanel.state.itemMetadataDraft.stack_size).toBe("3");
     expect(result.current.craftingPanel.state.craftingRecipeDrafts).toEqual([1]);
+  });
+
+  it("applies cached backpack drafts after switching to equipment", async () => {
+    mocks.open.mockResolvedValue("C:/save.das");
+    mocks.openDocument.mockResolvedValue(summary({ money: 100 }));
+    const { result } = renderHook(() => useSaveEditorApp());
+
+    await act(async () => {
+      await result.current.handleOpen();
+    });
+    act(() => {
+      result.current.setSection("inventory");
+    });
+    await waitFor(() => expect(result.current.inventoryPanel.state.itemIndex).toBe(0));
+
+    act(() => {
+      result.current.inventoryPanel.actions.setItemMetadataDraft((current) => ({ ...current, stack_size: "42" }));
+      result.current.setSection("characters");
+      result.current.setCharacterTab("equipment");
+    });
+    await waitFor(() => expect(result.current.inventoryPanel.state.itemMetadataDraft.item_level).toBe("1"));
+    mocks.executeCommand.mockClear();
+
+    act(() => {
+      result.current.inventoryPanel.actions.setItemMetadataDraft((current) => ({ ...current, item_level: "5" }));
+    });
+    await act(async () => {
+      await result.current.commitDrafts();
+    });
+
+    expect(mocks.executeCommand).toHaveBeenCalledWith({
+      command: "apply_batch",
+      commands: [
+        { command: "set_backpack_item_stack_size", index: 0, stack_size: 42 },
+        {
+          command: "patch_item_metadata",
+          container: { equipment: { target: "main_character" } },
+          index: 0,
+          patch: { item_level: 5 },
+        },
+      ],
+    });
+  });
+
+  it("sends backpack removals outside apply_batch", async () => {
+    mocks.open.mockResolvedValue("C:/save.das");
+    mocks.openDocument.mockResolvedValue(summary({ money: 100 }));
+    const { result } = renderHook(() => useSaveEditorApp());
+
+    await act(async () => {
+      await result.current.handleOpen();
+    });
+    act(() => {
+      result.current.setSection("inventory");
+    });
+    await waitFor(() => expect(result.current.inventoryPanel.state.itemIndex).toBe(0));
+
+    await act(async () => {
+      await result.current.inventoryPanel.actions.handleBackpackRemove();
+    });
+    mocks.executeCommand.mockClear();
+    await act(async () => {
+      await result.current.commitDrafts();
+    });
+
+    const applyBatchCalls = mocks.executeCommand.mock.calls
+      .map(([command]) => command)
+      .filter((command) => command.command === "apply_batch");
+    expect(applyBatchCalls.flatMap((command) => command.commands)).not.toEqual(
+      expect.arrayContaining([expect.objectContaining({ command: "remove_backpack_item" })]),
+    );
+    expect(mocks.executeCommand).toHaveBeenCalledWith({ command: "remove_backpack_item", index: 0 });
   });
 
   it("loads equipment items for the active character equipment tab", async () => {

@@ -195,6 +195,26 @@ function markDirty() {
   }
 }
 
+function isBatchEditCommand(command: SaveCommand) {
+  return [
+    "set_money",
+    "patch_core_stats",
+    "patch_point_pools",
+    "set_level",
+    "set_experience",
+    "set_approval",
+    "replace_ability_list",
+    "replace_crafting_recipe_list",
+    "patch_plot_flags",
+    "patch_item_metadata",
+    "set_backpack_item_stack_size",
+    "add_item_property",
+    "remove_item_property",
+    "set_item_property_power",
+    "set_item_property_id",
+  ].includes(command.command);
+}
+
 async function executeSingle(command: SaveCommand): Promise<SaveCommandResult> {
   if (failingCommand() === command.command) {
     throw { code: "io", message: `Mocked ${command.command} failure` };
@@ -384,6 +404,12 @@ async function executeSingle(command: SaveCommand): Promise<SaveCommandResult> {
       return { result: "saved", output_path: command.output_path, summary: state.summary! };
     case "apply_batch":
       for (const nested of command.commands) {
+        if (!isBatchEditCommand(nested)) {
+          throw {
+            code: "invalid_save_state",
+            message: `Command ${nested.command} is not supported in apply_batch`,
+          };
+        }
         await executeSingle(nested);
       }
       return summaryResult();

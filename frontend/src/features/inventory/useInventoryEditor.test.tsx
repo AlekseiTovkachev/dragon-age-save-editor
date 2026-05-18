@@ -285,10 +285,7 @@ describe("useInventoryEditor", () => {
       await result.current.commitInventoryItemDrafts();
     });
 
-    expect(mocks.executeCommand).toHaveBeenCalledWith({
-      command: "apply_batch",
-      commands: [{ command: "remove_backpack_item", index: 0 }],
-    });
+    expect(mocks.executeCommand).toHaveBeenCalledWith({ command: "remove_backpack_item", index: 0 });
   });
 
   it("queues backpack clone until inventory drafts are committed", async () => {
@@ -442,7 +439,11 @@ describe("useInventoryEditor", () => {
       indexedItem(2, { name: "Trap", item_stacksize: 5 }),
     ];
     mocks.executeCommand.mockImplementation(
-      async (command: { command: string; commands?: Array<{ command: string; index: number; stack_size?: number }> }) => {
+      async (command: {
+        command: string;
+        index?: number;
+        commands?: Array<{ command: string; index: number; stack_size?: number }>;
+      }) => {
         if (command.command === "list_backpack_items") {
           return { result: "items", items: backpackItems };
         }
@@ -455,12 +456,13 @@ describe("useInventoryEditor", () => {
                   : entry,
               );
             }
-            if (nested.command === "remove_backpack_item") {
-              backpackItems = backpackItems
-                .filter((entry) => entry.index !== nested.index)
-                .map((entry, index) => indexedItem(index, entry.item));
-            }
           }
+          return { result: "summary", summary: summary({ dirty: true }) };
+        }
+        if (command.command === "remove_backpack_item") {
+          backpackItems = backpackItems
+            .filter((entry) => entry.index !== command.index)
+            .map((entry, index) => indexedItem(index, entry.item));
           return { result: "summary", summary: summary({ dirty: true }) };
         }
         return { result: "summary", summary: summary({ dirty: true }) };
