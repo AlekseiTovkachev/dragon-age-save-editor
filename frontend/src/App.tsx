@@ -1,4 +1,5 @@
 import { AppShell } from "./components/AppShell";
+import { ApplyOnSavePrompt } from "./components/ApplyOnSavePrompt";
 import { Sidebar } from "./components/Sidebar/Sidebar";
 import { CharacterPanel } from "./features/characters/CharacterPanel";
 import { CraftingPanel } from "./features/crafting/CraftingPanel";
@@ -20,6 +21,7 @@ function App() {
           sectionCounts={app.sectionCounts}
           busy={app.operation.busy}
           hasPlotWarnings={app.hasPlotWarnings}
+          hasPendingDrafts={app.hasPendingDrafts}
           onSectionSelect={app.setSection}
           onOpen={() => void app.handleOpen()}
           onSaveAs={() => void app.handleSaveAs()}
@@ -85,6 +87,12 @@ function App() {
           <button className="dismiss-button" onClick={app.operation.clearError}>Dismiss</button>
         </div>
       ) : null}
+      <ApplyOnSavePrompt
+        open={app.saveAsPrompt.open}
+        busy={app.operation.busy}
+        onConfirm={() => void app.saveAsPrompt.onConfirm()}
+        onCancel={app.saveAsPrompt.onCancel}
+      />
     </AppShell>
   );
 }

@@ -9,7 +9,7 @@ async function openMockSave(page: Page, game: "dao" | "da2" = "dao") {
   await page.getByRole("button", { name: /open save/i }).click();
 }
 
-test("opens a DAO save, resets inventory drafts, commits, and saves a copy", async ({ page }) => {
+test("opens a DAO save, resets inventory drafts, and applies drafts before saving a copy", async ({ page }) => {
   await openMockSave(page);
 
   await expect(page.getByRole("button", { name: "Characters" })).toBeVisible();
@@ -32,11 +32,16 @@ test("opens a DAO save, resets inventory drafts, commits, and saves a copy", asy
 
   await stackSize.fill("12");
   await page.getByLabel("Party gold").fill("999");
-  await page.getByRole("button", { name: /apply drafts/i }).click();
 
-  await expect(page.getByText("Unsaved changes")).toBeVisible();
   await expect(page.getByRole("button", { name: /save as/i })).toBeEnabled();
   await page.getByRole("button", { name: /save as/i }).click();
+  await expect(page.getByText("You have unsaved drafts. Apply them before saving?")).toBeVisible();
+  await page.getByRole("button", { name: "Cancel" }).click();
+  await expect(stackSize).toHaveValue("12");
+  await expect(page.getByLabel("Party gold")).toHaveValue("999");
+
+  await page.getByRole("button", { name: /save as/i }).click();
+  await page.getByRole("button", { name: "Apply drafts and save" }).click();
   await expect(page.getByText("Saved copy ready")).toBeVisible();
 });
 

@@ -347,6 +347,97 @@ describe("useSaveEditorApp", () => {
     expect(result.current.inventoryPanel.state.moneyDraft).toBe("999");
   });
 
+  it("prompts before Save As when drafts are pending and cancels without saving", async () => {
+    mocks.open.mockResolvedValue("C:/save.das");
+    mocks.openDocument.mockResolvedValue(summary({ dirty: false }));
+    mocks.save.mockResolvedValue("C:/out.das");
+    const { result } = renderHook(() => useSaveEditorApp());
+
+    await act(async () => {
+      await result.current.handleOpen();
+    });
+    await waitFor(() => expect(result.current.characterPanel.state.levelDraft).toBe("1"));
+    act(() => {
+      result.current.characterPanel.actions.setLevelDraft("7");
+    });
+
+    await act(async () => {
+      await result.current.handleSaveAs();
+    });
+
+    expect(result.current.saveAsPrompt.open).toBe(true);
+    expect(mocks.save).not.toHaveBeenCalled();
+
+    act(() => {
+      result.current.saveAsPrompt.onCancel();
+    });
+
+    expect(result.current.saveAsPrompt.open).toBe(false);
+    expect(result.current.characterPanel.state.levelDraft).toBe("7");
+    expect(mocks.executeCommand).not.toHaveBeenCalledWith({ command: "save_as", output_path: "C:/out.das" });
+  });
+
+  it("applies pending drafts before Save As after confirmation", async () => {
+    mocks.open.mockResolvedValue("C:/save.das");
+    mocks.openDocument.mockResolvedValue(summary({ dirty: false }));
+    mocks.save.mockResolvedValue("C:/out.das");
+    const { result } = renderHook(() => useSaveEditorApp());
+
+    await act(async () => {
+      await result.current.handleOpen();
+    });
+    await waitFor(() => expect(result.current.characterPanel.state.levelDraft).toBe("1"));
+    act(() => {
+      result.current.characterPanel.actions.setLevelDraft("7");
+    });
+
+    await act(async () => {
+      await result.current.handleSaveAs();
+    });
+    await act(async () => {
+      await result.current.saveAsPrompt.onConfirm();
+    });
+
+    expect(mocks.executeCommand).toHaveBeenCalledWith({
+      command: "apply_batch",
+      commands: [{ command: "set_level", target: "main_character", level: 7 }],
+    });
+    expect(mocks.executeCommand).toHaveBeenCalledWith({ command: "save_as", output_path: "C:/out.das" });
+    expect(result.current.saveAsPrompt.open).toBe(false);
+  });
+
+  it("aborts Save As when draft apply fails", async () => {
+    mocks.open.mockResolvedValue("C:/save.das");
+    mocks.openDocument.mockResolvedValue(summary({ dirty: false }));
+    mocks.save.mockResolvedValue("C:/out.das");
+    const { result } = renderHook(() => useSaveEditorApp());
+
+    await act(async () => {
+      await result.current.handleOpen();
+    });
+    await waitFor(() => expect(result.current.characterPanel.state.levelDraft).toBe("1"));
+    act(() => {
+      result.current.characterPanel.actions.setLevelDraft("7");
+    });
+    mocks.executeCommand.mockImplementation(async (command: { command: string }) => {
+      if (command.command === "apply_batch") {
+        throw new Error("draft rejected");
+      }
+      return { result: "validation", report: { is_valid: true, findings: [] } };
+    });
+
+    await act(async () => {
+      await result.current.handleSaveAs();
+    });
+    await act(async () => {
+      await result.current.saveAsPrompt.onConfirm();
+    });
+
+    expect(result.current.operation.error).toBe("draft rejected");
+    expect(mocks.save).not.toHaveBeenCalled();
+    expect(mocks.executeCommand).not.toHaveBeenCalledWith({ command: "save_as", output_path: "C:/out.das" });
+  });
+
   it("applies cross-panel drafts in one merged batch", async () => {
     mocks.open.mockResolvedValue("C:/save.das");
     mocks.openDocument.mockResolvedValue(summary({ money: 100 }));

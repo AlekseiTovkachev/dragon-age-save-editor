@@ -12,6 +12,7 @@ type SidebarProps = {
   sectionCounts: SectionCounts;
   busy: boolean;
   hasPlotWarnings: boolean;
+  hasPendingDrafts: boolean;
   onSectionSelect: (section: Section) => void;
   onOpen: () => void;
   onSaveAs: () => void;
@@ -27,6 +28,7 @@ export function Sidebar({
   sectionCounts,
   busy,
   hasPlotWarnings,
+  hasPendingDrafts,
   onSectionSelect,
   onOpen,
   onSaveAs,
@@ -46,7 +48,7 @@ export function Sidebar({
         <div className="nav-section">Save</div>
         <SaveActions
           hasSummary={Boolean(summary)}
-          dirty={Boolean(summary?.dirty)}
+          dirty={Boolean(summary?.dirty || hasPendingDrafts)}
           busy={busy}
           hasPlotWarnings={hasPlotWarnings}
           onOpen={onOpen}

@@ -38,6 +38,21 @@ export function useDraftStore({
   craftingEditor,
   plotFlagsEditor,
 }: UseDraftStoreOptions) {
+  const hasPendingDrafts = useCallback(() => {
+    const characterPlan = characterEditor.planCommands();
+    const inventoryPlan = inventoryEditor.planCommands();
+    const craftingPlan = craftingEditor.planCommands();
+    const plotFlagPlan = preferredGame === "da2" ? plotFlagsEditor.planCommands() : { batch: [] };
+    return (
+      characterPlan.batch.length > 0 ||
+      inventoryPlan.batch.length > 0 ||
+      (inventoryPlan.clones?.length ?? 0) > 0 ||
+      (inventoryPlan.removes?.length ?? 0) > 0 ||
+      craftingPlan.batch.length > 0 ||
+      plotFlagPlan.batch.length > 0
+    );
+  }, [characterEditor, craftingEditor, inventoryEditor, plotFlagsEditor, preferredGame]);
+
   const apply = useCallback(async () => {
     return run(async () => {
       const characterPlan = characterEditor.planCommands();
@@ -108,5 +123,5 @@ export function useDraftStore({
     plotFlagsEditor.resetToCommittedDrafts();
   }, [characterEditor, craftingEditor, inventoryEditor, plotFlagsEditor]);
 
-  return { apply, reset };
+  return { apply, reset, hasPendingDrafts };
 }

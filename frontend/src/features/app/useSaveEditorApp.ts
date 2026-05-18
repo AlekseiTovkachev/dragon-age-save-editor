@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { executeCommand, expectResult, hasDocument, openDocument } from "../../api";
+import { executeCommand, expectResult, hasDocument, openDocument, toErrorMessage } from "../../api";
 import { useAsyncOperation } from "../../hooks/useAsyncOperation";
 import { openSaveDialog, saveAsDialog } from "../../lib/dialog";
 import { SECTIONS } from "../../lib/navigation";
@@ -16,6 +16,7 @@ export function useSaveEditorApp() {
   const [characterTab, setCharacterTab] = useState<CharacterTab>("overview");
   const [summary, setSummary] = useState<SaveSummary | null>(null);
   const [screenshotDataUrl, setScreenshotDataUrl] = useState<string | null>(null);
+  const [saveAsPromptOpen, setSaveAsPromptOpen] = useState(false);
   const operation = useAsyncOperation();
   const { run, setError } = operation;
   const activeSection = section === "plot_flags" && summary?.preferred_game !== "da2" ? "characters" : section;
@@ -171,8 +172,8 @@ export function useSaveEditorApp() {
     });
   }, [clearDocumentState, hydrateDocument, refreshDocumentAssets, resetFeatureState, run]);
 
-  const handleSaveAs = useCallback(async () => {
-    if (!summary || !summary.dirty) {
+  const saveCurrentDocumentAs = useCallback(async () => {
+    if (!summary) {
       return;
     }
     const path = await saveAsDialog(summary.source_path);
@@ -188,6 +189,40 @@ export function useSaveEditorApp() {
       setSummary(response.summary);
     });
   }, [run, summary]);
+
+  const handleSaveAs = useCallback(async () => {
+    if (!summary) {
+      return;
+    }
+    let hasPendingDrafts = false;
+    try {
+      hasPendingDrafts = draftStore.hasPendingDrafts();
+    } catch (caught) {
+      setError(toErrorMessage(caught));
+      return;
+    }
+    if (hasPendingDrafts) {
+      setSaveAsPromptOpen(true);
+      return;
+    }
+    if (!summary.dirty) {
+      return;
+    }
+    await saveCurrentDocumentAs();
+  }, [draftStore, saveCurrentDocumentAs, setError, summary]);
+
+  const confirmApplyDraftsAndSave = useCallback(async () => {
+    setSaveAsPromptOpen(false);
+    const applied = await draftStore.apply();
+    if (!applied) {
+      return;
+    }
+    await saveCurrentDocumentAs();
+  }, [draftStore, saveCurrentDocumentAs]);
+
+  const cancelApplyDraftsAndSave = useCallback(() => {
+    setSaveAsPromptOpen(false);
+  }, []);
 
   const visibleSections = useMemo(
     () => SECTIONS.filter((entry) => entry !== "plot_flags" || summary?.preferred_game === "da2"),
@@ -292,6 +327,17 @@ export function useSaveEditorApp() {
     plot_flags: plotFlagsEditor.modifiedCount,
   } satisfies Record<Section, number>;
 
+  const hasPendingDrafts = (() => {
+    if (!summary) {
+      return false;
+    }
+    try {
+      return draftStore.hasPendingDrafts();
+    } catch {
+      return true;
+    }
+  })();
+
   return {
     section: activeSection,
     setSection: handleSectionSelect,
@@ -302,6 +348,7 @@ export function useSaveEditorApp() {
     visibleSections,
     sectionCounts,
     canEdit: Boolean(summary),
+    hasPendingDrafts,
     hasPlotWarnings: summary?.preferred_game === "da2" && plotFlagsEditor.hasPlotWarnings,
     operation,
     characterPanel,
@@ -315,5 +362,10 @@ export function useSaveEditorApp() {
     resetToCommittedDrafts: draftStore.reset,
     handleOpen,
     handleSaveAs,
+    saveAsPrompt: {
+      open: saveAsPromptOpen,
+      onConfirm: confirmApplyDraftsAndSave,
+      onCancel: cancelApplyDraftsAndSave,
+    },
   };
 }

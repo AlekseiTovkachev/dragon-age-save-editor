@@ -416,6 +416,17 @@
   color: #eadfc8;
 }
 
+.apply-save-prompt {
+  align-items: flex-start;
+  flex-direction: column;
+}
+
+.prompt-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
 .dismiss-button {
   flex: 0 0 auto;
   min-height: 2rem;
