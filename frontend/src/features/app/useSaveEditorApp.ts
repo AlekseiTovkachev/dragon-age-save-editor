@@ -267,6 +267,7 @@ export function useSaveEditorApp() {
       canEditStackSize: inventoryEditor.canEditStackSize,
       canCloneBackpackItem: inventoryEditor.canCloneBackpackItem,
       canEditMaterial: inventoryEditor.canEditMaterial,
+      canEditItemLevel: inventoryEditor.canEditItemLevel,
       itemMetadataDraft: inventoryEditor.itemMetadataDraft,
       propertyDraft: inventoryEditor.propertyDraft,
       itemPropertiesDraft: inventoryEditor.itemPropertiesDraft,

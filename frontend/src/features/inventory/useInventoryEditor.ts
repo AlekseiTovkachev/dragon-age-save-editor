@@ -234,6 +234,7 @@ export function useInventoryEditor({
         summary?.preferred_game === "da2"),
   );
   const canEditMaterial = Boolean(selectedItem?.material_profile && selectedItem.material_options.length > 0);
+  const canEditItemLevel = summary?.preferred_game === "da2";
 
   useEffect(() => {
     if (summary) {
@@ -545,6 +546,7 @@ export function useInventoryEditor({
     canEditStackSize,
     canCloneBackpackItem,
     canEditMaterial,
+    canEditItemLevel,
     refreshAvailableItemProperties,
     refreshItems,
     refreshLoadedItems,

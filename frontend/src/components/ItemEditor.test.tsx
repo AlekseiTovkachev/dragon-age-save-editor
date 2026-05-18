@@ -31,6 +31,7 @@ function renderEditor(overrides = {}) {
     canEditStackSize: true,
     canCloneBackpackItem: false,
     canEditMaterial: true,
+    canEditItemLevel: true,
     metadataDraft: { material: "1", item_level: "1", stack_size: "3" },
     propertyDraft: { property_id: "7", power: "" },
     itemPropertiesDraft: [{ id: 7, name: "Damage", power: "1", sourceIndex: 0 }],

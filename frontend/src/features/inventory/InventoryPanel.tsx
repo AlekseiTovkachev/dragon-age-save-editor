@@ -22,6 +22,7 @@ export type InventoryPanelState = {
   canEditStackSize: boolean;
   canCloneBackpackItem: boolean;
   canEditMaterial: boolean;
+  canEditItemLevel: boolean;
   itemMetadataDraft: ItemMetadataDraft;
   propertyDraft: PropertyDraft;
   itemPropertiesDraft: ItemPropertyDraft[];

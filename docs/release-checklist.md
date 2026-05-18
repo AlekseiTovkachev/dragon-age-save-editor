@@ -55,8 +55,8 @@ Acceptance: each new spec runs end-to-end against a real DA2 save with PASS reco
 
 ### A4. Cleanup and known bugs found while planning
 
-- [ ] `frontend/src/components/ItemEditor.tsx:138` shows an "Item Level" input for every game. On DAO it's a no-op write — visibly editable, silently discarded. Either hide for DAO-family or wire it to a warning. *(Not strictly release-blocking, but a "user edits something and it doesn't stick" footgun.)*
-- [ ] Consider whether to remove the `item_cost` editor before v1.0. Founder flagged it as the least-useful editor in the app — keeping it widens the supported surface area.
+- [x] Item Level input is now hidden for DAO/DaoAwakening — only rendered when `preferred_game === "da2"`. Driven by a new `canEditItemLevel` flag on the inventory panel state, paralleling `canEditMaterial`.
+- [x] Item Cost display removed from `ItemEditor.tsx` for v1.0. Rust DTO and command surface kept intact (no contract break); the UI no longer surfaces it.
 - [x] **Bug — DA2 item-properties clear-then-add fails the writer.** Fixed in `src/edit/internal.rs`: the empty-list defaults for DA2 `ITEM_PROPERTIES` and `ITEM_PROPERTY_POWERS` were `Float32`/`UInt32`, but the actual DA2 GFF4 schema declares both as `Int32` (with powers being `f32.to_bits()` reinterpreted into `i32`). Now defaults to `Int32` for both. Regression: `write_reload_da2_item_property_clear_and_add`. The previously misleading unit assertion `da2_added_item_property_uses_float_property_id_storage` was renamed and corrected to `da2_added_item_property_uses_int32_storage_with_float_bitcast_power`.
 
 ## Track B — Distribution (after Track A passes)

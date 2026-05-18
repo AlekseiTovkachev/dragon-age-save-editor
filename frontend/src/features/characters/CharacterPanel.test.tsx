@@ -59,6 +59,7 @@ function inventoryState(): InventoryPanelState {
     canEditStackSize: false,
     canCloneBackpackItem: true,
     canEditMaterial: true,
+    canEditItemLevel: true,
     itemMetadataDraft: { material: "1", item_level: "1", stack_size: "1" },
     propertyDraft: { property_id: "7", power: "" },
     itemPropertiesDraft: [{ id: 7, name: "Damage", power: "1", sourceIndex: 0 }],

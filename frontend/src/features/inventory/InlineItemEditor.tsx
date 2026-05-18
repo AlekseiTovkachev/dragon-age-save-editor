@@ -27,6 +27,7 @@ export function InlineItemEditor({
         canEditStackSize={state.canEditStackSize}
         canCloneBackpackItem={allowBackpackActions && state.canCloneBackpackItem}
         canEditMaterial={state.canEditMaterial}
+        canEditItemLevel={state.canEditItemLevel}
         metadataDraft={state.itemMetadataDraft}
         propertyDraft={state.propertyDraft}
         itemPropertiesDraft={state.itemPropertiesDraft}

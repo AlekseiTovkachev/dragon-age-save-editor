@@ -29,6 +29,7 @@ type ItemEditorProps = {
   canEditStackSize: boolean;
   canCloneBackpackItem: boolean;
   canEditMaterial: boolean;
+  canEditItemLevel: boolean;
   metadataDraft: ItemMetadataDraft;
   propertyDraft: PropertyDraft;
   itemPropertiesDraft: ItemPropertyDraft[];
@@ -52,6 +53,7 @@ export function ItemEditor({
   canEditStackSize,
   canCloneBackpackItem,
   canEditMaterial,
+  canEditItemLevel,
   metadataDraft,
   propertyDraft,
   itemPropertiesDraft,
@@ -135,21 +137,13 @@ export function ItemEditor({
             </SelectInput>
           </Field>
         ) : null}
-        <Field label="Item Level">
-          <NumericInput
-            value={metadataDraft.item_level}
-            min={0}
-            onChange={(event) => onMetadataChange({ item_level: event.target.value })}
-            disabled={!canEdit || busy}
-          />
-        </Field>
-        {item.item_cost != null ? (
-          <Field label="Cost">
+        {canEditItemLevel ? (
+          <Field label="Item Level">
             <NumericInput
-              value={item.item_cost.toString()}
+              value={metadataDraft.item_level}
               min={0}
-              onChange={() => undefined}
-              disabled
+              onChange={(event) => onMetadataChange({ item_level: event.target.value })}
+              disabled={!canEdit || busy}
             />
           </Field>
         ) : null}
