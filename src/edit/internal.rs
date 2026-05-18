@@ -677,7 +677,7 @@ fn append_property_id_value(
         .iter()
         .find_map(NumericValueKind::from_value)
         .unwrap_or(match preferred_game {
-            Some(GameId::Da2) => NumericValueKind::Float32,
+            Some(GameId::Da2) => NumericValueKind::Int32,
             _ => NumericValueKind::UInt32,
         });
     values.push(kind.build_value(new_value, path)?);
@@ -711,7 +711,7 @@ fn append_property_power_value(
             let kind = values
                 .iter()
                 .find_map(NumericValueKind::from_value)
-                .unwrap_or(NumericValueKind::UInt32);
+                .unwrap_or(NumericValueKind::Int32);
             let mut value = match kind {
                 NumericValueKind::UInt8 => Value::UInt8(0),
                 NumericValueKind::Int8 => Value::Int8(0),
@@ -1141,11 +1141,12 @@ mod tests {
 
         assert_eq!(
             list_values(&item, ITEM_PROPERTIES_NAME),
-            &[Value::Float32(1000.0)]
+            &[Value::Int32(1000)]
         );
+        let expected_power = i32::from_ne_bytes(1.0f32.to_bits().to_ne_bytes());
         assert_eq!(
             list_values(&item, ITEM_PROPERTY_POWERS_NAME),
-            &[Value::UInt32(1.0f32.to_bits())]
+            &[Value::Int32(expected_power)]
         );
     }
 

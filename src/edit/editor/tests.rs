@@ -1074,7 +1074,7 @@ fn write_reload_da2_plot_flag_integer_cleared_to_zero() {
 }
 
 #[test]
-fn da2_added_item_property_uses_float_property_id_storage() {
+fn da2_added_item_property_uses_int32_storage_with_float_bitcast_power() {
     let lookup = SqliteGameData::open(DEFAULT_GAME_DATA_PATH).unwrap();
     let mut editor =
         SaveEditor::from_path_with_lookup(da2_save_path(), Some(&lookup), None).unwrap();
@@ -1096,14 +1096,46 @@ fn da2_added_item_property_uses_float_property_id_storage() {
     let property_ids = raw_item
         .get_list_by_name(super::ITEM_PROPERTIES_NAME)
         .unwrap();
-    assert_eq!(property_ids.first(), Some(&super::Value::Float32(1000.0)));
+    assert_eq!(property_ids.first(), Some(&super::Value::Int32(1000)));
     let property_powers = raw_item
         .get_list_by_name(super::ITEM_PROPERTY_POWERS_NAME)
         .unwrap();
+    let expected_power_bits = i32::from_ne_bytes(1.0f32.to_bits().to_ne_bytes());
     assert_eq!(
         property_powers.first(),
-        Some(&super::Value::UInt32(1.0f32.to_bits()))
+        Some(&super::Value::Int32(expected_power_bits))
     );
+}
+
+#[test]
+fn write_reload_da2_item_property_clear_and_add() {
+    let lookup = SqliteGameData::open(DEFAULT_GAME_DATA_PATH).unwrap();
+    let input = da2_save_path();
+    let output = test_output_path("da2-item-property-clear-add.das");
+    let mut editor = SaveEditor::from_path_with_lookup(&input, Some(&lookup), None).unwrap();
+    let index = first_backpack_item_with_properties(&editor)
+        .expect("expected DA2 backpack item with existing properties");
+    clear_backpack_item_properties(&mut editor, index);
+
+    editor
+        .add_item_property(InventoryContainer::Backpack, index, 1000, 12.5, Some(&lookup))
+        .unwrap();
+    editor
+        .add_item_property(InventoryContainer::Backpack, index, 1001, 0.25, Some(&lookup))
+        .unwrap();
+    editor
+        .set_item_property_power(InventoryContainer::Backpack, index, 0, -3.75)
+        .unwrap();
+
+    editor.write_to_path(&output).unwrap();
+    let reloaded = GffFile::from_path(&output).unwrap();
+    let save = SaveGame::from_gff_with_lookup(&reloaded, Some(&lookup), None).unwrap();
+    let properties = &save.backpack[index].properties;
+    assert_eq!(properties.len(), 2);
+    assert_eq!(properties[0].id, 1000);
+    assert_eq!(properties[0].power, -3.75);
+    assert_eq!(properties[1].id, 1001);
+    assert_eq!(properties[1].power, 0.25);
 }
 
 fn remove_stat_row(editor: &mut SaveEditor, target: CharacterTarget, stat_id: u32) {
