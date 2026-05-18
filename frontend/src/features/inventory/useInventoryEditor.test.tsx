@@ -102,6 +102,38 @@ describe("useInventoryEditor", () => {
     expect(refreshSummary).toHaveBeenCalled();
   });
 
+  it("plans money and item draft commands", async () => {
+    const { result } = renderHook(() =>
+      useInventoryEditor({
+        summary: summary({ money: 100 }),
+        container: "backpack",
+        isBackpackInventory: true,
+        run,
+        setError: vi.fn(),
+        refreshSummary: vi.fn(async () => summary()),
+      }),
+    );
+
+    await act(async () => {
+      await result.current.refreshItems();
+    });
+    await waitFor(() => expect(result.current.selectedItem).not.toBeNull());
+
+    act(() => {
+      result.current.setMoneyDraft("777");
+      result.current.setItemMetadataDraft((current) => ({ ...current, stack_size: "5" }));
+    });
+
+    expect(result.current.planCommands()).toEqual({
+      clones: [],
+      removes: [],
+      batch: [
+        { command: "set_money", money: 777 },
+        { command: "set_backpack_item_stack_size", index: 0, stack_size: 5 },
+      ],
+    });
+  });
+
   it("reports invalid stack size before issuing edit commands", async () => {
     const setError = vi.fn();
     const { result } = renderHook(() =>
@@ -305,6 +337,52 @@ describe("useInventoryEditor", () => {
     });
 
     expect(mocks.executeCommand).toHaveBeenCalledWith({ command: "clone_backpack_item", index: 0 });
+  });
+
+  it("plans queued backpack clones and removals", async () => {
+    mocks.executeCommand.mockImplementation(async (command: { command: string }) => {
+      if (command.command === "list_backpack_items") {
+        return {
+          result: "items",
+          items: [
+            indexedItem(0, { name: "Sword", stackable: false, item_stacksize: null }),
+            indexedItem(1, { name: "Shield", stackable: false, item_stacksize: null }),
+          ],
+        };
+      }
+      return { result: "summary", summary: summary({ dirty: true }) };
+    });
+    const { result } = renderHook(() =>
+      useInventoryEditor({
+        summary: summary(),
+        container: "backpack",
+        isBackpackInventory: true,
+        run,
+        setError: vi.fn(),
+        refreshSummary: vi.fn(async () => summary()),
+      }),
+    );
+
+    await act(async () => {
+      await result.current.refreshItems();
+    });
+    await waitFor(() => expect(result.current.canCloneBackpackItem).toBe(true));
+
+    await act(async () => {
+      await result.current.handleBackpackClone();
+    });
+    act(() => {
+      result.current.setItemIndex(1);
+    });
+    await act(async () => {
+      await result.current.handleBackpackRemove();
+    });
+
+    expect(result.current.planCommands()).toEqual({
+      clones: [{ tempIndex: -1, sourceIndex: 0 }],
+      removes: [1],
+      batch: [],
+    });
   });
 
   it("discards queued backpack structure changes on reset", async () => {

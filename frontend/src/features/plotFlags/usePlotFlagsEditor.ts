@@ -7,7 +7,7 @@ import {
   plotBooleanValueMap,
   plotIntegerValueMap,
 } from "../../lib/plotFlagUtils";
-import type { PlotBooleanFlag, PlotIntegerFlag } from "../../types";
+import type { PlotBooleanFlag, PlotIntegerFlag, SaveCommand } from "../../types";
 import type { AsyncRun } from "../shared/types";
 import { applyImplications } from "./plotFlagImplications";
 import { validatePlotFlags } from "./plotFlagValidation";
@@ -20,6 +20,10 @@ type UsePlotFlagsEditorOptions = {
 type PlotFlagDraftCheckpoint = {
   plotBooleanDrafts: Record<number, boolean>;
   plotIntegerDrafts: Record<number, number>;
+};
+
+type PlotFlagCommandPlan = {
+  batch: SaveCommand[];
 };
 
 const clonePlotFlagCheckpoint = (draft: PlotFlagDraftCheckpoint): PlotFlagDraftCheckpoint => ({
@@ -185,6 +189,36 @@ export function usePlotFlagsEditor({ run, refreshSummary }: UsePlotFlagsEditorOp
     return boolModified + intModified;
   }, [plotBooleanDrafts, plotBooleanValues, plotIntegerDrafts, plotIntegerValues]);
 
+  const planCommands = useCallback((): PlotFlagCommandPlan => {
+    if (modifiedCount === 0) {
+      return { batch: [] };
+    }
+    return {
+      batch: [{
+        command: "patch_plot_flags",
+        booleans: availablePlotBooleans
+          .filter((flag) => plotBooleanValues[flag.id] !== undefined || Boolean(plotBooleanDrafts[flag.id]))
+          .map((flag) => ({
+            id: flag.id,
+            value: Boolean(plotBooleanDrafts[flag.id]),
+          })),
+        integers: availablePlotIntegers
+          .filter((flag) => plotIntegerDrafts[flag.id] !== undefined)
+          .map((flag) => ({
+            id: flag.id,
+            value: plotIntegerDrafts[flag.id],
+          })),
+      }],
+    };
+  }, [
+    availablePlotBooleans,
+    availablePlotIntegers,
+    modifiedCount,
+    plotBooleanDrafts,
+    plotBooleanValues,
+    plotIntegerDrafts,
+  ]);
+
   return {
     plotBooleanValues,
     plotBooleanDrafts,
@@ -199,6 +233,7 @@ export function usePlotFlagsEditor({ run, refreshSummary }: UsePlotFlagsEditorOp
     handleBooleanBatch,
     commitPlotFlagDrafts,
     resetLoadedDrafts,
+    planCommands,
     commitDrafts,
     resetToCommittedDrafts,
     clear,

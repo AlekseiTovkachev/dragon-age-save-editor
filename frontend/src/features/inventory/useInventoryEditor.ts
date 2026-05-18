@@ -6,7 +6,7 @@ import { useDraftCheckpoint } from "../../hooks/useDraftCheckpoint";
 import { MAIN_TARGET, toItemPropertyDrafts } from "../../lib/itemUtils";
 import { parseNumber } from "../../lib/format";
 import type { ItemPropertyDraft } from "../../lib/itemUtils";
-import type { IndexedItem, InventoryContainer, Item, SaveSummary, SelectableItemProperty } from "../../types";
+import type { IndexedItem, InventoryContainer, Item, SaveCommand, SaveSummary, SelectableItemProperty } from "../../types";
 import type { AsyncRun } from "../shared/types";
 import { planInventoryDraftCommands } from "./inventoryCommandPlanner";
 
@@ -47,6 +47,14 @@ type PendingBackpackClone = {
   tempIndex: number;
   sourceIndex: number;
   item: Item;
+};
+
+export type InventoryCloneSpec = Pick<PendingBackpackClone, "tempIndex" | "sourceIndex">;
+
+type InventoryCommandPlan = {
+  clones?: InventoryCloneSpec[];
+  removes?: number[];
+  batch: SaveCommand[];
 };
 
 type DraftItemEntry = {
@@ -339,6 +347,51 @@ export function useInventoryEditor({
     [availableItemProperties],
   );
 
+  const planCommands = useCallback((): InventoryCommandPlan => {
+    storeCurrentItemDraft();
+    const batch: SaveCommand[] = [];
+    const money = parseNumber(moneyDraftRef.current);
+    if (money === null) {
+      throw new Error("Money must be a valid number.");
+    }
+    if (summary && summary.money !== money) {
+      batch.push({ command: "set_money", money });
+    }
+
+    const removed = container === "backpack" ? new Set(removedBackpackIndexes) : new Set<number>();
+    const draftEntries = Object.entries(itemDrafts.current)
+      .filter(([key]) => key.startsWith(`${containerKey}:`))
+      .map(([key, draft]) => {
+        const index = Number(key.slice(containerKey.length + 1));
+        if (index < 0 || removed.has(index)) {
+          return null;
+        }
+        const item = visibleItems.find((entry) => entry.index === index)?.item;
+        return item ? { index, item, draft } : null;
+      })
+      .filter((entry): entry is DraftItemEntry => entry !== null);
+
+    batch.push(...planInventoryDraftCommands({ container, entries: draftEntries }));
+
+    if (container !== "backpack") {
+      return { batch };
+    }
+
+    return {
+      clones: clonedBackpackItems.map(({ tempIndex, sourceIndex }) => ({ tempIndex, sourceIndex })),
+      removes: [...removedBackpackIndexes].sort((a, b) => b - a),
+      batch,
+    };
+  }, [
+    clonedBackpackItems,
+    container,
+    containerKey,
+    removedBackpackIndexes,
+    storeCurrentItemDraft,
+    summary,
+    visibleItems,
+  ]);
+
   const commitInventoryItemDrafts = useCallback(async () => {
     storeCurrentItemDraft();
     return run(async () => {
@@ -547,6 +600,7 @@ export function useInventoryEditor({
     handleBackpackRemove,
     handleBackpackClone,
     handleWikiOpen,
+    planCommands,
     commitDrafts,
     resetToCommittedDrafts,
     clear,

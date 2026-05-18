@@ -21,6 +21,7 @@ import type {
   Character,
   CharacterSummary,
   CharacterTarget,
+  SaveCommand,
   SaveSummary,
 } from "../../types";
 import type { AsyncRun } from "../shared/types";
@@ -50,6 +51,9 @@ const EMPTY_DRAFT: CharacterDraft = {
 
 type CharacterDraftMap = Record<string, CharacterDraft>;
 type DraftSetter<T> = SetStateAction<T>;
+type CharacterCommandPlan = {
+  batch: SaveCommand[];
+};
 
 const cloneCharacterDraft = (draft: CharacterDraft): CharacterDraft => ({
   statsDraft: { ...draft.statsDraft },
@@ -246,6 +250,20 @@ export function useCharacterEditor({ summary, run, refreshSummary }: UseCharacte
     });
   }, [character, currentDraft, loadCharacter, refreshSummary, run, selectedCharacterTarget]);
 
+  const planCommands = useCallback((): CharacterCommandPlan => {
+    const targetsByKey = new Map(characters.map((entry) => [targetKey(entry.target), entry.target]));
+    targetsByKey.set("main", MAIN_TARGET);
+    const batch = Object.entries(drafts).flatMap(([key, draft]) => {
+      const source = loadedCharacters[key];
+      const target = targetsByKey.get(key);
+      if (!source || !target) {
+        return [];
+      }
+      return planCharacterDraftCommands({ target, character: source, draft });
+    });
+    return { batch };
+  }, [characters, drafts, loadedCharacters]);
+
   const commitCharacterFields = useCallback(async () => {
     return commitPlannedDraftCommands(false);
   }, [commitPlannedDraftCommands]);
@@ -395,6 +413,7 @@ export function useCharacterEditor({ summary, run, refreshSummary }: UseCharacte
     visibleTreeAbilities: (list: AbilityListKind) =>
       visibleTreeAbilities(isDa2, list, availableAbilities, abilityDrafts),
     handleVisibleAbilityAdd,
+    planCommands,
     commitDrafts,
     resetToCommittedDrafts,
     clear,

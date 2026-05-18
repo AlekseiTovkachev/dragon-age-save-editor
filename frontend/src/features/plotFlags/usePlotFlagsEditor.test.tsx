@@ -79,4 +79,27 @@ describe("usePlotFlagsEditor", () => {
     });
     expect(refreshSummary).toHaveBeenCalledTimes(1);
   });
+
+  it("plans plot flag patch commands from drafts", async () => {
+    const { result } = renderHook(() =>
+      usePlotFlagsEditor({ run, refreshSummary: vi.fn(async () => undefined) }),
+    );
+
+    await act(async () => {
+      await result.current.refreshPlotFlags();
+      await result.current.refreshAvailablePlotFlags();
+    });
+    act(() => {
+      result.current.handleBooleanToggle(1, true);
+      result.current.handleIntegerChange(10, 2);
+    });
+
+    expect(result.current.planCommands()).toEqual({
+      batch: [{
+        command: "patch_plot_flags",
+        booleans: [{ id: 1, value: true }],
+        integers: [{ id: 10, value: 2 }],
+      }],
+    });
+  });
 });

@@ -7,7 +7,7 @@ import {
   recipeLabel,
   sortedRecipeChecklistIds,
 } from "../../lib/recipeUtils";
-import type { CraftingRecipe } from "../../types";
+import type { CraftingRecipe, SaveCommand } from "../../types";
 import type { AsyncRun } from "../shared/types";
 
 type UseCraftingEditorOptions = {
@@ -16,6 +16,14 @@ type UseCraftingEditorOptions = {
 };
 
 const cloneRecipeDrafts = (draft: number[]) => [...draft];
+
+type CraftingCommandPlan = {
+  batch: SaveCommand[];
+};
+
+function sameRecipeIds(left: number[], right: number[]) {
+  return left.length === right.length && left.every((value, index) => value === right[index]);
+}
 
 export function useCraftingEditor({ run, refreshSummary }: UseCraftingEditorOptions) {
   const [craftingRecipes, setCraftingRecipes] = useState<number[]>([]);
@@ -66,6 +74,15 @@ export function useCraftingEditor({ run, refreshSummary }: UseCraftingEditorOpti
       await refreshSummary();
     });
   }, [refreshSummary, run]);
+
+  const planCommands = useCallback((): CraftingCommandPlan => {
+    if (sameRecipeIds(craftingRecipes, craftingRecipeDrafts)) {
+      return { batch: [] };
+    }
+    return {
+      batch: [{ command: "replace_crafting_recipe_list", recipe_ids: craftingRecipeDrafts }],
+    };
+  }, [craftingRecipeDrafts, craftingRecipes]);
 
   const resetLoadedDrafts = useCallback(() => {
     setCraftingRecipeDrafts(craftingRecipes);
@@ -126,6 +143,7 @@ export function useCraftingEditor({ run, refreshSummary }: UseCraftingEditorOpti
     handleToggle,
     commitRecipeDrafts,
     resetLoadedDrafts,
+    planCommands,
     commitDrafts,
     resetToCommittedDrafts,
     clear,

@@ -184,6 +184,56 @@ describe("useCharacterEditor", () => {
     expect(result.current.statsDraft.strength).toBe("21");
   });
 
+  it("plans commands for cached character drafts", async () => {
+    const companionTarget = { companion: { index: 0 } } as const;
+    mocks.executeCommand.mockImplementation(async (command: { command: string; target?: unknown }) => {
+      if (command.command === "list_characters") {
+        return {
+          result: "characters",
+          characters: [
+            { target: "main_character", name: "Hero" },
+            { target: companionTarget, name: "Morrigan" },
+          ],
+        };
+      }
+      if (command.command === "get_character") {
+        if (command.target === companionTarget) {
+          return {
+            result: "character",
+            target: companionTarget,
+            character: character({ name: "Morrigan", approval: 10 }),
+          };
+        }
+        return { result: "character", target: "main_character", character: character() };
+      }
+      return { result: "character", target: "main_character", character: character() };
+    });
+    const { result } = renderHook(() =>
+      useCharacterEditor({ summary: null, run, refreshSummary: vi.fn(async () => undefined) }),
+    );
+
+    await act(async () => {
+      await result.current.refreshCharacters();
+      await result.current.loadCharacter("main_character");
+    });
+    act(() => {
+      result.current.setStatsDraft((current) => ({ ...current, strength: "21" }));
+    });
+    await act(async () => {
+      await result.current.loadCharacter(companionTarget);
+    });
+    act(() => {
+      result.current.setApprovalDraft("17");
+    });
+
+    expect(result.current.planCommands()).toEqual({
+      batch: [
+        { command: "patch_core_stats", target: "main_character", patch: { strength: 21 } },
+        { command: "set_approval", target: companionTarget, approval: 17 },
+      ],
+    });
+  });
+
   it("skips ability replacement when ability drafts are unchanged", async () => {
     const loaded = character({
       skills: [ability(1)],
