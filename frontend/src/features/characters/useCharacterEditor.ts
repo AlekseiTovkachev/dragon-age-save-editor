@@ -24,14 +24,11 @@ import type {
   SaveCommand,
   SaveSummary,
 } from "../../types";
-import type { AsyncRun } from "../shared/types";
 import { planCharacterDraftCommands } from "./characterCommandPlanner";
 import type { CharacterDraft } from "./characterCommandPlanner";
 
 type UseCharacterEditorOptions = {
   summary: SaveSummary | null;
-  run: AsyncRun;
-  refreshSummary: () => Promise<unknown>;
 };
 
 const EMPTY_ABILITIES: Record<AbilityListKind, Ability[]> = {
@@ -96,7 +93,7 @@ const draftFromCharacter = (source: Character): CharacterDraft => ({
   },
 });
 
-export function useCharacterEditor({ summary, run, refreshSummary }: UseCharacterEditorOptions) {
+export function useCharacterEditor({ summary }: UseCharacterEditorOptions) {
   const [characters, setCharacters] = useState<CharacterSummary[]>([]);
   const [characterKey, setCharacterKey] = useState("main");
   const [loadedCharacters, setLoadedCharacters] = useState<Record<string, Character>>({});
@@ -248,25 +245,6 @@ export function useCharacterEditor({ summary, run, refreshSummary }: UseCharacte
     }
   }, []);
 
-  const commitPlannedDraftCommands = useCallback(async (includeAbilities: boolean) => {
-    if (!character) {
-      return false;
-    }
-    return run(async () => {
-      const plannedCommands = planCharacterDraftCommands({
-        target: selectedCharacterTarget,
-        character,
-        draft: currentDraft,
-      }).filter((command) => includeAbilities || command.command !== "replace_ability_list");
-
-      if (plannedCommands.length > 0) {
-        await executeCommand({ command: "apply_batch", commands: plannedCommands });
-        await loadCharacter(selectedCharacterTarget);
-      }
-      await refreshSummary();
-    });
-  }, [character, currentDraft, loadCharacter, refreshSummary, run, selectedCharacterTarget]);
-
   const planCommands = useCallback((): CharacterCommandPlan => {
     const targetsByKey = new Map(characters.map((entry) => [targetKey(entry.target), entry.target]));
     targetsByKey.set("main", MAIN_TARGET);
@@ -281,29 +259,6 @@ export function useCharacterEditor({ summary, run, refreshSummary }: UseCharacte
     return { batch };
   }, [characters, drafts, loadedCharacters]);
 
-  const commitCharacterFields = useCallback(async () => {
-    return commitPlannedDraftCommands(false);
-  }, [commitPlannedDraftCommands]);
-
-  const commitAbilityDrafts = useCallback(async () => {
-    if (!character) {
-      return false;
-    }
-    return run(async () => {
-      const plannedCommands = planCharacterDraftCommands({
-        target: selectedCharacterTarget,
-        character,
-        draft: currentDraft,
-      }).filter((command) => command.command === "replace_ability_list");
-
-      if (plannedCommands.length > 0) {
-        await executeCommand({ command: "apply_batch", commands: plannedCommands });
-        await loadCharacter(selectedCharacterTarget);
-      }
-      await refreshSummary();
-    });
-  }, [character, currentDraft, loadCharacter, refreshSummary, run, selectedCharacterTarget]);
-
   const checkpointDrafts = useCallback(() => {
     draftCheckpoint.checkpoint(draftsRef.current);
   }, [draftCheckpoint]);
@@ -311,17 +266,6 @@ export function useCharacterEditor({ summary, run, refreshSummary }: UseCharacte
   const markDraftsCommitted = useCallback(() => {
     checkpointDrafts();
   }, [checkpointDrafts]);
-
-  const commitDrafts = useCallback(async () => {
-    if (!await commitCharacterFields()) {
-      return false;
-    }
-    if (!await commitAbilityDrafts()) {
-      return false;
-    }
-    checkpointDrafts();
-    return true;
-  }, [checkpointDrafts, commitAbilityDrafts, commitCharacterFields]);
 
   const resetToCommittedDrafts = useCallback(() => {
     const checkpoint = draftCheckpoint.reset();
@@ -425,8 +369,6 @@ export function useCharacterEditor({ summary, run, refreshSummary }: UseCharacte
     refreshAvailableAbilities,
     loadCharacter,
     refreshLoadedCharacters,
-    commitCharacterFields,
-    commitAbilityDrafts,
     abilityIsLocked: (list: AbilityListKind, abilityId: number) => abilityIsLocked(list, abilityId, abilityDrafts),
     handleAbilityRemove,
     handleAbilityAdd,
@@ -437,7 +379,6 @@ export function useCharacterEditor({ summary, run, refreshSummary }: UseCharacte
     handleVisibleAbilityAdd,
     planCommands,
     markDraftsCommitted,
-    commitDrafts,
     resetToCommittedDrafts,
     clear,
   };

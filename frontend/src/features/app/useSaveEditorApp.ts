@@ -32,11 +32,7 @@ export function useSaveEditorApp() {
     setScreenshotDataUrl(response.assets.screenshot_data_url);
   }, []);
 
-  const characterEditor = useCharacterEditor({
-    summary,
-    run,
-    refreshSummary,
-  });
+  const characterEditor = useCharacterEditor({ summary });
   const {
     refreshAvailableAbilities,
     refreshCharacters,
@@ -57,20 +53,19 @@ export function useSaveEditorApp() {
     isBackpackInventory,
     run,
     setError,
-    refreshSummary,
   });
   const {
     refreshAvailableItemProperties,
     refreshItems,
     clear: clearInventory,
   } = inventoryEditor;
-  const craftingEditor = useCraftingEditor({ run, refreshSummary });
+  const craftingEditor = useCraftingEditor();
   const {
     refreshAvailableCraftingRecipes,
     refreshCraftingRecipes,
     clear: clearCrafting,
   } = craftingEditor;
-  const plotFlagsEditor = usePlotFlagsEditor({ run, refreshSummary });
+  const plotFlagsEditor = usePlotFlagsEditor();
   const {
     refreshAvailablePlotFlags,
     refreshPlotFlags,

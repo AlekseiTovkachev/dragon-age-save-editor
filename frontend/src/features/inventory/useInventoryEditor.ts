@@ -16,7 +16,6 @@ type UseInventoryEditorOptions = {
   isBackpackInventory: boolean;
   run: AsyncRun;
   setError: (message: string | null) => void;
-  refreshSummary: () => Promise<unknown>;
 };
 
 export type ItemMetadataDraft = {
@@ -137,7 +136,6 @@ export function useInventoryEditor({
   isBackpackInventory,
   run,
   setError,
-  refreshSummary,
 }: UseInventoryEditorOptions) {
   const [items, setItems] = useState<IndexedItem[]>([]);
   const [loadedContainerKey, setLoadedContainerKey] = useState<string | null>(null);
@@ -333,25 +331,6 @@ export function useInventoryEditor({
     }
   }, [containerKey, loadItemsForContainer]);
 
-  const commitMoneyDraft = useCallback(async () => {
-    const money = parseNumber(moneyDraftRef.current);
-    if (money === null) {
-      setError("Money must be a valid number.");
-      return false;
-    }
-    return run(async () => {
-      const response = expectResult(await executeCommand({ command: "set_money", money }), "summary");
-      await refreshSummary();
-      setMoneyDraft(response.summary.money.toString());
-    });
-  }, [refreshSummary, run, setError]);
-
-  const resetMoneyDraftToLoaded = useCallback(() => {
-    if (summary) {
-      setMoneyDraft(summary.money.toString());
-    }
-  }, [summary]);
-
   const handlePropertyAddDraft = useCallback(() => {
     const propertyId = parseNumber(propertyDraft.property_id);
     const power = parseNumber(propertyDraft.power);
@@ -449,86 +428,6 @@ export function useInventoryEditor({
     summary,
   ]);
 
-  const commitInventoryItemDrafts = useCallback(async () => {
-    storeCurrentItemDraft();
-    return run(async () => {
-      const removed = container === "backpack" ? new Set(removedBackpackIndexes) : new Set<number>();
-      const draftEntries = Object.entries(itemDrafts.current)
-        .filter(([key]) => key.startsWith(`${containerKey}:`))
-        .map(([key, draft]) => {
-          const index = Number(key.slice(containerKey.length + 1));
-          if (index < 0 || removed.has(index)) {
-            return null;
-          }
-          const item = visibleItems.find((entry) => entry.index === index)?.item;
-          return item ? { index, item, draft } : null;
-        })
-        .filter((entry): entry is DraftItemEntry => entry !== null);
-
-      const commands = planInventoryDraftCommands({ container, entries: draftEntries });
-      if (commands.length > 0) {
-        await executeCommand({ command: "apply_batch", commands });
-      }
-      if (container === "backpack") {
-        const hasBackpackStructureChanges = clonedBackpackItems.length > 0 || removedBackpackIndexes.length > 0;
-        for (const clone of clonedBackpackItems) {
-          const cloneResponse = expectResult(
-            await executeCommand({ command: "clone_backpack_item", index: clone.sourceIndex }),
-            "item",
-          );
-          const cloneDraft = itemDrafts.current[`${containerKey}:${clone.tempIndex}`];
-          if (cloneDraft) {
-            const cloneCommands = planInventoryDraftCommands({
-              container,
-              entries: [{ index: cloneResponse.index, item: cloneResponse.item, draft: cloneDraft }],
-            });
-            if (cloneCommands.length > 0) {
-              await executeCommand({ command: "apply_batch", commands: cloneCommands });
-            }
-          }
-        }
-        const removeCommands = [...removedBackpackIndexes]
-          .sort((a, b) => b - a)
-          .map((index) => ({ command: "remove_backpack_item" as const, index }));
-        for (const command of removeCommands) {
-          await executeCommand(command);
-        }
-        setRemovedBackpackIndexes([]);
-        setClonedBackpackItems([]);
-        nextTemporaryBackpackIndex.current = -1;
-        if (hasBackpackStructureChanges) {
-          itemDrafts.current = withoutDraftsForContainer(itemDrafts.current, containerKey);
-          currentItemDraftKey.current = null;
-        }
-      }
-      await refreshItems();
-      await refreshSummary();
-    });
-  }, [
-    clonedBackpackItems,
-    container,
-    containerKey,
-    refreshItems,
-    refreshSummary,
-    removedBackpackIndexes,
-    run,
-    storeCurrentItemDraft,
-    visibleItems,
-  ]);
-
-  const resetInventoryDraftToLoaded = useCallback(() => {
-    if (!selectedItem) {
-      return;
-    }
-    setItemMetadataDraft({
-      material: selectedItem.material?.toString() ?? "",
-      item_level: selectedItem.item_level?.toString() ?? "",
-      stack_size: selectedItem.item_stacksize?.toString() ?? "1",
-    });
-    setItemPropertiesDraft(toItemPropertyDrafts(selectedItem.properties));
-    setPropertyDraft((current) => ({ ...current, power: "" }));
-  }, [selectedItem]);
-
   const checkpointDrafts = useCallback(() => {
     storeCurrentItemDraft();
     const nextItemDrafts = Object.fromEntries(
@@ -555,17 +454,6 @@ export function useInventoryEditor({
     }
     checkpointDrafts();
   }, [checkpointDrafts]);
-
-  const commitDrafts = useCallback(async () => {
-    if (!await commitMoneyDraft()) {
-      return false;
-    }
-    if (!await commitInventoryItemDrafts()) {
-      return false;
-    }
-    checkpointDrafts();
-    return true;
-  }, [checkpointDrafts, commitInventoryItemDrafts, commitMoneyDraft]);
 
   const resetToCommittedDrafts = useCallback(() => {
     const checkpoint = draftCheckpoint.reset();
@@ -660,19 +548,14 @@ export function useInventoryEditor({
     refreshAvailableItemProperties,
     refreshItems,
     refreshLoadedItems,
-    commitMoneyDraft,
-    resetMoneyDraftToLoaded,
     handlePropertyAddDraft,
     handlePropertyRemoveDraft,
     handlePropertyUpdateDraft,
-    commitInventoryItemDrafts,
-    resetInventoryDraftToLoaded,
     handleBackpackRemove,
     handleBackpackClone,
     handleWikiOpen,
     planCommands,
     markDraftsCommitted,
-    commitDrafts,
     resetToCommittedDrafts,
     clear,
   };

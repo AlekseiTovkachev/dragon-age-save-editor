@@ -55,8 +55,7 @@ describe("useInventoryEditor", () => {
     });
   });
 
-  it("commits stack size, metadata, and property mutations in order", async () => {
-    const refreshSummary = vi.fn(async () => summary());
+  it("plans stack size, metadata, and property mutations in order", async () => {
     const setError = vi.fn();
     const { result } = renderHook(() =>
       useInventoryEditor({
@@ -65,7 +64,6 @@ describe("useInventoryEditor", () => {
         isBackpackInventory: true,
         run,
         setError,
-        refreshSummary,
       }),
     );
 
@@ -85,13 +83,10 @@ describe("useInventoryEditor", () => {
       result.current.handlePropertyAddDraft();
     });
 
-    await act(async () => {
-      await result.current.commitInventoryItemDrafts();
-    });
-
-    expect(mocks.executeCommand).toHaveBeenCalledWith({
-      command: "apply_batch",
-      commands: [
+    expect(result.current.planCommands()).toEqual({
+      clones: [],
+      removes: [],
+      batch: [
         { command: "set_backpack_item_stack_size", index: 0, stack_size: 5 },
         { command: "patch_item_metadata", container: "backpack", index: 0, patch: { item_level: 2 } },
         { command: "set_item_property_id", container: "backpack", index: 0, property_index: 0, property_id: 8 },
@@ -99,7 +94,6 @@ describe("useInventoryEditor", () => {
         { command: "add_item_property", container: "backpack", index: 0, property_id: 9, power: 3 },
       ],
     });
-    expect(refreshSummary).toHaveBeenCalled();
   });
 
   it("plans money and item draft commands", async () => {
@@ -110,7 +104,6 @@ describe("useInventoryEditor", () => {
         isBackpackInventory: true,
         run,
         setError: vi.fn(),
-        refreshSummary: vi.fn(async () => summary()),
       }),
     );
 
@@ -134,7 +127,7 @@ describe("useInventoryEditor", () => {
     });
   });
 
-  it("reports invalid stack size before issuing edit commands", async () => {
+  it("reports invalid stack size before planning edit commands", async () => {
     const setError = vi.fn();
     const { result } = renderHook(() =>
       useInventoryEditor({
@@ -143,7 +136,6 @@ describe("useInventoryEditor", () => {
         isBackpackInventory: true,
         run,
         setError,
-        refreshSummary: vi.fn(async () => summary()),
       }),
     );
 
@@ -154,9 +146,7 @@ describe("useInventoryEditor", () => {
       result.current.setItemMetadataDraft((current) => ({ ...current, stack_size: "500" }));
     });
 
-    await expect(act(async () => result.current.commitInventoryItemDrafts())).rejects.toThrow(
-      "Stack size must be a whole number from 1 to 99.",
-    );
+    expect(() => result.current.planCommands()).toThrow("Stack size must be a whole number from 1 to 99.");
   });
 
   it("keeps item drafts when switching selections", async () => {
@@ -179,7 +169,6 @@ describe("useInventoryEditor", () => {
         isBackpackInventory: true,
         run,
         setError: vi.fn(),
-        refreshSummary: vi.fn(async () => summary()),
       }),
     );
 
@@ -220,7 +209,6 @@ describe("useInventoryEditor", () => {
           isBackpackInventory: container === "backpack",
           run,
           setError: vi.fn(),
-          refreshSummary: vi.fn(async () => summary()),
         }),
       { initialProps: { container: "backpack" as InventoryContainer } },
     );
@@ -242,7 +230,7 @@ describe("useInventoryEditor", () => {
     expect(result.current.items[0]?.item.name).toBe("Heavy Chainmail");
   });
 
-  it("queues backpack removal until inventory drafts are committed", async () => {
+  it("queues backpack removal until global apply", async () => {
     mocks.executeCommand.mockImplementation(async (command: { command: string }) => {
       if (command.command === "list_backpack_items") {
         return {
@@ -262,7 +250,6 @@ describe("useInventoryEditor", () => {
         isBackpackInventory: true,
         run,
         setError: vi.fn(),
-        refreshSummary: vi.fn(async () => summary()),
       }),
     );
 
@@ -281,14 +268,10 @@ describe("useInventoryEditor", () => {
       commands: [{ command: "remove_backpack_item", index: 0 }],
     });
 
-    await act(async () => {
-      await result.current.commitInventoryItemDrafts();
-    });
-
-    expect(mocks.executeCommand).toHaveBeenCalledWith({ command: "remove_backpack_item", index: 0 });
+    expect(result.current.planCommands()).toEqual({ clones: [], removes: [0], batch: [] });
   });
 
-  it("queues backpack clone until inventory drafts are committed", async () => {
+  it("queues backpack clone until global apply", async () => {
     mocks.executeCommand.mockImplementation(async (command: { command: string; index?: number }) => {
       if (command.command === "list_backpack_items") {
         return {
@@ -313,7 +296,6 @@ describe("useInventoryEditor", () => {
         isBackpackInventory: true,
         run,
         setError: vi.fn(),
-        refreshSummary: vi.fn(async () => summary()),
       }),
     );
 
@@ -329,11 +311,11 @@ describe("useInventoryEditor", () => {
     expect(result.current.itemIndex).toBeLessThan(0);
     expect(mocks.executeCommand).not.toHaveBeenCalledWith({ command: "clone_backpack_item", index: 0 });
 
-    await act(async () => {
-      await result.current.commitInventoryItemDrafts();
+    expect(result.current.planCommands()).toEqual({
+      clones: [{ tempIndex: -1, sourceIndex: 0, batch: [] }],
+      removes: [],
+      batch: [],
     });
-
-    expect(mocks.executeCommand).toHaveBeenCalledWith({ command: "clone_backpack_item", index: 0 });
   });
 
   it("plans queued backpack clones and removals", async () => {
@@ -356,7 +338,6 @@ describe("useInventoryEditor", () => {
         isBackpackInventory: true,
         run,
         setError: vi.fn(),
-        refreshSummary: vi.fn(async () => summary()),
       }),
     );
 
@@ -402,7 +383,6 @@ describe("useInventoryEditor", () => {
         isBackpackInventory: true,
         run,
         setError: vi.fn(),
-        refreshSummary: vi.fn(async () => summary()),
       }),
     );
 
@@ -422,106 +402,10 @@ describe("useInventoryEditor", () => {
 
     expect(result.current.items.map((entry) => entry.index)).toEqual([0, 1]);
 
-    await act(async () => {
-      await result.current.commitInventoryItemDrafts();
-    });
-
-    expect(mocks.executeCommand).not.toHaveBeenCalledWith({
-      command: "apply_batch",
-      commands: [{ command: "remove_backpack_item", index: 0 }],
-    });
+    expect(result.current.planCommands()).toEqual({ clones: [], removes: [], batch: [] });
   });
 
-  it("clears stale backpack drafts after removals shift backend indexes", async () => {
-    let backpackItems = [
-      indexedItem(0, { name: "Potion", item_stacksize: 3 }),
-      indexedItem(1, { name: "Bomb", item_stacksize: 4 }),
-      indexedItem(2, { name: "Trap", item_stacksize: 5 }),
-    ];
-    mocks.executeCommand.mockImplementation(
-      async (command: {
-        command: string;
-        index?: number;
-        commands?: Array<{ command: string; index: number; stack_size?: number }>;
-      }) => {
-        if (command.command === "list_backpack_items") {
-          return { result: "items", items: backpackItems };
-        }
-        if (command.command === "apply_batch") {
-          for (const nested of command.commands ?? []) {
-            if (nested.command === "set_backpack_item_stack_size") {
-              backpackItems = backpackItems.map((entry) =>
-                entry.index === nested.index
-                  ? indexedItem(entry.index, { ...entry.item, item_stacksize: nested.stack_size })
-                  : entry,
-              );
-            }
-          }
-          return { result: "summary", summary: summary({ dirty: true }) };
-        }
-        if (command.command === "remove_backpack_item") {
-          backpackItems = backpackItems
-            .filter((entry) => entry.index !== command.index)
-            .map((entry, index) => indexedItem(index, entry.item));
-          return { result: "summary", summary: summary({ dirty: true }) };
-        }
-        return { result: "summary", summary: summary({ dirty: true }) };
-      },
-    );
-    const { result } = renderHook(() =>
-      useInventoryEditor({
-        summary: summary(),
-        container: "backpack",
-        isBackpackInventory: true,
-        run,
-        setError: vi.fn(),
-        refreshSummary: vi.fn(async () => summary()),
-      }),
-    );
-
-    await act(async () => {
-      await result.current.refreshItems();
-    });
-    await waitFor(() => expect(result.current.itemIndex).toBe(0));
-
-    act(() => {
-      result.current.setItemIndex(1);
-    });
-    await waitFor(() => expect(result.current.itemMetadataDraft.stack_size).toBe("4"));
-    act(() => {
-      result.current.setItemMetadataDraft((current) => ({ ...current, stack_size: "8" }));
-      result.current.setItemIndex(0);
-    });
-    await waitFor(() => expect(result.current.itemMetadataDraft.stack_size).toBe("3"));
-
-    await act(async () => {
-      await result.current.handleBackpackRemove();
-    });
-    await waitFor(() => expect(result.current.items.map((entry) => entry.index)).toEqual([1, 2]));
-
-    await act(async () => {
-      await result.current.commitInventoryItemDrafts();
-    });
-
-    expect(backpackItems.map((entry) => [entry.index, entry.item.name, entry.item.item_stacksize])).toEqual([
-      [0, "Bomb", 8],
-      [1, "Trap", 5],
-    ]);
-    await waitFor(() => expect(result.current.itemIndex).toBe(1));
-    await waitFor(() => expect(result.current.itemMetadataDraft.stack_size).toBe("5"));
-
-    mocks.executeCommand.mockClear();
-    await act(async () => {
-      await result.current.commitInventoryItemDrafts();
-    });
-
-    expect(mocks.executeCommand).not.toHaveBeenCalledWith({
-      command: "apply_batch",
-      commands: [{ command: "set_backpack_item_stack_size", index: 1, stack_size: 8 }],
-    });
-  });
-
-  it("commits cached drafts for multiple selected items", async () => {
+  it("plans cached drafts for multiple selected items", async () => {
     const backpackItems = [
       indexedItem(0, { name: "Potion", item_stacksize: 3 }),
       indexedItem(1, { name: "Bomb", item_stacksize: 2 }),
@@ -550,7 +434,6 @@ describe("useInventoryEditor", () => {
         isBackpackInventory: true,
         run,
         setError: vi.fn(),
-        refreshSummary: vi.fn(async () => summary()),
       }),
     );
 
@@ -568,13 +451,10 @@ describe("useInventoryEditor", () => {
       result.current.setItemMetadataDraft((current) => ({ ...current, stack_size: "8" }));
     });
 
-    await act(async () => {
-      await result.current.commitDrafts();
-    });
-
-    expect(mocks.executeCommand).toHaveBeenCalledWith({
-      command: "apply_batch",
-      commands: [
+    expect(result.current.planCommands()).toEqual({
+      clones: [],
+      removes: [],
+      batch: [
         { command: "set_backpack_item_stack_size", index: 0, stack_size: 12 },
         { command: "set_backpack_item_stack_size", index: 1, stack_size: 8 },
       ],
@@ -606,7 +486,6 @@ describe("useInventoryEditor", () => {
         isBackpackInventory: true,
         run,
         setError: vi.fn(),
-        refreshSummary: vi.fn(async () => summary()),
       }),
     );
 
@@ -618,13 +497,10 @@ describe("useInventoryEditor", () => {
     act(() => {
       result.current.handlePropertyRemoveDraft(1);
     });
-    await act(async () => {
-      await result.current.commitInventoryItemDrafts();
-    });
-
-    expect(mocks.executeCommand).toHaveBeenCalledWith({
-      command: "apply_batch",
-      commands: [{ command: "remove_item_property", container: "backpack", index: 0, property_index: 1 }],
+    expect(result.current.planCommands()).toEqual({
+      clones: [],
+      removes: [],
+      batch: [{ command: "remove_item_property", container: "backpack", index: 0, property_index: 1 }],
     });
   });
 });

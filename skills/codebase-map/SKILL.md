@@ -35,7 +35,7 @@ dragon-age-save-editor/
 - `src/edit/`: `SaveEditor` public mutation API plus private raw-GFF helpers in `internal.rs`.
 - `src/app/`: command DTOs, document wrapper, command execution, catalogs, Tauri-facing errors.
 - `src/validate/`: structural validation rules.
-- `src/main.rs`: lightweight CLI/debug entry point.
+- `src/bin/apply_edit.rs`: manual/in-game test sidecar for applying JSON commands to copied saves.
 
 Key invariant: `SaveEditor` owns both raw `GffFile` and extracted `SaveGame`; every edit mutates both.
 

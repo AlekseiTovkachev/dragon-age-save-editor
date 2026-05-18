@@ -18,11 +18,6 @@ vi.mock("../../api", () => ({
   },
 }));
 
-const run = async (action: () => Promise<void>) => {
-  await action();
-  return true;
-};
-
 describe("useCharacterEditor", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -40,10 +35,9 @@ describe("useCharacterEditor", () => {
     });
   });
 
-  it("commits character overview edits in command order", async () => {
-    const refreshSummary = vi.fn(async () => undefined);
+  it("plans character overview edits in command order", async () => {
     const { result } = renderHook(() =>
-      useCharacterEditor({ summary: null, run, refreshSummary }),
+      useCharacterEditor({ summary: null }),
     );
 
     await act(async () => {
@@ -59,25 +53,18 @@ describe("useCharacterEditor", () => {
       result.current.setApprovalDraft("17");
     });
 
-    await act(async () => {
-      await result.current.commitCharacterFields();
-    });
-
-    expect(mocks.executeCommand).toHaveBeenCalledWith({
-      command: "apply_batch",
-      commands: [
+    expect(result.current.planCommands()).toEqual({
+      batch: [
         { command: "patch_core_stats", target: "main_character", patch: { strength: 21 } },
         { command: "set_level", target: "main_character", level: 5 },
         { command: "set_experience", target: "main_character", experience: 1234 },
         { command: "patch_point_pools", target: "main_character", patch: { talent_points: 9 } },
       ],
     });
-    const commands = mocks.executeCommand.mock.calls.map(([command]) => command);
-    expect(JSON.stringify(commands)).not.toContain("set_approval");
-    expect(refreshSummary).toHaveBeenCalledTimes(1);
+    expect(JSON.stringify(result.current.planCommands().batch)).not.toContain("set_approval");
   });
 
-  it("commits approval edits for companions", async () => {
+  it("plans approval edits for companions", async () => {
     const companionTarget = { companion: { index: 0 } } as const;
     mocks.executeCommand.mockImplementation(async (command: { command: string }) => {
       if (command.command === "list_characters") {
@@ -88,9 +75,8 @@ describe("useCharacterEditor", () => {
       }
       return { result: "character", target: companionTarget, character: character({ approval: 10 }) };
     });
-    const refreshSummary = vi.fn(async () => undefined);
     const { result } = renderHook(() =>
-      useCharacterEditor({ summary: null, run, refreshSummary }),
+      useCharacterEditor({ summary: null }),
     );
 
     await act(async () => {
@@ -106,13 +92,8 @@ describe("useCharacterEditor", () => {
       result.current.setApprovalDraft("17");
     });
 
-    await act(async () => {
-      await result.current.commitCharacterFields();
-    });
-
-    expect(mocks.executeCommand).toHaveBeenCalledWith({
-      command: "apply_batch",
-      commands: [{ command: "set_approval", target: companionTarget, approval: 17 }],
+    expect(result.current.planCommands()).toEqual({
+      batch: [{ command: "set_approval", target: companionTarget, approval: 17 }],
     });
   });
 
@@ -123,9 +104,8 @@ describe("useCharacterEditor", () => {
       target: companionTarget,
       character: character({ approval: 10, level: 8 }),
     });
-    const refreshSummary = vi.fn(async () => undefined);
     const { result } = renderHook(() =>
-      useCharacterEditor({ summary: null, run, refreshSummary }),
+      useCharacterEditor({ summary: null }),
     );
 
     await act(async () => {
@@ -156,9 +136,8 @@ describe("useCharacterEditor", () => {
       }
       return { result: "character", target: "main_character", character: character() };
     });
-    const refreshSummary = vi.fn(async () => undefined);
     const { result } = renderHook(() =>
-      useCharacterEditor({ summary: null, run, refreshSummary }),
+      useCharacterEditor({ summary: null }),
     );
 
     await act(async () => {
@@ -209,7 +188,7 @@ describe("useCharacterEditor", () => {
       return { result: "character", target: "main_character", character: character() };
     });
     const { result } = renderHook(() =>
-      useCharacterEditor({ summary: null, run, refreshSummary: vi.fn(async () => undefined) }),
+      useCharacterEditor({ summary: null }),
     );
 
     await act(async () => {
@@ -246,9 +225,8 @@ describe("useCharacterEditor", () => {
       }
       return { result: "character", target: "main_character", character: loaded };
     });
-    const refreshSummary = vi.fn(async () => undefined);
     const { result } = renderHook(() =>
-      useCharacterEditor({ summary: null, run, refreshSummary }),
+      useCharacterEditor({ summary: null }),
     );
 
     await act(async () => {
@@ -256,10 +234,6 @@ describe("useCharacterEditor", () => {
     });
     await waitFor(() => expect(result.current.abilityDrafts.skills).toHaveLength(1));
 
-    await act(async () => {
-      await result.current.commitAbilityDrafts();
-    });
-
-    expect(mocks.executeCommand).not.toHaveBeenCalledWith(expect.objectContaining({ command: "apply_batch" }));
+    expect(result.current.planCommands()).toEqual({ batch: [] });
   });
 });

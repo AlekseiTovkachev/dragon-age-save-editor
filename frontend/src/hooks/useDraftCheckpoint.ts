@@ -5,19 +5,14 @@ export type DraftCheckpoint<TDraft> = {
   checkpoint: (draft: TDraft) => void;
   reset: () => TDraft | null;
   clear: () => void;
-  hasChanges: (draft: TDraft) => boolean;
 };
 
 type DraftCheckpointOptions<TDraft> = {
   clone: (draft: TDraft) => TDraft;
-  equals?: (left: TDraft, right: TDraft) => boolean;
 };
-
-const jsonEquals = <TDraft,>(left: TDraft, right: TDraft) => JSON.stringify(left) === JSON.stringify(right);
 
 export function useDraftCheckpoint<TDraft>({
   clone,
-  equals = jsonEquals,
 }: DraftCheckpointOptions<TDraft>): DraftCheckpoint<TDraft> {
   const checkpointRef = useRef<TDraft | null>(null);
 
@@ -33,10 +28,6 @@ export function useDraftCheckpoint<TDraft>({
     checkpointRef.current = null;
   }, []);
 
-  const hasChanges = useCallback((draft: TDraft) => {
-    return checkpointRef.current !== null && !equals(draft, checkpointRef.current);
-  }, [equals]);
-
   return useMemo(() => ({
     get current() {
       return checkpointRef.current;
@@ -44,6 +35,5 @@ export function useDraftCheckpoint<TDraft>({
     checkpoint,
     reset,
     clear,
-    hasChanges,
-  }), [checkpoint, clear, hasChanges, reset]);
+  }), [checkpoint, clear, reset]);
 }

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { executeCommand, expectResult } from "../../api";
 import { useDraftCheckpoint } from "../../hooks/useDraftCheckpoint";
 import {
@@ -8,14 +8,8 @@ import {
   plotIntegerValueMap,
 } from "../../lib/plotFlagUtils";
 import type { PlotBooleanFlag, PlotIntegerFlag, SaveCommand } from "../../types";
-import type { AsyncRun } from "../shared/types";
 import { applyImplications } from "./plotFlagImplications";
 import { validatePlotFlags } from "./plotFlagValidation";
-
-type UsePlotFlagsEditorOptions = {
-  run: AsyncRun;
-  refreshSummary: () => Promise<unknown>;
-};
 
 type PlotFlagDraftCheckpoint = {
   plotBooleanDrafts: Record<number, boolean>;
@@ -31,7 +25,7 @@ const clonePlotFlagCheckpoint = (draft: PlotFlagDraftCheckpoint): PlotFlagDraftC
   plotIntegerDrafts: { ...draft.plotIntegerDrafts },
 });
 
-export function usePlotFlagsEditor({ run, refreshSummary }: UsePlotFlagsEditorOptions) {
+export function usePlotFlagsEditor() {
   const [plotBooleanValues, setPlotBooleanValues] = useState<Record<number, boolean>>({});
   const [plotBooleanDrafts, setPlotBooleanDrafts] = useState<Record<number, boolean>>({});
   const [plotIntegerValues, setPlotIntegerValues] = useState<Record<number, number>>({});
@@ -39,14 +33,6 @@ export function usePlotFlagsEditor({ run, refreshSummary }: UsePlotFlagsEditorOp
   const [availablePlotBooleans, setAvailablePlotBooleans] = useState<PlotBooleanFlag[]>([]);
   const [availablePlotIntegers, setAvailablePlotIntegers] = useState<PlotIntegerFlag[]>([]);
   const draftCheckpoint = useDraftCheckpoint<PlotFlagDraftCheckpoint>({ clone: clonePlotFlagCheckpoint });
-  const plotBooleanDraftsRef = useRef(plotBooleanDrafts);
-  const plotIntegerDraftsRef = useRef(plotIntegerDrafts);
-
-  useEffect(() => {
-    plotBooleanDraftsRef.current = plotBooleanDrafts;
-    plotIntegerDraftsRef.current = plotIntegerDrafts;
-  }, [plotBooleanDrafts, plotIntegerDrafts]);
-
   const refreshPlotFlags = useCallback(async () => {
     const response = expectResult(await executeCommand({ command: "list_plot_flags" }), "plot_flags");
     const booleanValues = plotBooleanValueMap(response.booleans);
@@ -69,12 +55,12 @@ export function usePlotFlagsEditor({ run, refreshSummary }: UsePlotFlagsEditorOp
 
   const handleBooleanToggle = useCallback((id: number, value: boolean) => {
     const merged = applyImplications(
-      { ...plotBooleanDraftsRef.current, [id]: value },
-      plotIntegerDraftsRef.current,
+      { ...plotBooleanDrafts, [id]: value },
+      plotIntegerDrafts,
     );
     setPlotBooleanDrafts(merged.bools);
     setPlotIntegerDrafts(merged.ints);
-  }, []);
+  }, [plotBooleanDrafts, plotIntegerDrafts]);
 
   const handleIntegerChange = useCallback((id: number, value: number) => {
     setPlotIntegerDrafts((current) => ({ ...current, [id]: value }));
@@ -90,47 +76,6 @@ export function usePlotFlagsEditor({ run, refreshSummary }: UsePlotFlagsEditorOp
     [],
   );
 
-  const commitPlotFlagDrafts = useCallback(async () => {
-    return run(async () => {
-      const response = expectResult(
-        await executeCommand({
-          command: "patch_plot_flags",
-          booleans: availablePlotBooleans
-            .filter((flag) => plotBooleanValues[flag.id] !== undefined || Boolean(plotBooleanDraftsRef.current[flag.id]))
-            .map((flag) => ({
-              id: flag.id,
-              value: Boolean(plotBooleanDraftsRef.current[flag.id]),
-            })),
-          integers: availablePlotIntegers
-            .filter((flag) => plotIntegerDraftsRef.current[flag.id] !== undefined)
-            .map((flag) => ({
-              id: flag.id,
-              value: plotIntegerDraftsRef.current[flag.id],
-            })),
-        }),
-        "plot_flags",
-      );
-      const booleanValues = plotBooleanValueMap(response.booleans);
-      const integerValues = plotIntegerValueMap(response.integers);
-      setPlotBooleanValues(booleanValues);
-      setPlotBooleanDrafts(booleanValues);
-      setPlotIntegerValues(integerValues);
-      setPlotIntegerDrafts(integerValues);
-      await refreshSummary();
-    });
-  }, [
-    availablePlotBooleans,
-    availablePlotIntegers,
-    plotBooleanValues,
-    refreshSummary,
-    run,
-  ]);
-
-  const resetLoadedDrafts = useCallback(() => {
-    setPlotBooleanDrafts(plotBooleanValues);
-    setPlotIntegerDrafts(plotIntegerValues);
-  }, [plotBooleanValues, plotIntegerValues]);
-
   const checkpointDrafts = useCallback(() => {
     draftCheckpoint.checkpoint({
       plotBooleanDrafts: { ...plotBooleanDrafts },
@@ -141,14 +86,6 @@ export function usePlotFlagsEditor({ run, refreshSummary }: UsePlotFlagsEditorOp
   const markDraftsCommitted = useCallback(() => {
     checkpointDrafts();
   }, [checkpointDrafts]);
-
-  const commitDrafts = useCallback(async () => {
-    if (!await commitPlotFlagDrafts()) {
-      return false;
-    }
-    checkpointDrafts();
-    return true;
-  }, [checkpointDrafts, commitPlotFlagDrafts]);
 
   const resetToCommittedDrafts = useCallback(() => {
     const checkpoint = draftCheckpoint.reset();
@@ -235,11 +172,8 @@ export function usePlotFlagsEditor({ run, refreshSummary }: UsePlotFlagsEditorOp
     handleBooleanToggle,
     handleIntegerChange,
     handleBooleanBatch,
-    commitPlotFlagDrafts,
-    resetLoadedDrafts,
     planCommands,
     markDraftsCommitted,
-    commitDrafts,
     resetToCommittedDrafts,
     clear,
     hasPlotWarnings,

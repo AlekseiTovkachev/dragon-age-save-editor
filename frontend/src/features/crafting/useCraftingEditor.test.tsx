@@ -17,11 +17,6 @@ vi.mock("../../api", () => ({
   },
 }));
 
-const run = async (action: () => Promise<void>) => {
-  await action();
-  return true;
-};
-
 describe("useCraftingEditor", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -34,9 +29,7 @@ describe("useCraftingEditor", () => {
   });
 
   it("plans recipe replacement commands from drafts", async () => {
-    const { result } = renderHook(() =>
-      useCraftingEditor({ run, refreshSummary: vi.fn(async () => undefined) }),
-    );
+    const { result } = renderHook(() => useCraftingEditor());
 
     await act(async () => {
       await result.current.refreshCraftingRecipes();

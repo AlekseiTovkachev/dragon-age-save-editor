@@ -17,11 +17,6 @@ vi.mock("../../api", () => ({
   },
 }));
 
-const run = async (action: () => Promise<void>) => {
-  await action();
-  return true;
-};
-
 describe("usePlotFlagsEditor", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -56,9 +51,8 @@ describe("usePlotFlagsEditor", () => {
     });
   });
 
-  it("builds patch payloads from boolean and integer drafts", async () => {
-    const refreshSummary = vi.fn(async () => undefined);
-    const { result } = renderHook(() => usePlotFlagsEditor({ run, refreshSummary }));
+  it("plans patch payloads from boolean and integer drafts", async () => {
+    const { result } = renderHook(() => usePlotFlagsEditor());
 
     await act(async () => {
       await result.current.refreshPlotFlags();
@@ -68,22 +62,17 @@ describe("usePlotFlagsEditor", () => {
       result.current.handleBooleanToggle(1, true);
       result.current.handleIntegerChange(10, 2);
     });
-    await act(async () => {
-      await result.current.commitPlotFlagDrafts();
+    expect(result.current.planCommands()).toEqual({
+      batch: [{
+        command: "patch_plot_flags",
+        booleans: [{ id: 1, value: true }],
+        integers: [{ id: 10, value: 2 }],
+      }],
     });
-
-    expect(mocks.executeCommand).toHaveBeenCalledWith({
-      command: "patch_plot_flags",
-      booleans: [{ id: 1, value: true }],
-      integers: [{ id: 10, value: 2 }],
-    });
-    expect(refreshSummary).toHaveBeenCalledTimes(1);
   });
 
   it("plans plot flag patch commands from drafts", async () => {
-    const { result } = renderHook(() =>
-      usePlotFlagsEditor({ run, refreshSummary: vi.fn(async () => undefined) }),
-    );
+    const { result } = renderHook(() => usePlotFlagsEditor());
 
     await act(async () => {
       await result.current.refreshPlotFlags();

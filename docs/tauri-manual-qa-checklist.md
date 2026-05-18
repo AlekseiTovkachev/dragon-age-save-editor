@@ -13,10 +13,10 @@ npm run tauri dev
 ## Startup And Shell
 
 - [x] App window opens centered and fully visible, with no clipped bottom edge.
-- [x] Header shows app title, save filename/path when loaded, game label, dirty/saved state, and screenshot/no-screenshot state.
-- [x] Horizontal tabs are visible and usable.
-- [x] Money display sits beside the tabs and stays compact.
-- [x] `Open Save`, `Commit Changes`, `Reset Drafts`, and `Save As` are visible in the header after loading a save.
+- [x] Titlebar shows the app title, and the sidebar shows save filename/path when loaded, game label, dirty/saved state, and screenshot/no-screenshot state.
+- [x] Sidebar sections and character subtabs are visible and usable.
+- [x] Money display stays compact in the inventory toolbar.
+- [x] `Open Save`, `Apply Drafts`, `Reset Drafts`, and `Save As` are visible in the sidebar after loading a save.
 - [x] `Save As` is disabled before any committed backend edit makes the save dirty.
 - [x] Error/warning banners are readable and dismissible if triggered.
 
@@ -64,13 +64,13 @@ npm run tauri dev
 - [ ] Change a character stat locally, then click `Reset Drafts`; stat returns to the loaded value.
 - [ ] Change a recipe locally, then click `Reset Drafts`; recipe returns to the loaded value.
 - [ ] For DA2, change a plot flag locally, then click `Reset Drafts`; plot flag returns to the loaded value.
-- [ ] Change money and stack size, then click `Commit Changes`; save state becomes dirty and `Save As` enables.
+- [ ] Change money and stack size, then click `Apply Drafts`; save state becomes dirty and `Save As` enables.
 - [ ] After commit, change the same fields again, then click `Reset Drafts`; fields return to the committed values, not the original loaded values.
-- [ ] Commit fails cleanly for an invalid edit and leaves prior committed state intact.
+- [ ] Apply fails cleanly for an invalid edit and leaves prior committed state intact.
 
 ## Save As And Reload
 
-- [ ] After a successful commit, click `Save As` and write to a copy path.
+- [ ] After a successful apply, click `Save As` and write to a copy path.
 - [ ] `Save As` completion marks the summary as saved/clean.
 - [ ] Reopen the saved copy.
 - [ ] DAO committed character, inventory, and recipe edits persist after reload.

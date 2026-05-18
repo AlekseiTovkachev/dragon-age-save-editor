@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { executeCommand, expectResult } from "../../api";
 import { useDraftCheckpoint } from "../../hooks/useDraftCheckpoint";
 import {
@@ -8,12 +8,6 @@ import {
   sortedRecipeChecklistIds,
 } from "../../lib/recipeUtils";
 import type { CraftingRecipe, SaveCommand } from "../../types";
-import type { AsyncRun } from "../shared/types";
-
-type UseCraftingEditorOptions = {
-  run: AsyncRun;
-  refreshSummary: () => Promise<unknown>;
-};
 
 const cloneRecipeDrafts = (draft: number[]) => [...draft];
 
@@ -25,16 +19,11 @@ function sameRecipeIds(left: number[], right: number[]) {
   return left.length === right.length && left.every((value, index) => value === right[index]);
 }
 
-export function useCraftingEditor({ run, refreshSummary }: UseCraftingEditorOptions) {
+export function useCraftingEditor() {
   const [craftingRecipes, setCraftingRecipes] = useState<number[]>([]);
   const [craftingRecipeDrafts, setCraftingRecipeDrafts] = useState<number[]>([]);
   const [availableCraftingRecipes, setAvailableCraftingRecipes] = useState<CraftingRecipe[]>([]);
-  const craftingRecipeDraftsRef = useRef(craftingRecipeDrafts);
   const draftCheckpoint = useDraftCheckpoint<number[]>({ clone: cloneRecipeDrafts });
-
-  useEffect(() => {
-    craftingRecipeDraftsRef.current = craftingRecipeDrafts;
-  }, [craftingRecipeDrafts]);
 
   const refreshCraftingRecipes = useCallback(async () => {
     const response = expectResult(await executeCommand({ command: "list_crafting_recipes" }), "crafting_recipes");
@@ -60,21 +49,6 @@ export function useCraftingEditor({ run, refreshSummary }: UseCraftingEditorOpti
     });
   }, []);
 
-  const commitRecipeDrafts = useCallback(async () => {
-    return run(async () => {
-      const response = expectResult(
-        await executeCommand({
-          command: "replace_crafting_recipe_list",
-          recipe_ids: craftingRecipeDraftsRef.current,
-        }),
-        "crafting_recipes",
-      );
-      setCraftingRecipes(response.recipe_ids);
-      setCraftingRecipeDrafts(response.recipe_ids);
-      await refreshSummary();
-    });
-  }, [refreshSummary, run]);
-
   const planCommands = useCallback((): CraftingCommandPlan => {
     if (sameRecipeIds(craftingRecipes, craftingRecipeDrafts)) {
       return { batch: [] };
@@ -84,10 +58,6 @@ export function useCraftingEditor({ run, refreshSummary }: UseCraftingEditorOpti
     };
   }, [craftingRecipeDrafts, craftingRecipes]);
 
-  const resetLoadedDrafts = useCallback(() => {
-    setCraftingRecipeDrafts(craftingRecipes);
-  }, [craftingRecipes]);
-
   const checkpointDrafts = useCallback(() => {
     draftCheckpoint.checkpoint(craftingRecipeDrafts);
   }, [craftingRecipeDrafts, draftCheckpoint]);
@@ -95,14 +65,6 @@ export function useCraftingEditor({ run, refreshSummary }: UseCraftingEditorOpti
   const markDraftsCommitted = useCallback(() => {
     checkpointDrafts();
   }, [checkpointDrafts]);
-
-  const commitDrafts = useCallback(async () => {
-    if (!await commitRecipeDrafts()) {
-      return false;
-    }
-    checkpointDrafts();
-    return true;
-  }, [checkpointDrafts, commitRecipeDrafts]);
 
   const resetToCommittedDrafts = useCallback(() => {
     const checkpoint = draftCheckpoint.reset();
@@ -145,11 +107,8 @@ export function useCraftingEditor({ run, refreshSummary }: UseCraftingEditorOpti
     refreshCraftingRecipes,
     refreshAvailableCraftingRecipes,
     handleToggle,
-    commitRecipeDrafts,
-    resetLoadedDrafts,
     planCommands,
     markDraftsCommitted,
-    commitDrafts,
     resetToCommittedDrafts,
     clear,
   };
