@@ -15,6 +15,7 @@ test("opens a DAO save, resets inventory drafts, commits, and saves a copy", asy
   await expect(page.getByRole("button", { name: "Characters" })).toBeVisible();
   await expect(page.getByText("Aedan").first()).toBeVisible();
   await expect(page.getByRole("button", { name: "Plot Flags" })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: /reset drafts/i })).toHaveCount(1);
 
   await page.getByRole("button", { name: "Inventory" }).click();
   await expect(page.getByRole("button", { name: /Starfang/ })).toBeVisible();
