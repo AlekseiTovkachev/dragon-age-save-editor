@@ -1,6 +1,6 @@
 # v1.0 Release Checklist
 
-The path from current `main` to a public GitHub Release. Decisions captured from the 2026-05-18 grilling session.
+The path from current `main` to a public GitHub Release. Decisions captured from the 2026-05-18 grilling session, corrected after surfacing the `ingame/` test suite.
 
 ## Release shape
 
@@ -10,37 +10,53 @@ The path from current `main` to a public GitHub Release. Decisions captured from
 - **Platforms:** Windows only for v1.0.
 - **License:** MIT.
 
+## How verification actually works in this project
+
+- **`cargo test` / `npm run verify`** — automated unit + write/reload + smoke (mocked backend).
+- **`npm run ingame-test -- <spec>`** — Playwright against the real desktop UI + the `apply_edit` sidecar, driven against a real save at `$env:DAO_SAVE`. Each spec ends in an injected pass/fail panel that waits indefinitely for the user to launch the game, eyeball the change, and click. Existing specs cover stats, abilities, inventory, properties, backpack-ops, companion, combo — all DAO-family.
+- The manual QA checklists in `docs/manual-testing.md` and `docs/tauri-manual-qa-checklist.md` are **stale** and not part of the release gate.
+
 ## Track A — Quality (release-blocker)
 
 ### A1. Close roadmap write/reload test gaps
 
-Source: `docs/roadmap.md` near-term list.
+Source: `docs/roadmap.md` near-term list. Scope corrected: DAO/DaoAwakening items do not carry `SAVEGAME_ITEM_LEVEL`, so item-level roundtrip is a DA2-only concept.
 
-- [ ] Write/reload test: item metadata edits.
-- [ ] Write/reload test: item property power encoding (covers DA2 float-bitcast roundtrip — also clears `docs/tauri-manual-qa-checklist.md` line 53).
-- [ ] Write/reload test: DA2 plot flags.
+- [x] Write/reload test: DAO backpack metadata (item_cost, material). `src/edit/editor/tests.rs::write_reload_backpack_metadata_edit`.
+- [x] Write/reload test: DA2 backpack metadata (item_cost, material, item_level). `src/edit/editor/tests.rs::write_reload_da2_backpack_metadata_edit`.
+- [ ] Write/reload test: item property power encoding (covers DA2 float-bitcast roundtrip).
+- [ ] Write/reload test: DA2 plot flags. (`write_reload_da2_plot_flag_edit` exists — confirm it covers the encodings we care about or extend it.)
 
-Acceptance: every persistent edit has a roundtrip test for at least one DAO fixture and one DA2 fixture.
-
-### A2. Promote automatable QA-checklist items into the test suite
-
-Source: `docs/tauri-manual-qa-checklist.md` "Commit And Reset Model" and "Save As And Reload" sections.
+### A2. Promote automatable smoke gaps into the test suite
 
 - [ ] Smoke: DA2 commit/reset walkthrough mirroring the DAO flow in `smoke/app.smoke.spec.ts`.
 - [ ] Smoke: Save As → reload roundtrip with the mocked backend.
-- [ ] Confirm `src/app/tests.rs::save_as_writes_new_file_and_keeps_original_unchanged` (or sibling test) covers DA2, not just DAO.
 
-Acceptance: the only items remaining on the manual checklist are inherently visual or responsive.
+### A3. In-game verification on real saves
 
-### A3. In-game roundtrip on real hardware
+Use the existing `ingame/` suite. Each spec drives the real UI, writes through the sidecar, then waits for human pass/fail after launching the game.
 
-The irreplaceable check — no automated test proves the game engine accepts the save.
+**DAO + Awakening:**
 
-- [ ] DAO vanilla: edit a visible value, launch the game, verify in-game, play 5–10 minutes.
-- [ ] One Awakening-style campaign (Awakening proper preferred): same.
-- [ ] DA2: same.
+- [ ] Run every `ingame/*.spec.ts` against a DAO vanilla save with the prerequisites documented in `ingame/README.md`. All PASS.
+- [ ] Run the suite against an Awakening-style save where prerequisites permit. (Some specs may be DAO-vanilla-only because of named companions/items — those are skipped, not failed.)
 
-Acceptance: zero unresolved bugs from this pass.
+**DA2 — net-new work, locked into v1.0 scope:**
+
+DA2 currently has zero `ingame/` coverage. Build the minimum DA2 set, chosen for differential risk surface (the things that aren't a re-skin of DAO).
+
+- [ ] **Helpers refactor.** `ingame/helpers.ts:5` hardcodes `DAO_SAVE`. Generalize so the suite reads whichever of `DAO_SAVE` / `DA2_SAVE` is set, errors clearly if neither, and exposes the active path to specs. Add a `prereq.da2Save()` mirroring `prereq.daoFamilySave()`. Update `ingame/README.md` to document the DA2 env var and prerequisites table.
+- [ ] **`ingame/da2-stats.spec.ts`** — set level + a core stat + money on the main character. Verify in-game. Baseline that the basics carry over to DA2.
+- [ ] **`ingame/da2-properties.spec.ts`** — edit a property power on an equipped item. This is the float-bitcast verification — the highest-risk DA2-specific encoding path. Verify the displayed value in-game matches.
+- [ ] **`ingame/da2-plot-flags.spec.ts`** — set one boolean and one integer plot flag, save, verify the game reflects the change. The only in-game verification of the DA2-exclusive plot-flag editor.
+- [ ] **`ingame/da2-combo.spec.ts`** — multi-feature roundtrip combining stats + a property edit + a plot flag. Confirms the integrated save still loads.
+
+Acceptance: each new spec runs end-to-end against a real DA2 save with PASS recorded.
+
+### A4. Frontend cleanup found while planning
+
+- [ ] `frontend/src/components/ItemEditor.tsx:138` shows an "Item Level" input for every game. On DAO it's a no-op write — visibly editable, silently discarded. Either hide for DAO-family or wire it to a warning. *(Not strictly release-blocking, but a "user edits something and it doesn't stick" footgun.)*
+- [ ] Consider whether to remove the `item_cost` editor before v1.0. Founder flagged it as the least-useful editor in the app — keeping it widens the supported surface area.
 
 ## Track B — Distribution (after Track A passes)
 
@@ -88,4 +104,5 @@ Explicitly out of scope for v1.0, captured here so the punch list stays honest:
 - macOS and Linux bundles.
 - `CHANGELOG.md`.
 - Telemetry / crash reporting.
+- Refresh or retire `docs/manual-testing.md` and `docs/tauri-manual-qa-checklist.md` — currently stale; superseded by `ingame/` + automated suite. Either prune them or rewrite them to match what's actually verified today.
 - TypeScript-from-Rust DTO generation, broader fixture coverage, native Tauri dialog test harness (all retained in `docs/roadmap.md` "Possible Later Work").

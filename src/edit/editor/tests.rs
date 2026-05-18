@@ -876,6 +876,32 @@ fn write_reload_backpack_metadata_edit() {
     let reloaded = GffFile::from_path(&output).unwrap();
     let save = SaveGame::from_gff_with_lookup(&reloaded, Some(&lookup), None).unwrap();
     assert_eq!(save.backpack[0].item_cost, Some(6060));
+    assert_eq!(save.backpack[0].material, Some(4));
+}
+
+#[test]
+fn write_reload_da2_backpack_metadata_edit() {
+    let lookup = SqliteGameData::open(DEFAULT_GAME_DATA_PATH).unwrap();
+    let input = da2_save_path();
+    let output = test_output_path("da2-backpack-metadata-edit.das");
+    let mut editor = SaveEditor::from_path_with_lookup(&input, Some(&lookup), None).unwrap();
+    editor
+        .patch_item_metadata(
+            InventoryContainer::Backpack,
+            0,
+            ItemMetadataPatch {
+                item_cost: Some(8123),
+                material: Some(3),
+                item_level: Some(5),
+            },
+        )
+        .unwrap();
+    editor.write_to_path(&output).unwrap();
+    let reloaded = GffFile::from_path(&output).unwrap();
+    let save = SaveGame::from_gff_with_lookup(&reloaded, Some(&lookup), None).unwrap();
+    assert_eq!(save.backpack[0].item_cost, Some(8123));
+    assert_eq!(save.backpack[0].material, Some(3));
+    assert_eq!(save.backpack[0].item_level, Some(5));
 }
 
 #[test]
