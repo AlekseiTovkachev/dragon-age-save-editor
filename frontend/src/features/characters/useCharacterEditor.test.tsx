@@ -116,6 +116,27 @@ describe("useCharacterEditor", () => {
     });
   });
 
+  it("hydrates character drafts as part of loading a character", async () => {
+    const companionTarget = { companion: { index: 0 } } as const;
+    mocks.executeCommand.mockResolvedValue({
+      result: "character",
+      target: companionTarget,
+      character: character({ approval: 10, level: 8 }),
+    });
+    const refreshSummary = vi.fn(async () => undefined);
+    const { result } = renderHook(() =>
+      useCharacterEditor({ summary: null, run, refreshSummary }),
+    );
+
+    await act(async () => {
+      await result.current.loadCharacter(companionTarget);
+    });
+
+    expect(result.current.character?.approval).toBe(10);
+    expect(result.current.approvalDraft).toBe("10");
+    expect(result.current.levelDraft).toBe("8");
+  });
+
   it("skips ability replacement when ability drafts are unchanged", async () => {
     const loaded = character({
       skills: [ability(1)],

@@ -1,7 +1,7 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { indexedItem, item, summary } from "../../test/factories";
-import type { SaveCommandResult } from "../../types";
+import type { InventoryContainer, SaveCommandResult } from "../../types";
 import { useInventoryEditor } from "./useInventoryEditor";
 
 const mocks = vi.hoisted(() => ({
@@ -167,6 +167,278 @@ describe("useInventoryEditor", () => {
     });
 
     await waitFor(() => expect(result.current.itemMetadataDraft.stack_size).toBe("12"));
+  });
+
+  it("hides stale items while a new container is loading", async () => {
+    const equipmentContainer = { equipment: { target: { companion: { index: 2 } } } } as const;
+    mocks.executeCommand.mockImplementation(async (command: { command: string }) => {
+      if (command.command === "list_backpack_items") {
+        return { result: "items", items: [indexedItem(0, { name: "Backpack Potion" })] };
+      }
+      if (command.command === "list_equipment_items") {
+        return { result: "items", items: [indexedItem(2, { name: "Heavy Chainmail" })] };
+      }
+      return { result: "item", container: "backpack", index: 0, item: item() };
+    });
+    const { result, rerender } = renderHook(
+      ({ container }: { container: InventoryContainer }) =>
+        useInventoryEditor({
+          summary: summary(),
+          container,
+          isBackpackInventory: container === "backpack",
+          run,
+          setError: vi.fn(),
+          refreshSummary: vi.fn(async () => summary()),
+        }),
+      { initialProps: { container: "backpack" as InventoryContainer } },
+    );
+
+    await act(async () => {
+      await result.current.refreshItems();
+    });
+    await waitFor(() => expect(result.current.items[0]?.item.name).toBe("Backpack Potion"));
+
+    rerender({ container: equipmentContainer });
+
+    expect(result.current.items).toEqual([]);
+    expect(result.current.selectedItem).toBeNull();
+
+    await act(async () => {
+      await result.current.refreshItems();
+    });
+
+    expect(result.current.items[0]?.item.name).toBe("Heavy Chainmail");
+  });
+
+  it("queues backpack removal until inventory drafts are committed", async () => {
+    mocks.executeCommand.mockImplementation(async (command: { command: string }) => {
+      if (command.command === "list_backpack_items") {
+        return {
+          result: "items",
+          items: [
+            indexedItem(0, { name: "Sword" }),
+            indexedItem(1, { name: "Shield" }),
+          ],
+        };
+      }
+      return { result: "summary", summary: summary({ dirty: true }) };
+    });
+    const { result } = renderHook(() =>
+      useInventoryEditor({
+        summary: summary(),
+        container: "backpack",
+        isBackpackInventory: true,
+        run,
+        setError: vi.fn(),
+        refreshSummary: vi.fn(async () => summary()),
+      }),
+    );
+
+    await act(async () => {
+      await result.current.refreshItems();
+    });
+    await waitFor(() => expect(result.current.itemIndex).toBe(0));
+
+    await act(async () => {
+      await result.current.handleBackpackRemove();
+    });
+
+    expect(result.current.items.map((entry) => entry.index)).toEqual([1]);
+    expect(mocks.executeCommand).not.toHaveBeenCalledWith({
+      command: "apply_batch",
+      commands: [{ command: "remove_backpack_item", index: 0 }],
+    });
+
+    await act(async () => {
+      await result.current.commitInventoryItemDrafts();
+    });
+
+    expect(mocks.executeCommand).toHaveBeenCalledWith({
+      command: "apply_batch",
+      commands: [{ command: "remove_backpack_item", index: 0 }],
+    });
+  });
+
+  it("queues backpack clone until inventory drafts are committed", async () => {
+    mocks.executeCommand.mockImplementation(async (command: { command: string; index?: number }) => {
+      if (command.command === "list_backpack_items") {
+        return {
+          result: "items",
+          items: [indexedItem(0, { name: "Sword", stackable: false, item_stacksize: null })],
+        };
+      }
+      if (command.command === "clone_backpack_item") {
+        return {
+          result: "item",
+          container: "backpack",
+          index: 1,
+          item: item({ name: "Sword", stackable: false, item_stacksize: null }),
+        };
+      }
+      return { result: "summary", summary: summary({ dirty: true }) };
+    });
+    const { result } = renderHook(() =>
+      useInventoryEditor({
+        summary: summary(),
+        container: "backpack",
+        isBackpackInventory: true,
+        run,
+        setError: vi.fn(),
+        refreshSummary: vi.fn(async () => summary()),
+      }),
+    );
+
+    await act(async () => {
+      await result.current.refreshItems();
+    });
+    await waitFor(() => expect(result.current.canCloneBackpackItem).toBe(true));
+
+    await act(async () => {
+      await result.current.handleBackpackClone();
+    });
+
+    expect(result.current.itemIndex).toBeLessThan(0);
+    expect(mocks.executeCommand).not.toHaveBeenCalledWith({ command: "clone_backpack_item", index: 0 });
+
+    await act(async () => {
+      await result.current.commitInventoryItemDrafts();
+    });
+
+    expect(mocks.executeCommand).toHaveBeenCalledWith({ command: "clone_backpack_item", index: 0 });
+  });
+
+  it("discards queued backpack structure changes on reset", async () => {
+    mocks.executeCommand.mockImplementation(async (command: { command: string }) => {
+      if (command.command === "list_backpack_items") {
+        return {
+          result: "items",
+          items: [
+            indexedItem(0, { name: "Sword" }),
+            indexedItem(1, { name: "Shield" }),
+          ],
+        };
+      }
+      return { result: "summary", summary: summary({ dirty: true }) };
+    });
+    const { result } = renderHook(() =>
+      useInventoryEditor({
+        summary: summary(),
+        container: "backpack",
+        isBackpackInventory: true,
+        run,
+        setError: vi.fn(),
+        refreshSummary: vi.fn(async () => summary()),
+      }),
+    );
+
+    await act(async () => {
+      await result.current.refreshItems();
+    });
+    await waitFor(() => expect(result.current.items.map((entry) => entry.index)).toEqual([0, 1]));
+
+    await act(async () => {
+      await result.current.handleBackpackRemove();
+    });
+    expect(result.current.items.map((entry) => entry.index)).toEqual([1]);
+
+    act(() => {
+      result.current.resetToCommittedDrafts();
+    });
+
+    expect(result.current.items.map((entry) => entry.index)).toEqual([0, 1]);
+
+    await act(async () => {
+      await result.current.commitInventoryItemDrafts();
+    });
+
+    expect(mocks.executeCommand).not.toHaveBeenCalledWith({
+      command: "apply_batch",
+      commands: [{ command: "remove_backpack_item", index: 0 }],
+    });
+  });
+
+  it("clears stale backpack drafts after removals shift backend indexes", async () => {
+    let backpackItems = [
+      indexedItem(0, { name: "Potion", item_stacksize: 3 }),
+      indexedItem(1, { name: "Bomb", item_stacksize: 4 }),
+      indexedItem(2, { name: "Trap", item_stacksize: 5 }),
+    ];
+    mocks.executeCommand.mockImplementation(
+      async (command: { command: string; commands?: Array<{ command: string; index: number; stack_size?: number }> }) => {
+        if (command.command === "list_backpack_items") {
+          return { result: "items", items: backpackItems };
+        }
+        if (command.command === "apply_batch") {
+          for (const nested of command.commands ?? []) {
+            if (nested.command === "set_backpack_item_stack_size") {
+              backpackItems = backpackItems.map((entry) =>
+                entry.index === nested.index
+                  ? indexedItem(entry.index, { ...entry.item, item_stacksize: nested.stack_size })
+                  : entry,
+              );
+            }
+            if (nested.command === "remove_backpack_item") {
+              backpackItems = backpackItems
+                .filter((entry) => entry.index !== nested.index)
+                .map((entry, index) => indexedItem(index, entry.item));
+            }
+          }
+          return { result: "summary", summary: summary({ dirty: true }) };
+        }
+        return { result: "summary", summary: summary({ dirty: true }) };
+      },
+    );
+    const { result } = renderHook(() =>
+      useInventoryEditor({
+        summary: summary(),
+        container: "backpack",
+        isBackpackInventory: true,
+        run,
+        setError: vi.fn(),
+        refreshSummary: vi.fn(async () => summary()),
+      }),
+    );
+
+    await act(async () => {
+      await result.current.refreshItems();
+    });
+    await waitFor(() => expect(result.current.itemIndex).toBe(0));
+
+    act(() => {
+      result.current.setItemIndex(1);
+    });
+    await waitFor(() => expect(result.current.itemMetadataDraft.stack_size).toBe("4"));
+    act(() => {
+      result.current.setItemMetadataDraft((current) => ({ ...current, stack_size: "8" }));
+      result.current.setItemIndex(0);
+    });
+    await waitFor(() => expect(result.current.itemMetadataDraft.stack_size).toBe("3"));
+
+    await act(async () => {
+      await result.current.handleBackpackRemove();
+    });
+    await waitFor(() => expect(result.current.items.map((entry) => entry.index)).toEqual([1, 2]));
+
+    await act(async () => {
+      await result.current.commitInventoryItemDrafts();
+    });
+
+    expect(backpackItems.map((entry) => [entry.index, entry.item.name, entry.item.item_stacksize])).toEqual([
+      [0, "Bomb", 8],
+      [1, "Trap", 5],
+    ]);
+    await waitFor(() => expect(result.current.itemIndex).toBe(1));
+    await waitFor(() => expect(result.current.itemMetadataDraft.stack_size).toBe("5"));
+
+    mocks.executeCommand.mockClear();
+    await act(async () => {
+      await result.current.commitInventoryItemDrafts();
+    });
+
+    expect(mocks.executeCommand).not.toHaveBeenCalledWith({
+      command: "apply_batch",
+      commands: [{ command: "set_backpack_item_stack_size", index: 1, stack_size: 8 }],
+    });
   });
 
   it("commits cached drafts for multiple selected items", async () => {

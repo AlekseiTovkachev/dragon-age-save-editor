@@ -196,8 +196,10 @@ export function useSaveEditorApp() {
     if (!await commitCraftingDrafts()) {
       return;
     }
-    await commitPlotFlagDrafts();
-  }, [commitCharacterDrafts, commitCraftingDrafts, commitInventoryDrafts, commitPlotFlagDrafts]);
+    if (summary?.preferred_game === "da2") {
+      await commitPlotFlagDrafts();
+    }
+  }, [commitCharacterDrafts, commitCraftingDrafts, commitInventoryDrafts, commitPlotFlagDrafts, summary?.preferred_game]);
 
   const resetToCommittedDrafts = useCallback(() => {
     resetCharacterDraftsToCommitted();
@@ -324,7 +326,7 @@ export function useSaveEditorApp() {
     visibleSections,
     sectionCounts,
     canEdit: Boolean(summary),
-    hasPlotWarnings: plotFlagsEditor.hasPlotWarnings,
+    hasPlotWarnings: summary?.preferred_game === "da2" && plotFlagsEditor.hasPlotWarnings,
     operation,
     characterPanel,
     inventoryPanel,

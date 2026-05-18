@@ -1,65 +1,67 @@
 import { test, expect } from "@playwright/test";
-import { openSave, applyAndSave, verifyInGame, backupSave, restoreSave, DAO_SAVE, setOutputPath } from "./helpers";
+import { openSave, applyAndSave, verifyInGame, backupSave, restoreSave, ensurePrerequisites, prereq } from "./helpers";
+
+const roseThornPrerequisites = [
+  prereq.daoFamilySave(),
+  prereq.mainEquipmentItemWithMaterialOption(/Rose.s Thorn/i, 1, "Iron"),
+];
+
+const healthPoulticePrerequisites = [
+  prereq.daoFamilySave(),
+  prereq.stackableBackpackItem(/Health Poultice/i),
+];
 
 test.describe("Inventory", () => {
   test.beforeEach(backupSave);
   test.afterEach(restoreSave);
 
-  test("set item level on main-hand weapon", async ({ page }) => {
+  test("downgrade The Rose's Thorn material to tier 1", async ({ page }, testInfo) => {
+    await ensurePrerequisites(testInfo, roseThornPrerequisites);
     await openSave(page);
-    await setOutputPath(page, DAO_SAVE);
 
     // Navigate to Characters > Equipment tab
     await page.getByRole("button", { name: "Characters" }).click();
-    await page.getByRole("button", { name: "Equipment" }).click();
+    await page.locator('nav[aria-label="Character sections"]').getByRole("button", { name: "Equipment" }).click();
 
-    // Click the first item row to expand its inline editor
-    // InventoryRow renders as <tr class="inventory-row"> with a button inside
-    await page.locator("tr.inventory-row").first().click();
+    // Click The Rose's Thorn row to expand its inline editor
+    await page.getByRole("row", { name: /Rose.s Thorn/i }).click();
 
-    // Fill Item Level in the inline editor
-    await page.getByLabel("Item Level").fill("5");
+    // Material options are formatted "Tier N - <name>"; pick the tier-1 option by its value attr
+    const materialSelect = page.getByRole("combobox", { name: /^Material/ });
+    const tierOneValue = await materialSelect
+      .locator("option")
+      .filter({ hasText: /^Tier 1 - / })
+      .first()
+      .getAttribute("value");
+    await materialSelect.selectOption(tierOneValue!);
 
     await applyAndSave(page);
 
     const passed = await verifyInGame(page, [
-      "Main-hand weapon has item level 5 (better base stats than original)",
-      "(In DAO, item level = OBJECT_RANK — affects damage/armour tier)",
+      "The Rose's Thorn now has tier-1 material (much weaker base stats)",
+      "(In DAO, item power scales with material tier — OBJECT_MATERIAL)",
     ]);
 
     expect(passed, "In-game verification failed").toBe(true);
   });
 
-  test("increase stack size of a backpack item", async ({ page }) => {
+  test("set Health Poultice stack size to 50", async ({ page }, testInfo) => {
+    await ensurePrerequisites(testInfo, healthPoulticePrerequisites);
     await openSave(page);
-    await setOutputPath(page, DAO_SAVE);
 
     // Navigate to the Inventory section
     await page.getByRole("button", { name: "Inventory" }).click();
 
-    // Click through item rows until we find one with a Stack Size field
-    const items = page.locator("tr.inventory-row");
-    const count = await items.count();
-    let found = false;
-    for (let i = 0; i < count; i++) {
-      await items.nth(i).click();
-      const stackField = page.getByLabel("Stack Size");
-      if (await stackField.isVisible()) {
-        await stackField.fill("50");
-        found = true;
-        break;
-      }
-    }
+    // Click the Health Poultice row to expand its inline editor
+    await page.getByRole("row", { name: /Health Poultice/i }).first().click();
 
-    // Only save if we found a stackable item
-    if (found) {
-      await applyAndSave(page);
-    }
+    // Fill Stack Size to 50
+    await page.getByLabel("Stack Size").fill("50");
+
+    await applyAndSave(page);
 
     const passed = await verifyInGame(page, [
-      found
-        ? "A stackable item in the backpack shows quantity 50"
-        : "No stackable items found in backpack — test skipped",
+      "Health Poultice in the backpack shows quantity 50",
     ]);
 
     expect(passed, "In-game verification failed").toBe(true);

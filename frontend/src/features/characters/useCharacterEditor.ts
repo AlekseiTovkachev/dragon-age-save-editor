@@ -153,12 +153,6 @@ export function useCharacterEditor({ summary, run, refreshSummary }: UseCharacte
     }
   }, [character, syncCharacterDrafts]);
 
-  useEffect(() => {
-    if (character) {
-      syncCharacterDrafts(character);
-    }
-  }, [character, syncCharacterDrafts]);
-
   const refreshCharacters = useCallback(async () => {
     const response = expectResult(await executeCommand({ command: "list_characters" }), "characters");
     setCharacters(response.characters);
@@ -173,8 +167,9 @@ export function useCharacterEditor({ summary, run, refreshSummary }: UseCharacte
 
   const loadCharacter = useCallback(async (target: CharacterTarget) => {
     const response = expectResult(await executeCommand({ command: "get_character", target }), "character");
+    syncCharacterDrafts(response.character);
     setCharacter(response.character);
-  }, []);
+  }, [syncCharacterDrafts]);
 
   useEffect(() => {
     if (summary) {

@@ -1,11 +1,226 @@
+import { execFileSync } from "child_process";
 import { copyFileSync, existsSync, rmSync } from "fs";
-import type { Page } from "@playwright/test";
+import { expect, type Page, type TestInfo } from "@playwright/test";
 
-export const DAO_SAVE =
-  process.env.DAO_SAVE ??
-  "C:/Users/atovk/Documents/BioWare/Dragon Age/Characters/Aedan/Saves/QuickSave_1/savegame.das";
+if (!process.env.DAO_SAVE) {
+  throw new Error("Set DAO_SAVE env var to the path of your test save file");
+}
+
+export const DAO_SAVE = process.env.DAO_SAVE;
+const APPLY_EDIT = process.platform === "win32" ? "target/debug/apply_edit.exe" : "target/debug/apply_edit";
+
+type CharacterTarget = "main_character" | { companion: { index: number } };
+
+type Ability = {
+  id: number;
+  name: string | null;
+};
+
+type MaterialOption = {
+  code: number;
+  tier: number;
+  name: string;
+};
+
+type Item = {
+  name: string | null;
+  resref: string | null;
+  category: { label: string; value: string };
+  stackable: boolean;
+  material: number | null;
+  material_options: MaterialOption[];
+  properties: unknown[];
+  item_stacksize: number | null;
+};
+
+type IndexedItem = {
+  index: number;
+  item: Item;
+};
+
+type CharacterSummary = {
+  target: CharacterTarget;
+  name: string;
+};
+
+type Character = {
+  name: string;
+  approval: number | null;
+  level: number | null;
+  core_stats: Record<string, number>;
+  equipment: Item[];
+  skills: Ability[];
+  talents: Ability[];
+  spells: Ability[];
+};
+
+type SaveSummary = {
+  preferred_game: string;
+  money: number;
+};
+
+export type SaveSnapshot = {
+  summary: SaveSummary;
+  characters: CharacterSummary[];
+  characterDetails: Map<string, Character>;
+  backpackItems: IndexedItem[];
+};
+
+export type InGamePrerequisite = {
+  label: string;
+  check: (snapshot: SaveSnapshot) => boolean;
+};
+
+type CharacterKind = "main" | `companion:${string}`;
+type AbilityList = "skills" | "talents" | "spells";
+
+function characterKey(summary: CharacterSummary) {
+  return summary.target === "main_character" ? "main" : `companion:${summary.name}`;
+}
+
+function namedCharacter(snapshot: SaveSnapshot, kind: CharacterKind) {
+  return snapshot.characterDetails.get(kind) ?? null;
+}
+
+function itemName(item: Item) {
+  return item.name ?? item.resref ?? "";
+}
+
+function itemsMatchingName(items: Item[], pattern: RegExp) {
+  return items.filter((item) => pattern.test(itemName(item)));
+}
+
+function hasMaterialOption(item: Item, tier: number, name: string) {
+  return item.material_options.some((option) => option.tier === tier && option.name.toLowerCase() === name.toLowerCase());
+}
+
+export function readSaveJson<T = unknown>(command: unknown, savePath: string = DAO_SAVE): T {
+  const stdout = execFileSync(APPLY_EDIT, [savePath, JSON.stringify(command)], { encoding: "utf8" });
+  return JSON.parse(stdout) as T;
+}
+
+export function loadSaveSnapshot(savePath: string = DAO_SAVE): SaveSnapshot {
+  const summary = readSaveJson<{ summary: SaveSummary }>({ command: "get_summary" }, savePath).summary;
+  const characters = readSaveJson<{ characters: CharacterSummary[] }>({ command: "list_characters" }, savePath).characters;
+  const characterDetails = new Map<string, Character>();
+  for (const character of characters) {
+    const detail = readSaveJson<{ character: Character }>({ command: "get_character", target: character.target }, savePath).character;
+    characterDetails.set(characterKey(character), detail);
+  }
+  const backpackItems = readSaveJson<{ items: IndexedItem[] }>({ command: "list_backpack_items" }, savePath).items;
+  return { summary, characters, characterDetails, backpackItems };
+}
+
+export async function ensurePrerequisites(testInfo: TestInfo, prerequisites: InGamePrerequisite[]) {
+  for (const prerequisite of prerequisites) {
+    testInfo.annotations.push({ type: "prerequisite", description: prerequisite.label });
+  }
+  const snapshot = loadSaveSnapshot();
+  const missing = prerequisites.filter((prerequisite) => !prerequisite.check(snapshot)).map((prerequisite) => prerequisite.label);
+  expect(missing, `DAO_SAVE does not fit this in-game test:\n${missing.map((item) => `- ${item}`).join("\n")}`).toEqual([]);
+  return snapshot;
+}
+
+export const prereq = {
+  daoFamilySave(): InGamePrerequisite {
+    return {
+      label: "DAO-family save (preferred_game is dao or dao_awakening)",
+      check: (snapshot) => ["dao", "dao_awakening"].includes(snapshot.summary.preferred_game),
+    };
+  },
+  mainCharacter(): InGamePrerequisite {
+    return {
+      label: "Main character can be loaded",
+      check: (snapshot) => namedCharacter(snapshot, "main") !== null,
+    };
+  },
+  companion(name: string): InGamePrerequisite {
+    return {
+      label: `${name} is present in the party list`,
+      check: (snapshot) => namedCharacter(snapshot, `companion:${name}`) !== null,
+    };
+  },
+  companionApproval(name: string): InGamePrerequisite {
+    return {
+      label: `${name} has an editable approval value`,
+      check: (snapshot) => namedCharacter(snapshot, `companion:${name}`)?.approval !== null,
+    };
+  },
+  mainHasAbility(list: AbilityList, abilityName: string): InGamePrerequisite {
+    return {
+      label: `Main character has ${abilityName} in ${list}`,
+      check: (snapshot) => namedCharacter(snapshot, "main")?.[list].some((ability) => ability.name === abilityName) ?? false,
+    };
+  },
+  mainDoesNotHaveAbility(list: AbilityList, abilityName: string): InGamePrerequisite {
+    return {
+      label: `Main character does not already have ${abilityName} in ${list}`,
+      check: (snapshot) => !(namedCharacter(snapshot, "main")?.[list].some((ability) => ability.name === abilityName) ?? false),
+    };
+  },
+  companionDoesNotHaveAbility(name: string, list: AbilityList, abilityName: string): InGamePrerequisite {
+    return {
+      label: `${name} does not already have ${abilityName} in ${list}`,
+      check: (snapshot) =>
+        !(namedCharacter(snapshot, `companion:${name}`)?.[list].some((ability) => ability.name === abilityName) ?? false),
+    };
+  },
+  mainEquipmentItem(pattern: RegExp): InGamePrerequisite {
+    return {
+      label: `Main character has equipped item matching ${pattern}`,
+      check: (snapshot) => itemsMatchingName(namedCharacter(snapshot, "main")?.equipment ?? [], pattern).length > 0,
+    };
+  },
+  mainEquipmentItemWithMaterialOption(pattern: RegExp, tier: number, material: string): InGamePrerequisite {
+    return {
+      label: `Main character has equipped item matching ${pattern} with Tier ${tier} ${material} option`,
+      check: (snapshot) =>
+        itemsMatchingName(namedCharacter(snapshot, "main")?.equipment ?? [], pattern).some((item) =>
+          hasMaterialOption(item, tier, material),
+        ),
+    };
+  },
+  companionArmorWithMaterialOption(name: string, tier: number, material: string): InGamePrerequisite {
+    return {
+      label: `${name} has at least one equipped armor piece with Tier ${tier} ${material} option`,
+      check: (snapshot) =>
+        (namedCharacter(snapshot, `companion:${name}`)?.equipment ?? []).some((item) =>
+          item.category.label.startsWith("Armor") && hasMaterialOption(item, tier, material),
+        ),
+    };
+  },
+  backpackItem(pattern: RegExp): InGamePrerequisite {
+    return {
+      label: `Backpack contains item matching ${pattern}`,
+      check: (snapshot) => snapshot.backpackItems.some((entry) => pattern.test(itemName(entry.item))),
+    };
+  },
+  stackableBackpackItem(pattern: RegExp): InGamePrerequisite {
+    return {
+      label: `Backpack contains stackable item matching ${pattern}`,
+      check: (snapshot) => snapshot.backpackItems.some((entry) => pattern.test(itemName(entry.item)) && entry.item.stackable),
+    };
+  },
+  nonStackableBackpackItem(pattern: RegExp): InGamePrerequisite {
+    return {
+      label: `Backpack contains non-stackable item matching ${pattern}`,
+      check: (snapshot) => snapshot.backpackItems.some((entry) => pattern.test(itemName(entry.item)) && !entry.item.stackable),
+    };
+  },
+  backpackHasItemNotMatching(pattern: RegExp): InGamePrerequisite {
+    return {
+      label: `Backpack contains at least one item not matching ${pattern}`,
+      check: (snapshot) => snapshot.backpackItems.some((entry) => !pattern.test(itemName(entry.item))),
+    };
+  },
+};
 
 export function backupSave() {
+  if (existsSync(DAO_SAVE + ".ingame-backup")) {
+    console.warn("[ingame] Stale backup detected — restoring from previous crashed run");
+    copyFileSync(DAO_SAVE + ".ingame-backup", DAO_SAVE);
+    rmSync(DAO_SAVE + ".ingame-backup");
+  }
   copyFileSync(DAO_SAVE, DAO_SAVE + ".ingame-backup");
 }
 
@@ -14,29 +229,48 @@ export function restoreSave() {
     copyFileSync(DAO_SAVE + ".ingame-backup", DAO_SAVE);
     rmSync(DAO_SAVE + ".ingame-backup");
   }
+  if (existsSync(DAO_SAVE + ".ingame-working")) {
+    rmSync(DAO_SAVE + ".ingame-working");
+  }
 }
 
-// Open the save in the editor via the UI
-export async function openSave(page: Page) {
-  await page.addInitScript((savePath) => {
+export async function openSave(page: Page, outputPath: string = DAO_SAVE) {
+  await page.addInitScript(({ savePath, outPath }) => {
     localStorage.setItem("ingameTestSave", savePath);
-  }, DAO_SAVE);
+    localStorage.setItem("ingameTestSaveOutput", outPath);
+  }, { savePath: DAO_SAVE, outPath: outputPath });
   await page.goto("/");
   await page.getByRole("button", { name: /open save/i }).click();
-  await page.waitForSelector('[aria-label="Save editor navigation"]');
+  // Wait until handleOpen FULLY completes. "Reset Drafts" only renders once summary is set,
+  // and is disabled while busy=true. When it's present AND enabled, hydration is done
+  // (including the setSection/setCharacterTab resets at the tail of handleOpen).
+  const resetBtn = page.getByRole("button", { name: "Reset Drafts" });
+  await resetBtn.waitFor({ timeout: 30_000 });
+  await expect(resetBtn).toBeEnabled({ timeout: 30_000 });
 }
 
-// Set the output path for Save As
-export async function setOutputPath(page: Page, outputPath: string) {
-  await page.evaluate((p) => localStorage.setItem("ingameTestSaveOutput", p), outputPath);
+// Commit current drafts to the in-memory state (NO write to disk). Use this between
+// context switches (character changes, container changes) since drafts are scoped to
+// the active character/container and would be silently discarded otherwise.
+export async function applyDrafts(page: Page) {
+  const applyBtn = page.getByRole("button", { name: /apply drafts/i });
+  await applyBtn.click();
+  // commitDrafts goes through `run()` which sets busy=true → does work → busy=false.
+  // Apply Drafts is disabled={busy}. Wait for the disabled phase, then re-enabled phase,
+  // to be sure the whole commit finished before we touch state-dependent UI.
+  await expect(applyBtn).toBeDisabled({ timeout: 5_000 });
+  await expect(applyBtn).toBeEnabled({ timeout: 30_000 });
 }
 
-// Apply drafts then save as to the same file (overwrite)
-export async function applyAndSave(page: Page) {
-  await page.getByRole("button", { name: /apply drafts/i }).click();
-  await page.waitForSelector("text=Unsaved changes");
+// Save current state to disk. Assumes drafts already committed (or there are none).
+export async function saveAs(page: Page) {
   await page.getByRole("button", { name: /save as/i }).click();
   await page.waitForSelector("text=Saved copy ready");
+}
+
+export async function applyAndSave(page: Page) {
+  await applyDrafts(page);
+  await saveAs(page);
 }
 
 // Inject an in-page verification panel and wait for pass/fail click

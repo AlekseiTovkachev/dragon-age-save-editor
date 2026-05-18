@@ -180,7 +180,8 @@ function CharacterOverview({
               <NumericInput
                 className={isDirty(state.approvalDraft, state.character?.approval ?? null) ? "inp dirty" : "inp"}
                 value={state.approvalDraft}
-                min={0}
+                min={-100}
+                max={100}
                 onChange={(event) => actions.setApprovalDraft(event.target.value)}
                 disabled={!canEdit || busy || state.character?.approval === null}
                 placeholder={state.character?.approval === null ? "Unavailable for this character" : undefined}

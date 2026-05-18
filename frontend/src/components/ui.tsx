@@ -94,7 +94,12 @@ function isAllowedNumericValue(value: string, { allowDecimal = false, min, max }
   if (value === "") {
     return true;
   }
-  const pattern = allowDecimal ? /^\d+(?:\.\d*)?$/ : /^\d+$/;
+  const allowNegative = min !== undefined && min < 0;
+  if (allowNegative && value === "-") {
+    return true;
+  }
+  const sign = allowNegative ? "-?" : "";
+  const pattern = allowDecimal ? new RegExp(`^${sign}\\d+(?:\\.\\d*)?$`) : new RegExp(`^${sign}\\d+$`);
   if (!pattern.test(value)) {
     return false;
   }

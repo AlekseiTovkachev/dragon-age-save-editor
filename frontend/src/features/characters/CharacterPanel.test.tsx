@@ -191,6 +191,32 @@ describe("CharacterPanel equipment tab", () => {
     expect(screen.getByText("Modified")).toBeInTheDocument();
   });
 
+  it("allows negative companion approval drafts", () => {
+    const setApprovalDraft = vi.fn();
+    render(
+      <CharacterPanel
+        state={{
+          ...characterState(),
+          characters: [{ target: { companion: { index: 0 } }, name: "Alistair" }],
+          characterKey: "companion:0",
+          character: character({ approval: 30 }),
+          approvalDraft: "30",
+        }}
+        actions={characterActions({ setApprovalDraft })}
+        inventoryState={inventoryState()}
+        inventoryActions={inventoryActions()}
+        characterTab="overview"
+        setCharacterTab={vi.fn()}
+        canEdit
+        busy={false}
+      />,
+    );
+
+    fireEvent.change(screen.getByLabelText("Approval"), { target: { value: "-10" } });
+
+    expect(setApprovalDraft).toHaveBeenCalledWith("-10");
+  });
+
   it("uses the inventory table with an equipment-only inline editor", () => {
     render(
       <CharacterPanel
@@ -304,7 +330,7 @@ describe("CharacterPanel abilities tab", () => {
 
     fireEvent.click(screen.getByRole("button", { name: /Talents/ }));
 
-    expect(screen.getByText("Locked ranks are required by another ability.")).toBeInTheDocument();
+    expect(screen.getByText("Locked abilities are required by another ability.")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Required Shield Bash" })).toBeDisabled();
 
     fireEvent.click(screen.getByRole("button", { name: "Required Shield Bash" }));

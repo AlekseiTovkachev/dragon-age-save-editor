@@ -34,6 +34,7 @@ const READ_ONLY_COMMANDS = new Set([
 
 // Server state
 let workingPath = null;
+let dirty = false;
 
 function addCorsHeaders(res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -97,6 +98,7 @@ const server = createServer(async (req, res) => {
         return;
       }
       workingPath = sourcePath + ".ingame-working";
+      dirty = false;
       copyFileSync(sourcePath, workingPath);
 
       const result = runApplyEdit(workingPath, { command: "get_summary" }, false);
@@ -105,8 +107,9 @@ const server = createServer(async (req, res) => {
         return;
       }
       const parsed = JSON.parse(result.stdout);
-      // open_document returns SaveSummary directly
-      sendJson(res, 200, parsed.summary ?? parsed);
+      const summary = parsed.summary ?? parsed;
+      summary.dirty = false;
+      sendJson(res, 200, summary);
     } catch (err) {
       sendJson(res, 500, { error: String(err) });
     }
@@ -137,17 +140,19 @@ const server = createServer(async (req, res) => {
           return;
         }
         copyFileSync(workingPath, outputPath);
-        // Get summary for the response
+        dirty = false;
         const result = runApplyEdit(workingPath, { command: "get_summary" }, false);
         if (result.status !== 0) {
           sendJson(res, 500, { error: result.stderr || `apply_edit exited with code ${result.status}` });
           return;
         }
         const summaryParsed = JSON.parse(result.stdout);
+        const summary = summaryParsed.summary ?? summaryParsed;
+        summary.dirty = false;
         sendJson(res, 200, {
           result: "saved",
           output_path: outputPath,
-          summary: summaryParsed.summary ?? summaryParsed,
+          summary,
         });
         return;
       }
@@ -159,6 +164,8 @@ const server = createServer(async (req, res) => {
         return;
       }
       const parsed = JSON.parse(result.stdout);
+      if (!isReadOnly) dirty = true;
+      if (parsed.summary) parsed.summary.dirty = dirty;
       sendJson(res, 200, parsed);
     } catch (err) {
       sendJson(res, 500, { error: String(err) });

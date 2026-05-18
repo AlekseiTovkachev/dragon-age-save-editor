@@ -41,7 +41,15 @@ const recipeCatalog: CraftingRecipe[] = [
 ];
 
 const plotBooleanCatalog: PlotBooleanFlag[] = [
-  { id: 1, name: "act1_helped_mages", description: "Helped the mages", category: "Act 1" },
+  { id: 2000, name: "origin_circle_mage", description: "Origin: Circle Mage", category: "Warden" },
+  { id: 2001, name: "origin_dwarf_commoner", description: "Origin: Dwarf Commoner", category: "Warden" },
+  { id: 2002, name: "origin_dwarf_noble", description: "Origin: Dwarf Noble", category: "Warden" },
+  { id: 2003, name: "origin_city_elf", description: "Origin: City Elf", category: "Warden" },
+  { id: 2004, name: "origin_dalish_elf", description: "Origin: Dalish Elf", category: "Warden" },
+  { id: 2005, name: "origin_human_noble", description: "Origin: Human Noble", category: "Warden" },
+  { id: 2012, name: "broken_circle_mages", description: "Sided with: Circle of Magi", category: "Broken Circle" },
+  { id: 2013, name: "broken_circle_templars", description: "Sided with: Templars", category: "Broken Circle" },
+  { id: 2030, name: "archdemon_warden", description: "Slew the Archdemon: The Warden", category: "Finale" },
 ];
 
 const plotIntegerCatalog: PlotIntegerFlag[] = [
@@ -77,6 +85,17 @@ function createItem(overrides: Partial<Item> = {}): Item {
     material_options: [{ code: 1, tier: 1, name: "Iron", family: "metal", target: "weapon" }],
     properties: [{ id: 7, name: "Increase Damage", power: 1 }],
     ...overrides,
+  };
+}
+
+function cloneItem(item: Item): Item {
+  return {
+    ...item,
+    category: { ...item.category },
+    material_profile: item.material_profile ? { ...item.material_profile } : null,
+    material_info: item.material_info ? { ...item.material_info } : null,
+    material_options: item.material_options.map((option) => ({ ...option })),
+    properties: item.properties.map((property) => ({ ...property })),
   };
 }
 
@@ -125,7 +144,7 @@ function createState(game: "dao" | "da2"): MockState {
       { index: 1, item: createItem({ name: "Health Poultice", resref: "gen_im_potion", item_stacksize: 1 }) },
     ],
     recipes: [1],
-    plotBooleans: { 1: false },
+    plotBooleans: { 2030: true },
     plotIntegers: { 10: 0 },
   };
 }
@@ -266,6 +285,30 @@ async function executeSingle(command: SaveCommand): Promise<SaveCommandResult> {
       updateBackpackItem(command.index, (item) => ({ ...item, item_stacksize: command.stack_size }));
       markDirty();
       return { result: "item", container: "backpack", index: command.index, item: state.backpack[command.index].item };
+    case "remove_backpack_item":
+      state.backpack = state.backpack
+        .filter((entry) => entry.index !== command.index)
+        .map((entry, index) => ({ ...entry, index }));
+      if (state.summary) {
+        state.summary = { ...state.summary, backpack_count: state.backpack.length };
+      }
+      markDirty();
+      return summaryResult();
+    case "clone_backpack_item":
+      {
+        const source = state.backpack.find((entry) => entry.index === command.index);
+        if (!source) {
+          throw { code: "edit", message: `Backpack item ${command.index} not found` };
+        }
+        const index = state.backpack.length;
+        const item = cloneItem(source.item);
+        state.backpack = [...state.backpack, { index, item }];
+        if (state.summary) {
+          state.summary = { ...state.summary, backpack_count: state.backpack.length };
+        }
+        markDirty();
+        return { result: "item", container: "backpack", index, item };
+      }
     case "patch_item_metadata":
       {
         const item = updateInventoryItem(command.container, command.index, (entry) => ({ ...entry, ...command.patch }));
