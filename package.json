@@ -20,7 +20,9 @@
     "preview": "vite preview",
     "tauri": "tauri",
     "ingame-server": "node tools/ingame-server.mjs",
-    "ingame-test": "cargo build --bin apply_edit -q && playwright test --config playwright.ingame.config.ts"
+    "ingame-test": "cargo build --bin apply_edit -q && playwright test --config playwright.ingame.config.ts",
+    "ingame-test:dao": "set INGAME_GAME=dao&& cargo build --bin apply_edit -q && playwright test --config playwright.ingame.config.ts dao",
+    "ingame-test:da2": "set INGAME_GAME=da2&& cargo build --bin apply_edit -q && playwright test --config playwright.ingame.config.ts da2"
   },
   "dependencies": {
     "@tauri-apps/api": "^2.0.0",

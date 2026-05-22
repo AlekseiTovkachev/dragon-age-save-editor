@@ -8,7 +8,6 @@ import {
   plotIntegerValueMap,
 } from "../../lib/plotFlagUtils";
 import type { PlotBooleanFlag, PlotIntegerFlag, SaveCommand } from "../../types";
-import { applyImplications } from "./plotFlagImplications";
 import { validatePlotFlags } from "./plotFlagValidation";
 
 type PlotFlagDraftCheckpoint = {
@@ -54,13 +53,8 @@ export function usePlotFlagsEditor() {
   }, []);
 
   const handleBooleanToggle = useCallback((id: number, value: boolean) => {
-    const merged = applyImplications(
-      { ...plotBooleanDrafts, [id]: value },
-      plotIntegerDrafts,
-    );
-    setPlotBooleanDrafts(merged.bools);
-    setPlotIntegerDrafts(merged.ints);
-  }, [plotBooleanDrafts, plotIntegerDrafts]);
+    setPlotBooleanDrafts((current) => ({ ...current, [id]: value }));
+  }, []);
 
   const handleIntegerChange = useCallback((id: number, value: number) => {
     setPlotIntegerDrafts((current) => ({ ...current, [id]: value }));

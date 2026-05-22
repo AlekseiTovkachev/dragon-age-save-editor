@@ -16,13 +16,25 @@ export function validatePlotFlags(
   if (originCount > 1) {
     warnings.push({ section: "Warden", message: "Multiple origins are active — only one should be set." });
   }
+  if (b(2000) && ![2, 3].includes(iv(1001))) {
+    warnings.push({ section: "Warden", message: "Circle Mage origin requires an elf or human Warden race." });
+  }
+  if ((b(2001) || b(2002)) && iv(1001) !== 1) {
+    warnings.push({ section: "Warden", message: "Dwarf origins require Warden race to be Dwarf." });
+  }
+  if ((b(2003) || b(2004)) && iv(1001) !== 2) {
+    warnings.push({ section: "Warden", message: "Elf origins require Warden race to be Elf." });
+  }
+  if (b(2005) && iv(1001) !== 3) {
+    warnings.push({ section: "Warden", message: "Human Noble origin requires Warden race to be Human." });
+  }
 
   // Identity — political marriages require matching identity
   if (b(2026) && !(iv(1000) === 2 && iv(1001) === 3 && b(2005))) {
-    warnings.push({ section: "Landsmeet", message: "Alistair + Warden marriage requires a female human noble Warden (gender=Female, race=Human, origin=Human Noble)." });
+    warnings.push({ section: "Landsmeet", message: "Alistair + Warden marriage will force a female human noble Warden (gender=Female, race=Human, origin=Human Noble)." });
   }
   if (b(2024) && !(iv(1000) === 1 && iv(1001) === 3 && b(2005))) {
-    warnings.push({ section: "Landsmeet", message: "Anora + Warden marriage requires a male human noble Warden (gender=Male, race=Human, origin=Human Noble)." });
+    warnings.push({ section: "Landsmeet", message: "Anora + Warden marriage will force a male human noble Warden (gender=Male, race=Human, origin=Human Noble)." });
   }
 
   // Landsmeet contradictions

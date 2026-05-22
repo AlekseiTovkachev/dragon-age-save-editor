@@ -308,11 +308,54 @@ describe("useInventoryEditor", () => {
       await result.current.handleBackpackClone();
     });
 
-    expect(result.current.itemIndex).toBeLessThan(0);
+    expect(result.current.itemIndex).toBe(0);
     expect(mocks.executeCommand).not.toHaveBeenCalledWith({ command: "clone_backpack_item", index: 0 });
 
     expect(result.current.planCommands()).toEqual({
       clones: [{ tempIndex: -1, sourceIndex: 0, batch: [] }],
+      removes: [],
+      batch: [],
+    });
+  });
+
+  it("queues repeated backpack clones from the selected source item", async () => {
+    mocks.executeCommand.mockImplementation(async (command: { command: string }) => {
+      if (command.command === "list_backpack_items") {
+        return {
+          result: "items",
+          items: [indexedItem(0, { name: "Ring of Ages", stackable: false, item_stacksize: null })],
+        };
+      }
+      return { result: "summary", summary: summary({ dirty: true }) };
+    });
+    const { result } = renderHook(() =>
+      useInventoryEditor({
+        summary: summary(),
+        container: "backpack",
+        isBackpackInventory: true,
+        run,
+        setError: vi.fn(),
+      }),
+    );
+
+    await act(async () => {
+      await result.current.refreshItems();
+    });
+    await waitFor(() => expect(result.current.canCloneBackpackItem).toBe(true));
+
+    await act(async () => {
+      await result.current.handleBackpackClone();
+    });
+    await waitFor(() => expect(result.current.canCloneBackpackItem).toBe(true));
+    await act(async () => {
+      await result.current.handleBackpackClone();
+    });
+
+    expect(result.current.planCommands()).toEqual({
+      clones: [
+        { tempIndex: -1, sourceIndex: 0, batch: [] },
+        { tempIndex: -2, sourceIndex: 0, batch: [] },
+      ],
       removes: [],
       batch: [],
     });

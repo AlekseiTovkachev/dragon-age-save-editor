@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { openSave, applyAndSave, verifyInGame, backupSave, restoreSave, ensurePrerequisites, prereq } from "./helpers";
+import { openSave, applyAndSave, verifyInGame, backupSave, restoreSave, ensurePrerequisites, prereq } from "../helpers";
 
 const prerequisites = [
   prereq.daoFamilySave(),
@@ -25,8 +25,8 @@ test.describe("Backpack operations", () => {
     const beforeCount = await ringRows().count();
 
     // Expand the original (first Ring of Ages by insertion order). The inline editor opens beneath it.
-    // After Clone, the editor stays expanded; only itemIndex jumps to the new clone — so we can
-    // click Clone again WITHOUT re-clicking the row (re-clicking would just collapse it).
+    // After Clone, the editor stays on the original source item so a second clone queues from the
+    // same source without re-clicking the row (re-clicking would just collapse it).
     await ringRows().first().click();
     await page.getByRole("button", { name: /^Clone$/ }).click();
     await expect(ringRows()).toHaveCount(beforeCount + 1);

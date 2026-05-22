@@ -499,7 +499,6 @@ export function useInventoryEditor({
       ...current,
       { tempIndex, sourceIndex: itemIndex, item: cloneItem(selectedItem) },
     ]);
-    setItemIndex(tempIndex);
   }, [canCloneBackpackItem, containerKey, draftFromItem, itemIndex, selectedItem, storeCurrentItemDraft]);
 
   const handleWikiOpen = useCallback(

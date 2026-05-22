@@ -58,10 +58,7 @@ const IMPLICATIONS: &[ImplicationRule] = &[
     },
 ];
 
-pub fn apply_implications(
-    booleans: &mut BTreeMap<u16, bool>,
-    integers: &mut BTreeMap<u16, i32>,
-) {
+pub fn apply_implications(booleans: &mut BTreeMap<u16, bool>, integers: &mut BTreeMap<u16, i32>) {
     for rule in IMPLICATIONS {
         if booleans.get(&rule.trigger_id).copied().unwrap_or(false) {
             for &(id, value) in rule.set_booleans {
@@ -73,7 +70,11 @@ pub fn apply_implications(
             if rule.clear_origin_group {
                 for &origin_id in ORIGIN_GROUP {
                     // Only clear if not explicitly set to true by this rule
-                    if !rule.set_booleans.iter().any(|&(id, v)| id == origin_id && v) {
+                    if !rule
+                        .set_booleans
+                        .iter()
+                        .any(|&(id, v)| id == origin_id && v)
+                    {
                         booleans.insert(origin_id, false);
                     }
                 }
@@ -107,18 +108,42 @@ pub fn validate_plot_flags(
             message: "Multiple origins are active — only one should be set.".into(),
         });
     }
+    if b(2000) && ![2, 3].contains(&iv(1001)) {
+        warnings.push(PlotFlagWarning {
+            section: "Warden".into(),
+            message: "Circle Mage origin requires an elf or human Warden race.".into(),
+        });
+    }
+    if (b(2001) || b(2002)) && iv(1001) != 1 {
+        warnings.push(PlotFlagWarning {
+            section: "Warden".into(),
+            message: "Dwarf origins require Warden race to be Dwarf.".into(),
+        });
+    }
+    if (b(2003) || b(2004)) && iv(1001) != 2 {
+        warnings.push(PlotFlagWarning {
+            section: "Warden".into(),
+            message: "Elf origins require Warden race to be Elf.".into(),
+        });
+    }
+    if b(2005) && iv(1001) != 3 {
+        warnings.push(PlotFlagWarning {
+            section: "Warden".into(),
+            message: "Human Noble origin requires Warden race to be Human.".into(),
+        });
+    }
 
     // Political marriage identity
     if b(2026) && !(iv(1000) == 2 && iv(1001) == 3 && b(2005)) {
         warnings.push(PlotFlagWarning {
             section: "Landsmeet".into(),
-            message: "Alistair + Warden marriage requires a female human noble Warden.".into(),
+            message: "Alistair + Warden marriage will force a female human noble Warden.".into(),
         });
     }
     if b(2024) && !(iv(1000) == 1 && iv(1001) == 3 && b(2005)) {
         warnings.push(PlotFlagWarning {
             section: "Landsmeet".into(),
-            message: "Anora + Warden marriage requires a male human noble Warden.".into(),
+            message: "Anora + Warden marriage will force a male human noble Warden.".into(),
         });
     }
 
@@ -150,10 +175,7 @@ pub fn validate_plot_flags(
     }
 
     // Archdemon killer
-    let archdemon_count = [2028u16, 2029, 2030]
-        .iter()
-        .filter(|&&id| b(id))
-        .count();
+    let archdemon_count = [2028u16, 2029, 2030].iter().filter(|&&id| b(id)).count();
     if archdemon_count > 1 {
         warnings.push(PlotFlagWarning {
             section: "Finale".into(),
@@ -177,7 +199,8 @@ pub fn validate_plot_flags(
     if b(2104) && b(2029) && !b(2097) {
         warnings.push(PlotFlagWarning {
             section: "Landsmeet".into(),
-            message: "Loghain killed the Archdemon (with ritual) — he should be marked as living.".into(),
+            message: "Loghain killed the Archdemon (with ritual) — he should be marked as living."
+                .into(),
         });
     }
 
@@ -222,15 +245,17 @@ pub fn validate_plot_flags(
     if (b(2053) || b(2055)) && !b(2038) {
         warnings.push(PlotFlagWarning {
             section: "Isabela".into(),
-            message: "Isabela + Leliana encounter requires Leliana to have been recruited and stayed."
-                .into(),
+            message:
+                "Isabela + Leliana encounter requires Leliana to have been recruited and stayed."
+                    .into(),
         });
     }
     if (b(2054) || b(2055)) && !b(2039) {
         warnings.push(PlotFlagWarning {
             section: "Isabela".into(),
-            message: "Isabela + Zevran encounter requires Zevran to have been recruited and stayed."
-                .into(),
+            message:
+                "Isabela + Zevran encounter requires Zevran to have been recruited and stayed."
+                    .into(),
         });
     }
 
@@ -238,7 +263,8 @@ pub fn validate_plot_flags(
     if b(2070) && b(2071) {
         warnings.push(PlotFlagWarning {
             section: "Warden's Keep (DLC)".into(),
-            message: "Avernus cannot have both ethical and evil research active simultaneously.".into(),
+            message: "Avernus cannot have both ethical and evil research active simultaneously."
+                .into(),
         });
     }
     if b(2068) && (b(2070) || b(2071)) {
@@ -250,7 +276,8 @@ pub fn validate_plot_flags(
     if !b(2094) && (b(2067) || b(2068) || b(2070) || b(2071)) {
         warnings.push(PlotFlagWarning {
             section: "Warden's Keep (DLC)".into(),
-            message: "Warden's Keep was not started but Sophia/Avernus outcome flags are set.".into(),
+            message: "Warden's Keep was not started but Sophia/Avernus outcome flags are set."
+                .into(),
         });
     }
 
@@ -264,15 +291,17 @@ pub fn validate_plot_flags(
     if b(2065) && b(2084) {
         warnings.push(PlotFlagWarning {
             section: "Nathaniel".into(),
-            message: "Nathaniel is marked as both recruited/stayed and died at the Vigil's Keep siege."
-                .into(),
+            message:
+                "Nathaniel is marked as both recruited/stayed and died at the Vigil's Keep siege."
+                    .into(),
         });
     }
     if b(2064) && b(2066) {
         warnings.push(PlotFlagWarning {
             section: "Anders".into(),
-            message: "Anders is marked as both recruited/stayed and died at the Vigil's Keep siege."
-                .into(),
+            message:
+                "Anders is marked as both recruited/stayed and died at the Vigil's Keep siege."
+                    .into(),
         });
     }
 
@@ -311,10 +340,7 @@ mod tests {
 
     #[test]
     fn tc03_alistair_warden_marriage_wrong_identity() {
-        let w = validate_plot_flags(
-            &bools(&[(2026, true)]),
-            &ints(&[(1000, 1), (1001, 3)]),
-        );
+        let w = validate_plot_flags(&bools(&[(2026, true)]), &ints(&[(1000, 1), (1001, 3)]));
         assert!(warns_in(&w, "Landsmeet", "female human noble"));
     }
 
@@ -325,6 +351,21 @@ mod tests {
             &ints(&[(1000, 2), (1001, 3)]),
         );
         assert!(!warns_in(&w, "Landsmeet", "female human noble"));
+    }
+
+    #[test]
+    fn tc04a_origin_must_match_race() {
+        let w = validate_plot_flags(&bools(&[(2005, true)]), &ints(&[(1001, 2)]));
+        assert!(warns_in(&w, "Warden", "Human Noble origin requires"));
+    }
+
+    #[test]
+    fn tc04b_political_marriage_explains_backend_forced_identity() {
+        let w = validate_plot_flags(
+            &bools(&[(2024, true), (2004, true)]),
+            &ints(&[(1000, 1), (1001, 2)]),
+        );
+        assert!(warns_in(&w, "Landsmeet", "will force a male human noble"));
     }
 
     #[test]

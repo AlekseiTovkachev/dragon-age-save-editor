@@ -9,7 +9,7 @@ import {
   ensurePrerequisites,
   prereq,
   readSaveJson,
-} from "./helpers";
+} from "../helpers";
 
 const prerequisites = [
   prereq.daoFamilySave(),

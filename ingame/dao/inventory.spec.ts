@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { openSave, applyAndSave, verifyInGame, backupSave, restoreSave, ensurePrerequisites, prereq } from "./helpers";
+import { openSave, applyAndSave, verifyInGame, backupSave, restoreSave, ensurePrerequisites, prereq } from "../helpers";
 
 const roseThornPrerequisites = [
   prereq.daoFamilySave(),

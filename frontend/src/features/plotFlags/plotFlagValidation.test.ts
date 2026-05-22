@@ -34,6 +34,16 @@ describe("validatePlotFlags", () => {
     expect(warnsIn(w, "Landsmeet", "female human noble")).toBe(false);
   });
 
+  it("tc04a: origin must match race", () => {
+    const w = validatePlotFlags(bools([[2005, true]]), ints([[1001, 2]]));
+    expect(warnsIn(w, "Warden", "Human Noble origin requires")).toBe(true);
+  });
+
+  it("tc04b: political marriage explains backend-forced identity", () => {
+    const w = validatePlotFlags(bools([[2024, true], [2004, true]]), ints([[1000, 1], [1001, 2]]));
+    expect(warnsIn(w, "Landsmeet", "will force a male human noble")).toBe(true);
+  });
+
   it("tc05: Alistair king and exiled", () => {
     const w = validatePlotFlags(bools([[2021, true], [2022, true]]), ints([]));
     expect(warnsIn(w, "Landsmeet", "exiled")).toBe(true);

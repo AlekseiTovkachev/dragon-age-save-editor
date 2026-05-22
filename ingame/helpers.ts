@@ -4,15 +4,46 @@ import { expect, type Page, type TestInfo } from "@playwright/test";
 
 const DAO_SAVE_ENV = process.env.DAO_SAVE;
 const DA2_SAVE_ENV = process.env.DA2_SAVE;
+const INGAME_GAME_ENV = process.env.INGAME_GAME;
+const NPM_SCRIPT = process.env.npm_lifecycle_event;
 
-if (!DAO_SAVE_ENV && !DA2_SAVE_ENV) {
-  throw new Error("Set DAO_SAVE or DA2_SAVE env var to the path of your test save file");
-}
-if (DAO_SAVE_ENV && DA2_SAVE_ENV) {
-  throw new Error("Set only one of DAO_SAVE or DA2_SAVE; the suite mutates one save file at a time");
+function selectedGame(): "dao" | "da2" | null {
+  if (INGAME_GAME_ENV === "dao" || INGAME_GAME_ENV === "da2") {
+    return INGAME_GAME_ENV;
+  }
+  if (NPM_SCRIPT === "ingame-test:dao") {
+    return "dao";
+  }
+  if (NPM_SCRIPT === "ingame-test:da2") {
+    return "da2";
+  }
+  return null;
 }
 
-export const SAVE_PATH = (DAO_SAVE_ENV ?? DA2_SAVE_ENV) as string;
+function resolveSavePath() {
+  const game = selectedGame();
+
+  if (game === "dao") {
+    if (!DAO_SAVE_ENV) {
+      throw new Error("Set DAO_SAVE env var to run DAO-family in-game tests");
+    }
+    return DAO_SAVE_ENV;
+  }
+
+  if (game === "da2") {
+    if (!DA2_SAVE_ENV) {
+      throw new Error("Set DA2_SAVE env var to run DA2 in-game tests");
+    }
+    return DA2_SAVE_ENV;
+  }
+
+  if (!DAO_SAVE_ENV && !DA2_SAVE_ENV) {
+    throw new Error("Set DAO_SAVE or DA2_SAVE env var to the path of your test save file");
+  }
+  return (DAO_SAVE_ENV ?? DA2_SAVE_ENV) as string;
+}
+
+export const SAVE_PATH = resolveSavePath();
 // Back-compat alias for legacy DAO specs. Prefer SAVE_PATH in new code.
 export const DAO_SAVE = SAVE_PATH;
 const APPLY_EDIT = process.platform === "win32" ? "target/debug/apply_edit.exe" : "target/debug/apply_edit";

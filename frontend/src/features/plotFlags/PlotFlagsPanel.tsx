@@ -3,7 +3,6 @@ import { ChevronDown, ChevronRight } from "lucide-react";
 import { EmptyState, Panel, PanelBody } from "../../components/ui";
 import type { PlotBooleanFlag, PlotIntegerFlag, SaveSummary } from "../../types";
 import { validatePlotFlags, type PlotWarning } from "./plotFlagValidation";
-import { applyImplications } from "./plotFlagImplications";
 
 type PlotFlagsPanelProps = {
   state: PlotFlagsPanelState;
@@ -547,31 +546,18 @@ function handleExclusiveSelect(
   def: ExclusiveBooleanGroup,
   opt: ExclusiveBooleanOption | null,
   currentBools: Record<number, boolean>,
-  currentInts: Record<number, number>,
   onBatch: PlotFlagsPanelActions["handleBooleanBatch"],
 ) {
-  // Step 1: group changes
   const groupChanges: Record<number, boolean> = {};
   for (const id of def.flagIds) {
     groupChanges[id] = opt !== null && opt.setTrue.includes(id);
   }
-  // Step 2: merge into current state and run implications
-  const merged = applyImplications(
-    { ...currentBools, ...groupChanges },
-    { ...currentInts },
-  );
-  // Step 3: compute what actually changed from base
   const boolDiff: Record<number, boolean> = {};
-  for (const [idStr, value] of Object.entries(merged.bools)) {
+  for (const [idStr, value] of Object.entries(groupChanges)) {
     const id = Number(idStr);
     if (Boolean(currentBools[id]) !== value) boolDiff[id] = value;
   }
-  const intDiff: Record<number, number> = {};
-  for (const [idStr, value] of Object.entries(merged.ints)) {
-    const id = Number(idStr);
-    if ((currentInts[id] ?? 0) !== value) intDiff[id] = value;
-  }
-  onBatch(boolDiff, Object.keys(intDiff).length > 0 ? intDiff : undefined);
+  onBatch(boolDiff);
 }
 
 function stripGroupPrefix(description: string, groupLabel: string): string {
@@ -801,7 +787,7 @@ function SectionedView({ state, boolFlagMap, intFlagMap, disabled, actions }: Vi
             draftValues={state.plotBooleanDrafts}
             disabled={disabled}
             onSelect={(def, opt) =>
-              handleExclusiveSelect(def, opt, state.plotBooleanDrafts, state.plotIntegerDrafts, actions.handleBooleanBatch)
+              handleExclusiveSelect(def, opt, state.plotBooleanDrafts, actions.handleBooleanBatch)
             }
           />,
         );
@@ -889,7 +875,7 @@ function FlatFilteredView({ query, category, state, boolFlagMap, intFlagMap, dis
             draftValues={state.plotBooleanDrafts}
             disabled={disabled}
             onSelect={(def, opt) =>
-              handleExclusiveSelect(def, opt, state.plotBooleanDrafts, state.plotIntegerDrafts, actions.handleBooleanBatch)
+              handleExclusiveSelect(def, opt, state.plotBooleanDrafts, actions.handleBooleanBatch)
             }
           />,
         );
