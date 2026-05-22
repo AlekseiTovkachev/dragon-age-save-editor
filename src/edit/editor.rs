@@ -274,8 +274,24 @@ impl SaveEditor {
         ability_ids: &[u32],
         lookup: &dyn GameDataLookup,
     ) -> Result<(), EditError> {
-        let replacement =
-            load_validated_abilities(target, list, ability_ids, lookup, self.save.preferred_game)?;
+        let character = self.character(target)?;
+        let current_abilities = match list {
+            AbilityListKind::Skills => &character.skills,
+            AbilityListKind::Talents => &character.talents,
+            AbilityListKind::Spells => &character.spells,
+        };
+        let preserved_existing_ids = current_abilities
+            .iter()
+            .map(|ability| ability.id)
+            .collect();
+        let replacement = load_validated_abilities(
+            target,
+            list,
+            ability_ids,
+            lookup,
+            self.save.preferred_game,
+            &preserved_existing_ids,
+        )?;
         let uses_da2_ability_list =
             uses_combined_ability_list(&self.raw, target, self.save.preferred_game)?;
         if uses_da2_ability_list {

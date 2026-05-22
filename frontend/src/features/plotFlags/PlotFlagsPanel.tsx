@@ -727,15 +727,18 @@ type ViewProps = {
 
 function PlotSectionCard({ title, children }: { title: string; children: ReactNode }) {
   const [expanded, setExpanded] = useState(true);
+  // The heading id must be a single token — aria-labelledby is a space-separated
+  // IDREF list, so a raw multi-word title would break the section's accessible name.
+  const headingId = `plot-section-${title.replace(/\s+/g, "-")}`;
   return (
-    <section className="plot-section-card" aria-labelledby={`plot-section-${title}`}>
+    <section className="plot-section-card" aria-labelledby={headingId}>
       <button
         className="plot-section-head"
         type="button"
         onClick={() => setExpanded((v) => !v)}
         aria-expanded={expanded}
       >
-        <h2 id={`plot-section-${title}`} className="plot-section-title">{title}</h2>
+        <h2 id={headingId} className="plot-section-title">{title}</h2>
         {expanded
           ? <ChevronDown size={14} aria-hidden="true" />
           : <ChevronRight size={14} aria-hidden="true" />}

@@ -13,7 +13,7 @@ The path from current `main` to a public GitHub Release. Decisions captured from
 ## How verification actually works in this project
 
 - **`cargo test` / `npm run verify`** — automated unit + write/reload + smoke (mocked backend).
-- **`npm run ingame-test -- <spec>`** — Playwright against the real desktop UI + the `apply_edit` sidecar, driven against a real save at `$env:DAO_SAVE`. Each spec ends in an injected pass/fail panel that waits indefinitely for the user to launch the game, eyeball the change, and click. Existing specs cover stats, abilities, inventory, properties, backpack-ops, companion, combo — all DAO-family.
+- **`npm run ingame-test -- <spec>`** — Playwright against the real desktop UI + the `apply_edit` sidecar, driven against a real save at exactly one of `$env:DAO_SAVE` or `$env:DA2_SAVE`. Each spec ends in an injected pass/fail panel that waits indefinitely for the user to launch the game, eyeball the change, and click.
 - The manual QA checklists in `docs/manual-testing.md` and `docs/tauri-manual-qa-checklist.md` are **stale** and not part of the release gate.
 
 ## Track A — Quality (release-blocker)
@@ -29,8 +29,8 @@ Source: `docs/roadmap.md` near-term list. Scope corrected: DAO/DaoAwakening item
 
 ### A2. Promote automatable smoke gaps into the test suite
 
-- [ ] Smoke: DA2 commit/reset walkthrough mirroring the DAO flow in `smoke/app.smoke.spec.ts`.
-- [ ] Smoke: Save As → reload roundtrip with the mocked backend.
+- [x] Smoke: DA2 commit/reset walkthrough — already covered by `smoke/app.smoke.spec.ts` "resets, commits, and saves DA2 plot flag drafts" at line 150. Full reset → commit → save-as roundtrip on DA2 plot flags.
+- [x] Save As → reload roundtrip — covered by the real-serialization path (Rust write/reload tests in `src/edit/editor/tests.rs` and the `ingame/` suite via the `apply_edit` sidecar). Adding a mock-backend reload would require snapshotting `save_as` state for re-open in the mock and would only verify React re-hydration, which every `openMockSave`-based smoke spec already exercises. Net low marginal value; not pursued.
 
 ### A3. In-game verification on real saves
 
@@ -43,15 +43,39 @@ Use the existing `ingame/` suite. Each spec drives the real UI, writes through t
 
 **DA2 — net-new work, locked into v1.0 scope:**
 
-DA2 currently has zero `ingame/` coverage. Build the minimum DA2 set, chosen for differential risk surface (the things that aren't a re-skin of DAO).
+DA2 now has the minimum `ingame/` coverage chosen for differential risk surface (the things that aren't a re-skin of DAO).
 
 - [x] **Helpers refactor.** `ingame/helpers.ts` now reads either `DAO_SAVE` or `DA2_SAVE`, errors if neither or both are set, and exposes `SAVE_PATH` to specs. `prereq.da2Save()` mirrors `prereq.daoFamilySave()`. `ingame/README.md` updated.
-- [x] **`ingame/da2-stats.spec.ts`** — set level + a core stat + money on the main character. *Skeleton landed; needs a real DA2 save and a human in-game PASS to fully close.*
-- [ ] **`ingame/da2-properties.spec.ts`** — edit a property power on an equipped item. This is the float-bitcast verification — the highest-risk DA2-specific encoding path. Verify the displayed value in-game matches.
-- [ ] **`ingame/da2-plot-flags.spec.ts`** — set one boolean and one integer plot flag, save, verify the game reflects the change. The only in-game verification of the DA2-exclusive plot-flag editor.
-- [ ] **`ingame/da2-combo.spec.ts`** — multi-feature roundtrip combining stats + a property edit + a plot flag. Confirms the integrated save still loads.
+- [x] **`ingame/da2-stats.spec.ts`** — set level + a core stat + money. Verified in-game (level + money exact; strength shows base+gear bonus, expected).
+- [x] **`ingame/da2-properties.spec.ts`** — add a property to an equipped item. Verified in-game: the added property roundtrips and appears on the item. Note: DA2 rescales the raw power value (power 25 → ~+315 displayed), so the spec verifies presence, not the literal number.
+- [x] **`ingame/da2-abilities.spec.ts`** — add Lacerate/Murder to Hawke, add Walking Bomb/Death Vortex to Anders, and set Anders approval to -10. Verified in-game.
+- [x] **`ingame/da2-plot-flags.spec.ts`** — set one boolean and one integer plot flag, save, verify the game reflects the change. Verified via the Nexus worldstate inspection mod; codex entries may not refresh after first unlock, so codex text is not a reliable verification surface for edited imported worldstate.
+- [x] **`ingame/da2-combo.spec.ts`** — multi-feature roundtrip combining stats + a property edit + a plot flag. Verified in-game; plot flag uses "Andraste's ashes revealed" -> No for an easy observable edit.
 
 Acceptance: each new spec runs end-to-end against a real DA2 save with PASS recorded.
+
+### A3a. DA2 in-game issues found and fixed
+
+- [x] **In-game Save As helper could pass too early.** `ingame/saveAs()` was waiting on stale "Saved copy ready" sidebar text, so tests could read the original file before the sidecar copied the working save back. Fixed by waiting for the actual `save_as` HTTP response.
+- [x] **DA2 sidecar screenshot output exceeded the default Node stdout buffer.** `get_document_assets` can return a multi-megabyte base64 `screen.dds`; `tools/ingame-server.mjs` now raises `spawnSync` `maxBuffer`.
+- [x] **DA2 ability replacement rejected valid saves with existing odd IDs.** Hawke's save had existing unknown/internal ability IDs and a known ability with a missing catalogued core. Replacing the list to add Lacerate/Murder revalidated those old entries and failed. Fixed by preserving existing ability IDs as-is while still validating newly added IDs and their dependencies.
+
+### A5. Latent product bug — active item-editor draft not flushed before global Apply
+
+- [ ] When an item-editor draft (e.g. a freshly added property) is created and **Apply Drafts** is clicked with no intervening context switch, the global apply misses it. `storeCurrentItemDraft` only flushes the active draft into `itemDrafts.current` on item/tab change; the global `planDraftCommands` path reads the store without forcing a flush of the live editor draft first. Result: Apply Drafts silently commits nothing for that item, and the subsequent Save As shows the "apply unsaved drafts?" confirmation. Surfaced while running `da2-properties.spec.ts`. The ingame `saveAs()` helper now tolerates the confirmation dialog so specs aren't blocked, but the underlying flush gap should be fixed (force `storeCurrentItemDraft()` at the start of the global apply) before v1.0.
+
+### A6. Plot flags — no cross-decision contradiction validation
+
+- [ ] The DA2 plot-flags panel validates *within* each exclusive group but does nothing *across* groups. The whole "Cross-Decision Validation Rules" section of `docs/dao_da2_decision_tables_tracker.md` is unimplemented. Concrete cases found while building `ingame/da2-plot-flags.spec.ts`:
+  - **Race vs. origin** — race (`1001`) and the Origin group (`2000`–`2005`) are independent controls; race = Elf with a Human Noble origin is accepted. Each origin carries a required race (tracker section 10).
+  - **Race vs. political marriage** — a Warden consort outcome (`2024` / `2026`, Landsmeet group) requires `1001 = 3` (human) and `2005 = 1` (human noble). Changing the Warden to an elf silently contradicts an existing consort flag.
+  - These are examples, not the full list — the tracker enumerates Landsmeet, companion, Isabela, Warden's Keep, and Awakening cross-rules too.
+  - Fix before v1.0: implement the tracker's validation rules as visible warnings near the affected sections (the panel already has a `PlotWarningsPanel`), and/or have identity changes cascade. `ingame/da2-plot-flags.spec.ts` works around this by setting a self-consistent set of flags explicitly.
+- [ ] **Silent reversion via implications — no user feedback, and order-dependent.** Implications run in two places: the `PatchPlotFlags` backend handler (`apply_implications`) *and* the frontend `handleExclusiveSelect` (PlotFlagsPanel.tsx) on every exclusive-group click. A prince-consort outcome (`2024`/`2026`) forces the Warden to a human noble and clears the origin group. Two problems:
+  - **Silent.** A user can pick race = Elf, and it snaps back to Human with no message.
+  - **Order-dependent.** Because the frontend re-runs implications per click, editing identity *before* clearing the consort outcome gets reverted on the next exclusive-group interaction; editing it *after* works. The same set of changes succeeds or fails purely on click order. Surfaced debugging `da2-plot-flags.spec.ts` — the spec now clears the Landsmeet consort outcome first as a workaround.
+  - Fix before v1.0: surface implication overrides (e.g. a `PlotWarningsPanel` entry: "Warden identity forced to human noble by the Anora prince-consort outcome"), and make the outcome independent of click order. Today the user has no way to know their edit was discarded or why.
+- [x] **Bug (fixed) — multi-word plot sections had no accessible name.** `PlotSectionCard` built the heading `id`/`aria-labelledby` from the raw section title. `aria-labelledby` is a space-separated IDREF list, so multi-word titles ("Nature of the Beast", "Broken Circle", "Arl of Redcliffe") resolved to nonexistent IDs — those `<section>`s got no accessible name and were not exposed as `region` landmarks (screen readers would not announce them). Single-word sections worked by accident. Fixed by slugifying the title into a single-token id. Surfaced because `da2-plot-flags.spec.ts` could not locate the "Nature of the Beast" region.
 
 ### A4. Cleanup and known bugs found while planning
 

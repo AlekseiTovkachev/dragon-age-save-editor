@@ -33,6 +33,7 @@ describe("Sidebar", () => {
     fireEvent.click(screen.getByRole("button", { name: /Plot Flags5/ }));
     expect(onSectionSelect).toHaveBeenCalledWith("plot_flags");
     expect(screen.getByRole("button", { name: /Save As/ })).not.toBeDisabled();
+    expect(screen.getByRole("button", { name: /Apply Drafts/ })).not.toBeDisabled();
   });
 
   it("hides draft actions and disables Save As before a save is open", () => {

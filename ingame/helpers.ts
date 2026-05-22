@@ -185,6 +185,13 @@ export const prereq = {
       check: (snapshot) => itemsMatchingName(namedCharacter(snapshot, "main")?.equipment ?? [], pattern).length > 0,
     };
   },
+  mainHasEquippedItemWithProperties(): InGamePrerequisite {
+    return {
+      label: "Main character has at least one equipped item with properties",
+      check: (snapshot) =>
+        (namedCharacter(snapshot, "main")?.equipment ?? []).some((item) => item.properties.length > 0),
+    };
+  },
   mainEquipmentItemWithMaterialOption(pattern: RegExp, tier: number, material: string): InGamePrerequisite {
     return {
       label: `Main character has equipped item matching ${pattern} with Tier ${tier} ${material} option`,
@@ -268,17 +275,36 @@ export async function openSave(page: Page, outputPath: string = SAVE_PATH) {
 // the active character/container and would be silently discarded otherwise.
 export async function applyDrafts(page: Page) {
   const applyBtn = page.getByRole("button", { name: /apply drafts/i });
+  if (!(await applyBtn.isEnabled())) {
+    return;
+  }
   await applyBtn.click();
-  // commitDrafts goes through `run()` which sets busy=true → does work → busy=false.
-  // Apply Drafts is disabled={busy}. Wait for the disabled phase, then re-enabled phase,
-  // to be sure the whole commit finished before we touch state-dependent UI.
-  await expect(applyBtn).toBeDisabled({ timeout: 5_000 });
-  await expect(applyBtn).toBeEnabled({ timeout: 30_000 });
+  // The commit can be fast enough to miss busy=true, and some editor state can
+  // keep Apply Drafts enabled until the next render. Save As handles the
+  // remaining "apply drafts first" dialog, so only wait for the app to be usable.
+  await expect(page.getByRole("button", { name: /save as/i })).toBeEnabled({ timeout: 30_000 });
 }
 
-// Save current state to disk. Assumes drafts already committed (or there are none).
+// Save current state to disk. If any drafts are still uncommitted, the app asks
+// to apply them first — handle that dialog so the save always goes through.
 export async function saveAs(page: Page) {
-  await page.getByRole("button", { name: /save as/i }).click();
+  const saveAsBtn = page.getByRole("button", { name: /save as/i });
+  if (!(await saveAsBtn.isEnabled())) {
+    return;
+  }
+  const saved = page.waitForResponse((response) =>
+    response.url().includes("/execute_save_command") &&
+    response.request().postData()?.includes('"save_as"') === true,
+  );
+  await saveAsBtn.click();
+  const applyAndSaveBtn = page.getByRole("button", { name: "Apply drafts and save" });
+  try {
+    await applyAndSaveBtn.waitFor({ state: "visible", timeout: 3_000 });
+    await applyAndSaveBtn.click();
+  } catch {
+    // No confirmation dialog — drafts were already committed.
+  }
+  await saved;
   await page.waitForSelector("text=Saved copy ready");
 }
 

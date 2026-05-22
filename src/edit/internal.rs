@@ -141,20 +141,36 @@ pub(super) fn load_validated_abilities(
     ability_ids: &[u32],
     lookup: &dyn GameDataLookup,
     preferred_game: Option<GameId>,
+    preserved_existing_ids: &BTreeSet<u32>,
 ) -> Result<Vec<AbilityRef>, EditError> {
     let mut abilities = Vec::with_capacity(ability_ids.len());
     let mut replacement_ids = BTreeSet::new();
     let expected_kind = expected_ability_kind(list);
 
     for &ability_id in ability_ids {
-        let ability = lookup
+        let ability = match lookup
             .ability(ability_id, preferred_game)
             .map_err(|err| EditError::LookupFailed {
                 path: "character.ability_list".to_string(),
                 detail: err.to_string(),
-            })?
-            .ok_or(EditError::UnknownAbility { ability_id })?;
+            })? {
+            Some(ability) => ability,
+            None if preserved_existing_ids.contains(&ability_id) => AbilityRef {
+                id: ability_id,
+                name: None,
+                tree: None,
+                ability_type: None,
+                kind: AbilityKind::Unknown,
+                core_ids: Vec::new(),
+            },
+            None => return Err(EditError::UnknownAbility { ability_id }),
+        };
         if ability.kind != expected_kind {
+            if ability.kind == AbilityKind::Unknown && preserved_existing_ids.contains(&ability_id) {
+                replacement_ids.insert(ability.id);
+                abilities.push(ability);
+                continue;
+            }
             return Err(EditError::InvalidAbilityKind {
                 ability_id,
                 expected: list,
@@ -166,6 +182,9 @@ pub(super) fn load_validated_abilities(
     }
 
     for ability in &abilities {
+        if preserved_existing_ids.contains(&ability.id) {
+            continue;
+        }
         let mut enforceable_core_ids = Vec::new();
         for &core_id in &ability.core_ids {
             let Some(core_ability) =

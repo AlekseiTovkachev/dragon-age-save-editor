@@ -8,6 +8,7 @@ use crate::domain::stats::{CoreStat, CoreStatsPatch, PointPoolsPatch};
 use crate::gff4::GffFile;
 use crate::gff4::fields::{SAVEGAME_MONEY, SAVEGAME_PARTYLIST};
 use crate::test_support::{da2_save_path, dao_save_path};
+use std::collections::BTreeSet;
 use std::fs;
 use std::path::PathBuf;
 
@@ -138,6 +139,7 @@ fn replaces_da2_talent_list_with_valid_da2_ids() {
         &replacement,
         &lookup,
         Some(crate::domain::gamedata::GameId::Da2),
+        &BTreeSet::new(),
     )
     .unwrap();
 
@@ -159,6 +161,7 @@ fn specialization_talent_requires_specialization_core() {
         &[23],
         &lookup,
         Some(crate::domain::gamedata::GameId::Dao),
+        &BTreeSet::new(),
     )
     .unwrap_err();
 
@@ -179,6 +182,7 @@ fn archery_talent_accepts_either_rogue_or_warrior_core() {
         &[4020, 3071],
         &lookup,
         Some(crate::domain::gamedata::GameId::Dao),
+        &BTreeSet::new(),
     )
     .unwrap();
 
@@ -200,6 +204,7 @@ fn core_talent_can_be_removed_when_dependents_are_removed() {
         &[],
         &lookup,
         Some(crate::domain::gamedata::GameId::Dao),
+        &BTreeSet::new(),
     )
     .unwrap();
 
@@ -215,6 +220,7 @@ fn coercion_requires_player_skill_unlock() {
         &[100011],
         &lookup,
         Some(crate::domain::gamedata::GameId::Dao),
+        &BTreeSet::new(),
     )
     .unwrap_err();
 
@@ -235,6 +241,7 @@ fn humanoid_skill_requires_humanoid_skill_unlock() {
         &[100021],
         &lookup,
         Some(crate::domain::gamedata::GameId::Dao),
+        &BTreeSet::new(),
     )
     .unwrap_err();
 
@@ -255,6 +262,7 @@ fn humanoid_skill_list_succeeds_without_player_skill_unlock() {
         &[4002, 100021],
         &lookup,
         Some(crate::domain::gamedata::GameId::Dao),
+        &BTreeSet::new(),
     )
     .unwrap();
 
@@ -286,6 +294,52 @@ fn rejects_dao_talent_id_when_editing_da2_talents() {
         EditError::UnknownAbility { ability_id: 23 } => {}
         other => panic!("unexpected error: {other}"),
     }
+}
+
+#[test]
+fn preserves_existing_unknown_ability_ids_when_replacing_list() {
+    let lookup = SqliteGameData::open(DEFAULT_GAME_DATA_PATH).unwrap();
+    let preserved_unknown_ids = BTreeSet::from([100]);
+    let abilities = super::load_validated_abilities(
+        CharacterTarget::MainCharacter,
+        AbilityListKind::Talents,
+        &[100, 101000],
+        &lookup,
+        Some(GameId::Da2),
+        &preserved_unknown_ids,
+    )
+    .unwrap();
+
+    assert_eq!(
+        abilities
+            .iter()
+            .map(|ability| ability.id)
+            .collect::<Vec<_>>(),
+        vec![100, 101000]
+    );
+}
+
+#[test]
+fn preserves_existing_ability_with_missing_core_when_replacing_list() {
+    let lookup = SqliteGameData::open(DEFAULT_GAME_DATA_PATH).unwrap();
+    let preserved_existing_ids = BTreeSet::from([211041]);
+    let abilities = super::load_validated_abilities(
+        CharacterTarget::MainCharacter,
+        AbilityListKind::Talents,
+        &[211041, 101000],
+        &lookup,
+        Some(GameId::Da2),
+        &preserved_existing_ids,
+    )
+    .unwrap();
+
+    assert_eq!(
+        abilities
+            .iter()
+            .map(|ability| ability.id)
+            .collect::<Vec<_>>(),
+        vec![211041, 101000]
+    );
 }
 
 #[test]

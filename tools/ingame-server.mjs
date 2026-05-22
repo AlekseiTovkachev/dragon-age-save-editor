@@ -60,7 +60,9 @@ function readBody(req) {
 function runApplyEdit(savePath, command, withSave) {
   const args = [savePath, JSON.stringify(command)];
   if (withSave) args.push("--save");
-  const result = spawnSync(BINARY, args, { encoding: "utf8" });
+  // get_document_assets returns a base64-encoded screenshot that can exceed
+  // the default 1 MB spawnSync stdout buffer (DA2 screen.dds files are ~4 MB).
+  const result = spawnSync(BINARY, args, { encoding: "utf8", maxBuffer: 64 * 1024 * 1024 });
   return result;
 }
 

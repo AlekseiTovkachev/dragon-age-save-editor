@@ -29,6 +29,7 @@ The suite is forced to one worker because all tests mutate the same save file an
 | `companion.spec.ts` | DAO-family save; Morrigan is present; Morrigan has approval; Morrigan does not already have Blood Mage or Blood Magic |
 | `combo.spec.ts` | DAO-family save; Alistair is present; Alistair has approval; Alistair has at least one equipped armor piece with a Tier 6 Silverite option |
 | `da2-stats.spec.ts` | DA2 save; loadable main character |
+| `da2-abilities.spec.ts` | DA2 save; loadable main character; Anders is present with editable approval; Hawke does not already have Lacerate/Murder; Anders does not already have Walking Bomb/Death Vortex |
 
 The same prerequisites are executable in each spec via `ensurePrerequisites(...)`, so a mismatched save fails before UI mutation starts.
 
