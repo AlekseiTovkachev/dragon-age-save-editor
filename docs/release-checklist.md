@@ -13,7 +13,7 @@ The path from current `main` to a public GitHub Release. Decisions captured from
 ## How verification actually works in this project
 
 - **`cargo test` / `npm run verify`** — automated unit + write/reload + smoke (mocked backend).
-- **`npm run ingame-test:dao` / `npm run ingame-test:da2`** — Playwright against the real desktop UI + the `apply_edit` sidecar, driven against `DAO_SAVE` or `DA2_SAVE` respectively. Each spec ends in an injected pass/fail panel that waits indefinitely for the user to launch the game, eyeball the change, and click. Use `npm run ingame-test -- <spec>` for a single spec.
+- **`npm run ingame-test:dao` / `npm run ingame-test:da2`** — Playwright against the real desktop UI + the `apply_edit` sidecar, driven against `DAO_SAVE` or `DA2_SAVE` respectively. Each spec ends in an injected pass/fail panel that waits indefinitely for the user to launch the game, eyeball the change, and click. Use `npm run ingame-test -- <spec>` for a single spec; if both `DAO_SAVE` and `DA2_SAVE` are set, the generic runner requires `INGAME_GAME=dao` or `INGAME_GAME=da2`.
 - The manual QA checklists in `docs/manual-testing.md` and `docs/tauri-manual-qa-checklist.md` are **stale** and not part of the release gate.
 
 ## Track A — Quality (release-blocker)
@@ -45,7 +45,7 @@ Use the existing `ingame/` suite. Each spec drives the real UI, writes through t
 
 DA2 now has the minimum `ingame/` coverage chosen for differential risk surface (the things that aren't a re-skin of DAO).
 
-- [x] **Helpers refactor.** `ingame/helpers.ts` now reads either `DAO_SAVE` or `DA2_SAVE`, errors if neither or both are set, and exposes `SAVE_PATH` to specs. `prereq.da2Save()` mirrors `prereq.daoFamilySave()`. `ingame/README.md` updated.
+- [x] **Helpers refactor.** `ingame/helpers.ts` now reads `DAO_SAVE` for the DAO folder script and `DA2_SAVE` for the DA2 folder script. The generic runner accepts exactly one save env var, errors if neither is set, and errors if both are set without an explicit `INGAME_GAME`. `SAVE_PATH` is exposed to specs, `prereq.da2Save()` mirrors `prereq.daoFamilySave()`, and `ingame/README.md` is updated.
 - [x] **`ingame/da2/stats.spec.ts`** — set level + a core stat + money. Verified in-game (level + money exact; strength shows base+gear bonus, expected).
 - [x] **`ingame/da2/properties.spec.ts`** — add a property to an equipped item. Verified in-game: the added property roundtrips and appears on the item. Note: DA2 rescales the raw power value (power 25 → ~+315 displayed), so the spec verifies presence, not the literal number.
 - [x] **`ingame/da2/abilities.spec.ts`** — add Lacerate/Murder to Hawke, add Walking Bomb/Death Vortex to Anders, and set Anders approval to -10. Verified in-game.

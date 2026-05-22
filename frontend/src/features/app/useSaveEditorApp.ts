@@ -81,6 +81,15 @@ export function useSaveEditorApp() {
     craftingEditor,
     plotFlagsEditor,
   });
+  const hasDa2PlotWarnings = summary?.preferred_game === "da2" && plotFlagsEditor.hasPlotWarnings;
+
+  const blockDa2PlotWarningApply = useCallback(() => {
+    if (!hasDa2PlotWarnings) {
+      return false;
+    }
+    setError("Resolve DA2 plot warnings before applying drafts or saving a copy.");
+    return true;
+  }, [hasDa2PlotWarnings, setError]);
 
   const resetFeatureState = useCallback(() => {
     clearCharacters();
@@ -208,12 +217,15 @@ export function useSaveEditorApp() {
 
   const confirmApplyDraftsAndSave = useCallback(async () => {
     setSaveAsPromptOpen(false);
+    if (blockDa2PlotWarningApply()) {
+      return;
+    }
     const applied = await draftStore.apply();
     if (!applied) {
       return;
     }
     await saveCurrentDocumentAs();
-  }, [draftStore, saveCurrentDocumentAs]);
+  }, [blockDa2PlotWarningApply, draftStore, saveCurrentDocumentAs]);
 
   const cancelApplyDraftsAndSave = useCallback(() => {
     setSaveAsPromptOpen(false);
@@ -345,7 +357,7 @@ export function useSaveEditorApp() {
     sectionCounts,
     canEdit: Boolean(summary),
     hasPendingDrafts,
-    hasPlotWarnings: summary?.preferred_game === "da2" && plotFlagsEditor.hasPlotWarnings,
+    hasPlotWarnings: hasDa2PlotWarnings,
     operation,
     characterPanel,
     inventoryPanel,
@@ -354,7 +366,12 @@ export function useSaveEditorApp() {
     refreshSummary,
     hydrateDocument,
     clearDocumentState,
-    commitDrafts: draftStore.apply,
+    commitDrafts: async () => {
+      if (blockDa2PlotWarningApply()) {
+        return false;
+      }
+      return draftStore.apply();
+    },
     resetToCommittedDrafts: draftStore.reset,
     handleOpen,
     handleSaveAs,

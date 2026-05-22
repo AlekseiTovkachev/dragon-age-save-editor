@@ -40,6 +40,11 @@ function resolveSavePath() {
   if (!DAO_SAVE_ENV && !DA2_SAVE_ENV) {
     throw new Error("Set DAO_SAVE or DA2_SAVE env var to the path of your test save file");
   }
+  if (DAO_SAVE_ENV && DA2_SAVE_ENV) {
+    throw new Error(
+      "Both DAO_SAVE and DA2_SAVE are set. Set INGAME_GAME=dao or INGAME_GAME=da2, or use npm run ingame-test:dao / ingame-test:da2.",
+    );
+  }
   return (DAO_SAVE_ENV ?? DA2_SAVE_ENV) as string;
 }
 

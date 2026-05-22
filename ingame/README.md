@@ -14,7 +14,7 @@ $env:DA2_SAVE = "C:\path\to\da2-savegame.das"
 npm run ingame-test:da2
 ```
 
-To run one spec, keep using the generic runner:
+To run one spec, keep using the generic runner. If both `DAO_SAVE` and `DA2_SAVE` are set in your shell, also set `INGAME_GAME` so the generic runner cannot pick the wrong save by accident. With exactly one save env var set, `INGAME_GAME` is optional.
 
 ```powershell
 $env:INGAME_GAME = "dao"

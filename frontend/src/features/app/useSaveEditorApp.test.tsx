@@ -1,7 +1,14 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { character, indexedItem, recipe, summary } from "../../test/factories";
-import type { SaveCommand, SaveCommandResult } from "../../types";
+import type {
+  PlotBooleanFlag,
+  PlotBooleanValue,
+  PlotIntegerFlag,
+  PlotIntegerValue,
+  SaveCommand,
+  SaveCommandResult,
+} from "../../types";
 import { useSaveEditorApp } from "./useSaveEditorApp";
 
 const mocks = vi.hoisted(() => ({
@@ -50,7 +57,20 @@ function isBatchEditCommand(command: SaveCommand) {
   ].includes(command.command);
 }
 
-function installCommandResponses() {
+type CommandResponseOptions = {
+  currentSummary?: ReturnType<typeof summary>;
+  plotBooleans?: PlotBooleanValue[];
+  plotIntegers?: PlotIntegerValue[];
+  availablePlotBooleans?: PlotBooleanFlag[];
+  availablePlotIntegers?: PlotIntegerFlag[];
+};
+
+function installCommandResponses(options: CommandResponseOptions = {}) {
+  const currentSummary = options.currentSummary ?? summary();
+  const plotBooleans = options.plotBooleans ?? [];
+  const plotIntegers = options.plotIntegers ?? [];
+  const availablePlotBooleans = options.availablePlotBooleans ?? [];
+  const availablePlotIntegers = options.availablePlotIntegers ?? [];
   let currentCharacter = character();
   let currentBackpackItem = indexedItem().item;
   let currentEquipmentItem = indexedItem(0, { name: "Equipped Sword", stackable: false, item_stacksize: null }).item;
@@ -59,7 +79,7 @@ function installCommandResponses() {
       case "validate":
         return { result: "validation", report: { is_valid: true, findings: [] } };
       case "get_summary":
-        return { result: "summary", summary: summary() };
+        return { result: "summary", summary: currentSummary };
       case "get_document_assets":
         return { result: "document_assets", assets: { screenshot_data_url: "data:image/png;base64,abc" } };
       case "list_characters":
@@ -81,9 +101,9 @@ function installCommandResponses() {
       case "list_available_crafting_recipes":
         return { result: "available_crafting_recipes", recipes: [recipe(1)] };
       case "list_plot_flags":
-        return { result: "plot_flags", booleans: [], integers: [] };
+        return { result: "plot_flags", booleans: plotBooleans, integers: plotIntegers };
       case "list_available_plot_flags":
-        return { result: "available_plot_flags", booleans: [], integers: [] };
+        return { result: "available_plot_flags", booleans: availablePlotBooleans, integers: availablePlotIntegers };
       case "list_backpack_items":
         return { result: "items", items: [{ index: 0, item: currentBackpackItem }] };
       case "list_equipment_items":
@@ -441,6 +461,51 @@ describe("useSaveEditorApp", () => {
       commands: [{ command: "set_level", target: "main_character", level: 7 }],
     });
     expect(mocks.executeCommand).toHaveBeenCalledWith({ command: "save_as", output_path: "C:/out.das" });
+    expect(result.current.saveAsPrompt.open).toBe(false);
+  });
+
+  it("blocks Save As confirmation when DA2 plot drafts have warnings", async () => {
+    installCommandResponses({
+      currentSummary: summary({ preferred_game: "da2", dirty: false }),
+      plotBooleans: [{ id: 2005, value: false }],
+      plotIntegers: [{ id: 1001, value: 3 }],
+      availablePlotBooleans: [{ id: 2005, name: "Human Noble", description: "", category: "Warden" }],
+      availablePlotIntegers: [{
+        id: 1001,
+        name: "Warden race",
+        description: "",
+        category: "Warden",
+        options: [
+          { value: 2, label: "Elf" },
+          { value: 3, label: "Human" },
+        ],
+      }],
+    });
+    mocks.open.mockResolvedValue("C:/save.das");
+    mocks.openDocument.mockResolvedValue(summary({ preferred_game: "da2", dirty: false }));
+    mocks.save.mockResolvedValue("C:/out.das");
+    const { result } = renderHook(() => useSaveEditorApp());
+
+    await act(async () => {
+      await result.current.handleOpen();
+    });
+    act(() => {
+      result.current.plotFlagsPanel.actions.handleBooleanToggle(2005, true);
+      result.current.plotFlagsPanel.actions.handleIntegerChange(1001, 2);
+    });
+    expect(result.current.hasPlotWarnings).toBe(true);
+
+    await act(async () => {
+      await result.current.handleSaveAs();
+    });
+    await act(async () => {
+      await result.current.saveAsPrompt.onConfirm();
+    });
+
+    expect(result.current.operation.error).toContain("Resolve DA2 plot warnings");
+    expect(mocks.save).not.toHaveBeenCalled();
+    expect(mocks.executeCommand).not.toHaveBeenCalledWith(expect.objectContaining({ command: "apply_batch" }));
+    expect(mocks.executeCommand).not.toHaveBeenCalledWith({ command: "save_as", output_path: "C:/out.das" });
     expect(result.current.saveAsPrompt.open).toBe(false);
   });
 
