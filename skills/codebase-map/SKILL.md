@@ -23,7 +23,7 @@ dragon-age-save-editor/
 ├── src-tauri/        # Tauri desktop shell
 ├── data/             # SQLite schema, seed CSVs, generated gamedata.db
 ├── tools/            # Cross-platform verification and data helpers
-├── smoke/            # Playwright smoke tests with mocked Tauri backend
+├── verification/     # Playwright smoke and real-save in-game verification
 ├── docs/             # Architecture, testing, QA, data, roadmap notes
 └── sample_saves/     # Ignored local fixtures used for manual and smoke-like coverage
 ```
@@ -66,7 +66,7 @@ Key invariant: `SaveEditor` owns both raw `GffFile` and extracted `SaveGame`; ev
 
 - Main gate: `npm run verify`.
 - Frontend only: `npm run check`.
-- Browser smoke tests: `npm run smoke`.
+- Browser smoke tests: `npm run smoke` (`verification/smoke/`).
 - Coverage: `npm run coverage`.
 - Rust only: `cargo test` and `cargo check`.
 - Tauri check: `cargo check --manifest-path src-tauri/Cargo.toml`.

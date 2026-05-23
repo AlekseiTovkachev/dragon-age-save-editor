@@ -77,6 +77,6 @@ Keep raw helpers private to `src/edit/internal.rs` unless the public API truly n
 - Command DTO/frontend contract: `frontend/src/api.contract.test.ts`.
 - Rust extraction/editing: `cargo test`.
 - Real persistence: write/reload tests using copied or temporary save paths.
-- End-to-end UI smoke: Playwright tests in `smoke/` with `VITE_E2E_MOCK=1`.
+- End-to-end UI smoke: Playwright tests in `verification/smoke/` with `VITE_E2E_MOCK=1`.
 
 Run `npm run verify` before handing off broad behavior changes.

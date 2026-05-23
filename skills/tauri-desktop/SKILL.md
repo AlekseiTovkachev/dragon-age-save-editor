@@ -12,7 +12,7 @@ metadata:
 - Check `src-tauri/src/main.rs` for exposed desktop commands.
 - Check `src-tauri/tauri.conf.json` for app window, bundle, and icon configuration.
 - Check `src-tauri/capabilities/default.json` for command permissions.
-- Use `docs/tauri-manual-qa-checklist.md` for manual desktop QA.
+- Use `docs/manual-qa.md` for packaged desktop install smoke.
 
 ## Commands
 
@@ -27,5 +27,5 @@ npm run tauri dev
 
 - Keep platform-specific paths and commands cross-platform unless a branch is intentional.
 - Update generated Tauri schema files when config changes produce them.
-- Keep icon references valid for macOS, Windows, and Linux bundle expectations.
+- Keep icon references valid for the configured desktop bundle targets.
 - Exercise native dialog or shell behavior manually when browser smoke tests cannot cover it.

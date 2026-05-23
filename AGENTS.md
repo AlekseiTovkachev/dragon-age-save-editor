@@ -57,7 +57,8 @@ npm run data:verify  # verify gamedata integrity
 - `src/` — Rust library: `gff4/` (binary format), `domain/` (models), `edit/` (save editor), `app/` (commands), `validate/` (structural validation)
 - `src-tauri/` — Tauri desktop app shell
 - `data/gamedata.db` — SQLite catalog. Do not edit directly; rebuild from `data/seeds/*.csv` via `npm run data:build`.
-- `smoke/` — Playwright smoke tests with mocked Tauri backend
+- `verification/smoke/` — Playwright smoke tests with mocked Tauri backend
+- `verification/ingame/` — Playwright/manual in-game tests against copied real saves
 
 ---
 
@@ -258,7 +259,7 @@ Read the relevant skill before starting work in that area:
 | Fixtures | `docs/fixtures.md` | Before using local sample saves |
 | Roadmap | `docs/roadmap.md` | For near-term priorities and known gaps |
 | Game behavior | `docs/game-behavior.md` | Game-specific save differences |
-| Manual testing | `docs/manual-testing.md` + `docs/tauri-manual-qa-checklist.md` | Desktop manual QA |
+| Manual QA | `docs/manual-qa.md` | Packaged desktop install smoke |
 
 ---
 

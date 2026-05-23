@@ -25,6 +25,8 @@ React UI
 - `frontend/src/components`: reusable UI controls and item editor primitives.
 - `frontend/src/lib`: pure formatting, grouping, navigation, and draft helpers.
 - `frontend/src/test`: factories, setup, and mocked backend used by unit and smoke tests.
+- `verification/smoke`: browser smoke tests against the mocked Tauri backend.
+- `verification/ingame`: real-save in-game verification specs driven through the sidecar.
 
 ## Rust Library
 

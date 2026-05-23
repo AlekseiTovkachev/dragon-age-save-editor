@@ -33,7 +33,7 @@ Use frontend tests for hooks, command planners, pure helpers, component states, 
 
 ## Smoke Tests
 
-Playwright smoke tests live in `smoke/` and exercise primary user workflows through the real React UI with the mocked Tauri backend.
+Playwright smoke tests live in `verification/smoke/` and exercise primary user workflows through the real React UI with the mocked Tauri backend.
 
 Current smoke coverage should include:
 

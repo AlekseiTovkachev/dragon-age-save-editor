@@ -2,13 +2,26 @@
 
 This is the current working roadmap. Historical completed refactors live in `docs/refactoring.md` and `docs/frontend-refactoring.md`.
 
-For the path to v1.0, see `docs/release-checklist.md`.
+For the current public beta release path, see `docs/release-checklist.md`.
 
 ## Near-Term
 
-- Expand write/reload tests around item metadata, item property power encoding, and DA2 plot flags. (Tracked in `docs/release-checklist.md` A1.)
+- Finish the `v0.9` public beta release: clean install smoke, tag, installer upload, release notes.
+- Rework DAO-family in-game specs so they can run meaningfully against arbitrary DAO/Awakening-style saves.
 - Keep smoke tests aligned with main user workflows when UI flow changes.
-- Refresh manual QA checklist statuses after each substantial desktop UI pass.
+
+## v1.0 Candidates
+
+- Decide whether `v1.0` needs broader real-save coverage beyond the current `v0.9` gate.
+- Revisit code signing after the first public beta feedback.
+- Consider a changelog once releases become recurring instead of one-off.
+
+## Structure Cleanup After v0.9
+
+- Split large Rust test modules, especially `src/app/tests.rs` and `src/edit/editor/tests.rs`, by feature area.
+- Break up the large plot flag panel into smaller view components without changing behavior.
+- Consider archiving completed refactor notes under `docs/archive/`.
+- Revisit whether root-level Node/Rust/Tauri config files should be documented in one short repository map.
 
 ## Documentation
 

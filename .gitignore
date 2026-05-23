@@ -14,6 +14,10 @@ sample_saves/
 
 # Local environment and logs
 .vscode/
+.continue/
+.agents/
+.claude/settings.local.json
+skills-lock.json
 .env.local
 .env.*.local
 *.log

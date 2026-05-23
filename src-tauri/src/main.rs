@@ -1,3 +1,5 @@
+#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+
 use dragon_age_save_editor::app::{
     CommandError, CommandErrorCode, SaveCommand, SaveCommandResult, SaveDocument, SaveSummaryDto,
 };

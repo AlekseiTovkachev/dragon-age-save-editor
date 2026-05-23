@@ -1,9 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(npm run *)",
-      "Bash(npx vitest *)",
-      "Bash(git -C /c/Users/atovk/Desktop/dragon-age-save-editor/.claude/worktrees/agent-a9c4f1bc31fbab22d status --short)"
-    ]
-  }
-}

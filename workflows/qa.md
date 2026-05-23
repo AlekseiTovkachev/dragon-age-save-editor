@@ -25,7 +25,7 @@
 | Rust mutation + persistence | Inline test with write/reload using temp path | `cargo test` |
 | Frontend hooks, planners, helpers | Beside the source file | Vitest |
 | Command/DTO contract | `frontend/src/api.contract.test.ts` | Vitest |
-| Main user workflows | `smoke/` with `VITE_E2E_MOCK=1` | Playwright |
+| Main user workflows | `verification/smoke/` with `VITE_E2E_MOCK=1` | Playwright |
 | Game data rules | Verifier + `npm run data:verify` | Python verifier |
 
 See `docs/testing.md` for when each level applies.

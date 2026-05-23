@@ -79,7 +79,7 @@ test("edits character progress, attributes, and point pools with reset and commi
 });
 
 test("edits equipped item metadata through the character equipment tab", async ({ page }) => {
-  await openMockSave(page);
+  await openMockSave(page, "da2");
 
   await page.getByRole("button", { name: "Equipment" }).click();
   await page.getByRole("button", { name: /Equipped Sword/ }).click();
@@ -98,7 +98,7 @@ test("edits equipped item metadata through the character equipment tab", async (
 });
 
 test("edits item metadata and properties in the backpack", async ({ page }) => {
-  await openMockSave(page);
+  await openMockSave(page, "da2");
 
   await page.getByRole("button", { name: "Inventory" }).click();
   await page.getByRole("button", { name: /Starfang/ }).click();
@@ -151,21 +151,16 @@ test("resets, commits, and saves DA2 plot flag drafts", async ({ page }) => {
   await openMockSave(page, "da2");
 
   await page.getByRole("button", { name: "Plot Flags" }).click();
-  const humanNoble = page.getByRole("radio", { name: "Human Noble" });
-  const templars = page.getByRole("radio", { name: "Templars" });
+  const circleOfMagi = page.getByRole("radio", { name: "Circle of Magi", exact: true });
 
-  await humanNoble.click();
-  await templars.click();
+  await circleOfMagi.click();
   await page.getByRole("button", { name: /reset drafts/i }).click();
-  await expect(humanNoble).toHaveAttribute("aria-checked", "false");
-  await expect(templars).toHaveAttribute("aria-checked", "false");
+  await expect(circleOfMagi).toHaveAttribute("aria-checked", "false");
 
-  await humanNoble.click();
-  await templars.click();
+  await circleOfMagi.click();
   await page.getByRole("button", { name: /apply drafts/i }).click();
   await expect(page.getByText("Unsaved changes")).toBeVisible();
-  await expect(humanNoble).toHaveAttribute("aria-checked", "true");
-  await expect(templars).toHaveAttribute("aria-checked", "true");
+  await expect(circleOfMagi).toHaveAttribute("aria-checked", "true");
 
   await page.getByRole("button", { name: /save as/i }).click();
   await expect(page.getByText("Saved copy ready")).toBeVisible();

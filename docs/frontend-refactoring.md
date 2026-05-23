@@ -9,7 +9,7 @@ The original frontend refactor is complete enough that this file is now a status
 - Reusable UI lives under `frontend/src/components/*`.
 - Pure helpers live under `frontend/src/lib/*`.
 - Vitest covers hooks, components, planners, utility functions, and API contract behavior.
-- Playwright smoke tests exercise main workflows against the mocked Tauri backend.
+- Playwright smoke tests under `verification/smoke/` exercise main workflows against the mocked Tauri backend.
 
 ## Remaining Opportunities
 

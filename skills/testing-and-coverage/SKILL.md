@@ -20,7 +20,7 @@ metadata:
 - Rust editor mutation behavior: test raw/domain state and write/reload persistence.
 - Frontend pure helpers and hooks: Vitest tests beside the source file.
 - Frontend command planners: Vitest planner tests.
-- Main user workflows: Playwright smoke tests under `smoke/` with mocked Tauri backend.
+- Main user workflows: Playwright smoke tests under `verification/smoke/` with mocked Tauri backend.
 - Game data rules: verifier updates plus `npm run data:verify`.
 
 ## Coverage

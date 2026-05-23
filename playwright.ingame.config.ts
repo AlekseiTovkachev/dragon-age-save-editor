@@ -1,7 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
 
 export default defineConfig({
-  testDir: "ingame",
+  testDir: "verification/ingame",
   timeout: 0, // no timeout — user needs time to verify in-game
   fullyParallel: false,
   workers: 1,
