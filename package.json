@@ -15,6 +15,7 @@
     "smoke": "playwright test",
     "check": "npm run typecheck && npm run lint && npm run test && npm run build",
     "verify": "node tools/verify.mjs",
+    "release:build": "node tools/release-build.mjs",
     "data:build": "node tools/python.mjs tools/gamedata/build_gamedata.py",
     "data:verify": "node tools/python.mjs tools/gamedata/verify_gamedata.py",
     "preview": "vite preview",

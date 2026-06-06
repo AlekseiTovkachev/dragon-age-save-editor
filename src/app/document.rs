@@ -25,17 +25,33 @@ pub struct SaveDocument {
 
 impl SaveDocument {
     pub fn open(path: impl AsRef<Path>) -> Result<Self, CommandError> {
+        Self::open_with_game_data_path(path, None)
+    }
+
+    pub fn open_with_game_data_path(
+        path: impl AsRef<Path>,
+        game_data_path: Option<PathBuf>,
+    ) -> Result<Self, CommandError> {
         let source_path = path.as_ref().to_path_buf();
         let raw = GffFile::from_path(&source_path).map_err(|err| CommandError {
             code: CommandErrorCode::Io,
             message: err.to_string(),
         })?;
-        Self::from_gff(source_path, raw)
+        Self::from_gff_with_game_data_path(source_path, raw, game_data_path)
     }
 
     pub fn from_gff(source_path: impl Into<PathBuf>, raw: GffFile) -> Result<Self, CommandError> {
+        Self::from_gff_with_game_data_path(source_path, raw, None)
+    }
+
+    pub fn from_gff_with_game_data_path(
+        source_path: impl Into<PathBuf>,
+        raw: GffFile,
+        game_data_path: Option<PathBuf>,
+    ) -> Result<Self, CommandError> {
         let source_path = source_path.into();
-        let lookup = resolve_game_data_path()
+        let lookup = game_data_path
+            .or_else(resolve_game_data_path)
             .map(|path| SqliteGameData::open(path).map_err(CommandError::from_lookup))
             .transpose()?;
         let editor_result =

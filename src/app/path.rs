@@ -3,10 +3,10 @@ use std::env;
 use std::path::PathBuf;
 
 pub(super) fn resolve_game_data_path() -> Option<PathBuf> {
-    let mut candidates = vec![
-        PathBuf::from(DEFAULT_GAME_DATA_PATH),
-        PathBuf::from(env!("CARGO_MANIFEST_DIR")).join(DEFAULT_GAME_DATA_PATH),
-    ];
+    let mut candidates = vec![PathBuf::from(DEFAULT_GAME_DATA_PATH)];
+
+    #[cfg(debug_assertions)]
+    candidates.push(PathBuf::from(env!("CARGO_MANIFEST_DIR")).join(DEFAULT_GAME_DATA_PATH));
 
     if let Ok(current_dir) = env::current_dir() {
         candidates.push(current_dir.join(DEFAULT_GAME_DATA_PATH));

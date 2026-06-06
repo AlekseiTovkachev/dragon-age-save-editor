@@ -34,6 +34,9 @@
     "publisher": "Aleksei Tovkachev",
     "license": "MIT",
     "licenseFile": "../LICENSE",
+    "resources": {
+      "../data/gamedata.db": "data/gamedata.db"
+    },
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",

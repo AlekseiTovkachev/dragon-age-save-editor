@@ -3,7 +3,9 @@
 use dragon_age_save_editor::app::{
     CommandError, CommandErrorCode, SaveCommand, SaveCommandResult, SaveDocument, SaveSummaryDto,
 };
+use std::path::PathBuf;
 use std::sync::Mutex;
+use tauri::Manager;
 
 struct AppState {
     document: Mutex<Option<SaveDocument>>,
@@ -12,9 +14,10 @@ struct AppState {
 #[tauri::command]
 fn open_document(
     path: String,
+    app: tauri::AppHandle,
     state: tauri::State<'_, AppState>,
 ) -> Result<SaveSummaryDto, CommandError> {
-    let document = SaveDocument::open(&path)?;
+    let document = SaveDocument::open_with_game_data_path(&path, game_data_resource_path(&app))?;
     let summary = document.summary();
     *state.document.lock().expect("app state lock poisoned") = Some(document);
     Ok(summary)
@@ -56,6 +59,14 @@ fn main() {
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
+}
+
+fn game_data_resource_path(app: &tauri::AppHandle) -> Option<PathBuf> {
+    app.path()
+        .resource_dir()
+        .ok()
+        .map(|dir| dir.join("data").join("gamedata.db"))
+        .filter(|path| path.exists())
 }
 
 #[cfg(test)]
@@ -138,6 +149,16 @@ mod tests {
             }
             other => panic!("unexpected response: {other:?}"),
         }
+    }
+
+    #[test]
+    fn tauri_config_bundles_game_data_resource() {
+        let config =
+            std::fs::read_to_string(Path::new(env!("CARGO_MANIFEST_DIR")).join("tauri.conf.json"))
+                .unwrap();
+
+        assert!(config.contains("../data/gamedata.db"));
+        assert!(config.contains("data/gamedata.db"));
     }
 
     fn relative_sample_save(game_folder: &str) -> PathBuf {
